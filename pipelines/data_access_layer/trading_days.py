@@ -6,7 +6,7 @@ import polars as pl
 from dotenv import load_dotenv
 from tqdm import tqdm
 
-from silverfund.enums import Interval
+from pipelines.enums import Interval
 
 
 def load_trading_days(
@@ -39,7 +39,7 @@ def load_trading_days(
     end_date = end_date or date.today()
 
     # Get file paths
-    load_dotenv()
+    load_dotenv(override=True)
     parts = os.getenv("ROOT").split("/")
     home = parts[1]
     user = parts[2]

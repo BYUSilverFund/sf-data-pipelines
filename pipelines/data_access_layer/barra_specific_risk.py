@@ -24,7 +24,7 @@ def load_specific_risk(date_: date) -> pl.DataFrame:
     """
 
     # Paths
-    load_dotenv()
+    load_dotenv(override=True)
     parts = os.getenv("ROOT").split("/")
     home = parts[1]
     user = parts[2]

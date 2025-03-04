@@ -20,7 +20,7 @@ def load_russell_constituents() -> pl.DataFrame:
     """
 
     # File path
-    load_dotenv()
+    load_dotenv(override=True)
     parts = os.getenv("ROOT").split("/")
     home = parts[1]
     user = parts[2]

@@ -26,7 +26,7 @@ def load_factor_exposures(
     """
 
     # Paths
-    load_dotenv()
+    load_dotenv(override=True)
     parts = os.getenv("ROOT").split("/")
     home = parts[1]
     user = parts[2]

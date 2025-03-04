@@ -2,9 +2,9 @@ from datetime import date
 
 import polars as pl
 
-from silverfund.data_access_layer.russell_consituents import load_russell_constituents
-from silverfund.data_access_layer.trading_days import load_trading_days
-from silverfund.enums import Interval
+from pipelines.data_access_layer.russell_consituents import load_russell_constituents
+from pipelines.data_access_layer.trading_days import load_trading_days
+from pipelines.enums import Interval
 
 
 def load_universe(
