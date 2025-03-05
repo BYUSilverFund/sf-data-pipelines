@@ -1,8 +1,18 @@
 import duckdb
+from dotenv import load_dotenv
+from pathlib import Path
+import os
 
 class Database:
-    def __init__(self, db_path: str = "barra.duckdb"):
-        self.db_path = db_path
+    def __init__(self, db_name: str = "barra.duckdb"):
+        load_dotenv(override=True)
+
+        # Define database path
+        home, user = os.getenv("ROOT").split("/")[1:3]
+        path = Path(f"/{home}/{user}/groups/grp_quant/data")
+        self.db_path = path / db_name
+
+        # Preset connection
         self.con: duckdb.DuckDBPyConnection | None = None
 
     def __enter__(self) -> duckdb.DuckDBPyConnection:
