@@ -1,70 +1,83 @@
 # Let's see if I can write a pipeline for Barra returns
 from datetime import date
 import polars as pl
-from pathlib import Path
 from zipfile import ZipFile
 from io import BytesIO
-import duckdb
 from prefect import task, flow
+from database import Database
+from barra.files import (
+    BarraFile,
+    Folder,
+    Model,
+    ModelFolder,
+    Frequency,
+    ZipFolder,
+    File,
+)
+from barra.utils import rename_barra_columns, cast_barra_columns
 
 
 @task
-def get_barra_file_as_pl() -> pl.DataFrame:
-    BARRA_FOLDER = Path("/Users/andrew/groups/grp_barra/barra")
-    DAILY_FOLDER = BARRA_FOLDER / "history/usslow/sm/daily"
-
-    zip_file = "SMD_USSLOW_100_D_2025.zip"
-    file_date = date(2025, 2, 21).strftime("%Y%m%d")
-    file_name = "USSLOW_Daily_Asset_Price." + file_date
-
-    zip_file_path = DAILY_FOLDER / zip_file
-    print(zip_file_path)
-
+def get_barra_file_as_df(barra_file: BarraFile) -> pl.DataFrame:
+    """Task for getting a file given a BarraFile."""
     # Open zipped folder as a ref
-    with ZipFile(zip_file_path, "r") as zip_ref:
+    with ZipFile(barra_file.zip_folder_path, "r") as zip_ref:
         # Open a specific file in the zipped folder
-        with zip_ref.open(file_name) as file:
+        with zip_ref.open(barra_file.file_path) as file:
+            # Read file as a csv
             return pl.read_csv(BytesIO(file.read()), skip_rows=1, separator="|")
 
 
 @task
-def clean_barra_pl(raw_df: pl.DataFrame) -> pl.DataFrame:
-    df = (
-        raw_df.head(-1)  # Drop last row
-        # Ranme columns
-        .rename(
-            {
-                "!Barrid": "barrid",
-                "Price": "price",
-                "Capt": "market_cap",
-                "PriceSource": "price_source",
-                "Currency": "currency",
-                "DlyReturn%": "return",
-                "DataDate": "date",
-            }
-        )
-        # Cast date type
-        .with_columns(pl.col("date").cast(pl.Utf8).str.strptime(pl.Date, "%Y%m%d"))
-    )
+def clean_barra_df(raw_df: pl.DataFrame) -> pl.DataFrame:
+    """Task for cleaning barra files"""
+    # Drop last row
+    if raw_df.row(-1)[0] == "[End of File]":
+        raw_df = raw_df.head(-1)
+
+    # Rename columns
+    df = rename_barra_columns(raw_df)
+
+    # Cast data types
+    df = cast_barra_columns(df)
 
     return df
 
+
 @task
-def load_pl_into_duckdb(df: pl.DataFrame) -> None:
-    with duckdb.connect("barra.duckdb") as con:
-        con.execute("CREATE TABLE IF NOT EXISTS barra_returns AS SELECT * FROM df;")
+def ingest_df_into_db(df: pl.DataFrame, table: str) -> None:
+    """Task for ingesting dataframe into duck db"""
+    with Database() as db:
+        db.execute(f"CREATE TABLE IF NOT EXISTS {table} AS SELECT * FROM df;")
+
 
 @flow(name="barra-backfill-flow")
 def barra_backfill_flow() -> None:
-    raw_df = get_barra_file_as_pl()
-    clean_df = clean_barra_pl(raw_df)
-    load_pl_into_duckdb(clean_df)
+    """Flow for orchestrating barra reutrns backfill."""
+    # Define barra file
+    barra_file = BarraFile(
+        folder=Folder.HISTORY,
+        model=Model.USSLOW,
+        model_folder=ModelFolder.SM,
+        frequency=Frequency.DAILY,
+        zip_folder=ZipFolder.SMD_USSLOW_100_D,
+        file=File.USSLOW_Daily_Asset_Price,
+        date_=date(2025, 2, 21),
+    )
+
+    # Get raw dataframe
+    raw_df = get_barra_file_as_df(barra_file)
+
+    # Clean dataframe
+    clean_df = clean_barra_df(raw_df)
+
+    # Load into database
+    ingest_df_into_db(clean_df, "barra_returns")
 
 
 if __name__ == "__main__":
     barra_backfill_flow()
 
-    # Verify run
-    with duckdb.connect("barra.duckdb") as con:
-        result = con.execute("SELECT * FROM barra_returns;").pl()
+    with Database() as db:
+        result = db.execute("SELECT * FROM barra_returns;").pl()
         print(result)
