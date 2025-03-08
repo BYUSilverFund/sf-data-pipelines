@@ -48,4 +48,5 @@
 /history/usslow/sm/monthly/SM_USSLOWL_100_M_2025/SM_USSLOWL_100_FacRet.20250201
 
 ## bime/SMD_USSLOWL_100_20250304
+**Daily Factor Returns:**  
 /bime/SMD_USSLOWL_100_20250304/USSLOWL_100_DlyFacRet.20250304
