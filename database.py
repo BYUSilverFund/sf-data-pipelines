@@ -4,7 +4,7 @@ from pathlib import Path
 import os
 
 class Database:
-    def __init__(self, db_name: str = "barra.duckdb"):
+    def __init__(self, db_name: str = "silverfund.duckdb"):
         load_dotenv(override=True)
 
         # Define database path
