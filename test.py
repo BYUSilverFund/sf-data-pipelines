@@ -18,11 +18,6 @@ from barra.utils import rename_barra_columns, cast_barra_columns
 from jinja2 import Template
 
 
-class Pipeline:
-    def __init__(self, barra_file: BarraFile):
-        pass
-
-
 @task
 def barra_file_exists(barra_file: BarraFile) -> bool:
     """Task for checking if a BarraFile exists inside the zipped folder."""
@@ -137,7 +132,7 @@ def barra_backfill_flow(start_date: date, end_date: date) -> None:
 
 
 if __name__ == "__main__":
-    # barra_backfill_flow(start_date=date(2025, 1, 1), end_date=date.today())
+    barra_backfill_flow(start_date=date(2025, 1, 1), end_date=date.today())
 
     with Database() as db:
         result = db.execute("SELECT * FROM assets ORDER BY barrid, date;").pl()
