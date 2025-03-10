@@ -19,6 +19,7 @@ def load_barra_file(barra_file: BarraFile) -> None:
     date_string = barra_file.date_.strftime("%Y%m%d")
     stage_table = f"exposures_{date_string}_stage"
     transform_table = f"exposures_{date_string}_transform"
+    pivot_table = f"exposures_{date_string}_pivot"
 
     with Database() as db:
         _ = barra_file.df
@@ -40,6 +41,19 @@ def load_barra_file(barra_file: BarraFile) -> None:
         )
         db.execute(merge_query)
 
+        pivot_query = render_sql_file(
+            "sql/exposures_pivot.sql",
+            long_table=transform_table,
+            wide_table=pivot_table
+        )
+        db.execute(pivot_query)
+
+        merge_pivot_query = render_sql_file(
+            "sql/exposures_wide_merge.sql",
+            source_table=pivot_table
+        )
+        db.execute(merge_pivot_query)
+
 
 @flow(name="barra-exposures-backfill-flow")
 def barra_exposures_backfill_flow(start_date: date, end_date: date) -> None:
@@ -48,6 +62,8 @@ def barra_exposures_backfill_flow(start_date: date, end_date: date) -> None:
     with Database() as db:
         create_query = render_sql_file("sql/exposures_create.sql")
         db.execute(create_query)
+        create_wide_query = render_sql_file("sql/exposures_wide_create.sql")
+        db.execute(create_wide_query)
 
     current_date = start_date
     while current_date <= end_date:
@@ -74,6 +90,8 @@ def barra_exposures_daily_flow() -> None:
     with Database() as db:
         create_query = render_sql_file("sql/exposures_create.sql")
         db.execute(create_query)
+        create_wide_query = render_sql_file("sql/exposures_wide_create.sql")
+        db.execute(create_wide_query)
 
     barra_file = BarraFile(
         folder=Folder.HISTORY,
@@ -97,3 +115,4 @@ if __name__ == "__main__":
 
     with Database() as db:
         print(db.execute("SELECT * FROM exposures ORDER BY barrid, factor, date;").pl())
+        print(db.execute("SELECT * FROM exposures_wide ORDER BY barrid, date;").pl())
