@@ -16,7 +16,7 @@ SELECT
     s.price_source, 
     s.currency, 
     s.return
-FROM assets_{{ date }}_xf AS s
+FROM {{ source_table }} AS s
 ON CONFLICT (barrid, date) DO UPDATE SET 
     price = excluded.price,
     market_cap = excluded.market_cap,
