@@ -67,7 +67,7 @@ def barra_returns_backfill_flow(start_date: date, end_date: date) -> None:
         current_date += timedelta(days=1)
 
 
-@flow(name="barra-returns-flow")
+@flow(name="barra-returns-daily-flow")
 def barra_returns_daily_flow() -> None:
     """Flow for orchestrating barra reutrns each day."""
 
