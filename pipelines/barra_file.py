@@ -31,10 +31,12 @@ class Frequency(Enum):
 
 class ZipFolder(Enum):
     SMD_USSLOW_100_D = "SMD_USSLOW_100_D"  # _2025
+    SMD_USSLOWL_100_D = "SMD_USSLOWL_100_D"
 
 
 class File(Enum):
     USSLOW_Daily_Asset_Price = "USSLOW_Daily_Asset_Price"  # .20250221
+    USSLOWL_100_Asset_Data = "USSLOWL_100_Asset_Data"
 
 
 @dataclass
@@ -94,7 +96,18 @@ class BarraFile:
         """Task for getting a file given a BarraFile."""
         with ZipFile(self.zip_folder_path, "r") as zip_ref:
             with zip_ref.open(self.file_name) as file:
-                return pl.read_csv(BytesIO(file.read()), skip_rows=1, separator="|")
+                skip = 0
+
+                match self.file:
+                    case File.USSLOW_Daily_Asset_Price:
+                        skip = 1
+                    case File.USSLOWL_100_Asset_Data:
+                        skip = 2
+                    case _:
+                        msg = "Not a valid barra_file.file."
+                        raise ValueError(msg)
+
+                return pl.read_csv(BytesIO(file.read()), skip_rows=skip, separator="|")
 
 
 if __name__ == "__main__":
@@ -103,10 +116,11 @@ if __name__ == "__main__":
         model=Model.USSLOW,
         model_folder=ModelFolder.SM,
         frequency=Frequency.DAILY,
-        zip_folder=ZipFolder.SMD_USSLOW_100_D,
-        file=File.USSLOW_Daily_Asset_Price,
+        zip_folder=ZipFolder.SMD_USSLOWL_100_D,
+        file=File.USSLOWL_100_Asset_Data,
         date_=date(2025, 2, 21),
     )
 
     print(barra_file.zip_folder_path)
     print(barra_file.file_path)
+    print(barra_file.df)
