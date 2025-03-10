@@ -41,8 +41,8 @@ def load_barra_file(barra_file: BarraFile) -> None:
         db.execute(merge_query)
 
 
-@flow(name="barra-backfill-flow")
-def barra_backfill_flow(start_date: date, end_date: date) -> None:
+@flow(name="barra-returns-backfill-flow")
+def barra_returns_backfill_flow(start_date: date, end_date: date) -> None:
     """Flow for orchestrating barra reutrns backfill."""
 
     with Database() as db:
@@ -67,8 +67,8 @@ def barra_backfill_flow(start_date: date, end_date: date) -> None:
         current_date += timedelta(days=1)
 
 
-@flow(name="barra-backfill-flow")
-def barra_daily_flow() -> None:
+@flow(name="barra-returns-flow")
+def barra_returns_daily_flow() -> None:
     """Flow for orchestrating barra reutrns each day."""
 
     with Database() as db:
@@ -93,7 +93,7 @@ def barra_daily_flow() -> None:
 
 
 if __name__ == "__main__":
-    barra_backfill_flow(start_date=date(2025, 1, 1), end_date=date(2025, 2, 21))
+    barra_returns_backfill_flow(start_date=date(2025, 1, 1), end_date=date(2025, 2, 21))
     # barra_daidly_flow()
 
     with Database() as db:
