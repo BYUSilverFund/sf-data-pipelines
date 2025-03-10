@@ -83,7 +83,7 @@ def barra_covariances_backfill_flow(start_date: date, end_date: date) -> None:
         current_date += timedelta(days=1)
 
 
-@flow(name="barra-exposures-daily-flow")
+@flow(name="barra-covariances-daily-flow")
 def barra_covariances_daily_flow() -> None:
     """Flow for orchestrating barra covariances each day."""
 
