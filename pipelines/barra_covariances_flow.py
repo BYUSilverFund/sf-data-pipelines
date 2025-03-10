@@ -111,7 +111,7 @@ def barra_covariances_daily_flow() -> None:
 
 
 if __name__ == "__main__":
-    barra_covariances_backfill_flow(start_date=date(2025, 1, 1), end_date=date(2025, 2, 21))
+    barra_covariances_backfill_flow(start_date=date(2025, 1, 1), end_date=date.today())
 
     with Database() as db:
         print(db.execute("SELECT * FROM covariances ORDER BY factor1, factor2, date;").pl())

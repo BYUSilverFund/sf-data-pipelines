@@ -22,7 +22,6 @@ def load_barra_file(barra_file: BarraFile) -> None:
 
     with Database() as db:
         _ = barra_file.df
-        print(_)
         stage_query = (
             f"CREATE OR REPLACE TEMPORARY TABLE {stage_table} AS SELECT * FROM _;"
         )
@@ -94,7 +93,7 @@ def barra_specific_returns_daily_flow() -> None:
 
 
 if __name__ == "__main__":
-    barra_speicifc_returns_backfill_flow(start_date=date(2025, 2, 21), end_date=date(2025, 2, 21))
+    barra_speicifc_returns_backfill_flow(start_date=date(2025, 1, 1), end_date=date.today())
 
     with Database() as db:
         print(db.execute("SELECT date, barrid, price, specific_return FROM assets ORDER BY barrid, date;").pl())

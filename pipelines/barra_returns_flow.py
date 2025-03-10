@@ -93,7 +93,7 @@ def barra_returns_daily_flow() -> None:
 
 
 if __name__ == "__main__":
-    barra_returns_backfill_flow(start_date=date(2025, 1, 1), end_date=date(2025, 2, 21))
+    barra_returns_backfill_flow(start_date=date(2025, 1, 1), end_date=date.today())
     # barra_daidly_flow()
 
     with Database() as db:
