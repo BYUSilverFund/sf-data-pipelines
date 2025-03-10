@@ -1,4 +1,7 @@
 from jinja2 import Template
+import polars as pl
+import exchange_calendars as xcals
+from datetime import date
 
 def render_sql_file(sql_file: str, **kwargs) -> str:
     """
@@ -14,3 +17,29 @@ def render_sql_file(sql_file: str, **kwargs) -> str:
     query = template.render(**kwargs)
 
     return query
+
+def get_last_market_date(current_date: date) -> date:
+    """
+    Get the last trading day before the given date.
+
+    This function retrieves the previous market date based on the
+    New York Stock Exchange (XNYS) trading calendar.
+
+    Args:
+        current_date (date): The reference date to find the previous trading day.
+
+    Returns:
+        date: The last trading day before the given date.
+    """
+    # Load market calendar
+    market_calendar = (
+        pl.DataFrame(xcals.get_calendar("XNYS").schedule)
+        .with_columns(pl.col("close").dt.date())
+        .select(pl.col("close").alias("date"))
+        .with_columns(pl.col("date").shift(1).alias("prev_date"))
+    )
+
+    # Get previous date
+    prev_date = market_calendar.filter(pl.col("date").eq(current_date))["prev_date"].max()
+
+    return prev_date
