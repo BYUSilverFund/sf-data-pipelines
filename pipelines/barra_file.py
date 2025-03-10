@@ -37,7 +37,7 @@ class ZipFolder(Enum):
 class File(Enum):
     USSLOW_Daily_Asset_Price = "USSLOW_Daily_Asset_Price"  # .20250221
     USSLOWL_100_Asset_Data = "USSLOWL_100_Asset_Data"
-
+    USSLOWL_100_Asset_Exposure = "USSLOWL_100_Asset_Exposure"
 
 @dataclass
 class BarraFile:
@@ -103,6 +103,8 @@ class BarraFile:
                         skip = 1
                     case File.USSLOWL_100_Asset_Data:
                         skip = 2
+                    case File.USSLOWL_100_Asset_Exposure:
+                        skip = 2
                     case _:
                         msg = "Not a valid barra_file.file."
                         raise ValueError(msg)
@@ -117,7 +119,7 @@ if __name__ == "__main__":
         model_folder=ModelFolder.SM,
         frequency=Frequency.DAILY,
         zip_folder=ZipFolder.SMD_USSLOWL_100_D,
-        file=File.USSLOWL_100_Asset_Data,
+        file=File.USSLOWL_100_Asset_Exposure,
         date_=date(2025, 2, 21),
     )
 

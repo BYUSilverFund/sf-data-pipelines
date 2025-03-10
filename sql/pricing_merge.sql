@@ -22,4 +22,5 @@ ON CONFLICT (barrid, date) DO UPDATE SET
     market_cap = excluded.market_cap,
     price_source = excluded.price_source,
     currency = excluded.currency,
-    return = excluded.return;
+    return = excluded.return
+;
