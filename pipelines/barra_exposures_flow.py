@@ -111,7 +111,7 @@ def barra_exposures_daily_flow() -> None:
 
 
 if __name__ == "__main__":
-    barra_exposures_backfill_flow(start_date=date(2025, 2, 21), end_date=date(2025, 2, 21))
+    barra_exposures_backfill_flow(start_date=date(2025, 1, 1), end_date=date(2025, 2, 21))
 
     with Database() as db:
         print(db.execute("SELECT * FROM exposures ORDER BY barrid, factor, date;").pl())
