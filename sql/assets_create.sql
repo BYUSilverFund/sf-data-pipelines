@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS assets(
     price_source TEXT,
     currency TEXT,
     return DOUBLE,
+    specific_return DOUBLE,
     yield DOUBLE,
     total_risk DOUBLE,
     specific_risk DOUBLE,

@@ -38,6 +38,7 @@ class File(Enum):
     USSLOW_Daily_Asset_Price = "USSLOW_Daily_Asset_Price"  # .20250221
     USSLOWL_100_Asset_Data = "USSLOWL_100_Asset_Data"
     USSLOWL_100_Asset_Exposure = "USSLOWL_100_Asset_Exposure"
+    USSLOW_100_Asset_DlySpecRet = "USSLOW_100_Asset_DlySpecRet"
 
 @dataclass
 class BarraFile:
@@ -104,6 +105,8 @@ class BarraFile:
                     case File.USSLOWL_100_Asset_Data:
                         skip = 2
                     case File.USSLOWL_100_Asset_Exposure:
+                        skip = 2
+                    case File.USSLOW_100_Asset_DlySpecRet:
                         skip = 2
                     case _:
                         msg = "Not a valid barra_file.file."
