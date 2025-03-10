@@ -32,6 +32,7 @@ class Frequency(Enum):
 class ZipFolder(Enum):
     SMD_USSLOW_100_D = "SMD_USSLOW_100_D"  # _2025
     SMD_USSLOWL_100_D = "SMD_USSLOWL_100_D"
+    SMD_USSLOWL_100 = "SMD_USSLOWL_100"
 
 
 class File(Enum):
@@ -40,16 +41,17 @@ class File(Enum):
     USSLOWL_100_Asset_Exposure = "USSLOWL_100_Asset_Exposure"
     USSLOW_100_Asset_DlySpecRet = "USSLOW_100_Asset_DlySpecRet"
     USSLOWL_100_Covariance = "USSLOWL_100_Covariance"
+    USSLOWL_100_DlyFacRet = "USSLOWL_100_DlyFacRet"
 
 @dataclass
 class BarraFile:
     folder: Folder
-    model: Model | None
-    model_folder: ModelFolder | None
-    frequency: Frequency | None
-    zip_folder: ZipFolder | None
     file: File
     date_: date
+    model: Model | None = None
+    model_folder: ModelFolder | None = None
+    frequency: Frequency | None = None
+    zip_folder: ZipFolder | None = None
 
     def __post_init__(self) -> None:
         """Build the base url"""
@@ -69,7 +71,12 @@ class BarraFile:
 
     @property
     def zip_folder_name(self) -> str:
-        return f"{self.zip_folder.value}_{self.date_.year}"
+        match self.folder:
+            case Folder.HISTORY:
+                return f"{self.zip_folder.value}_{self.date_.year}"            
+            case Folder.BIME:
+                return f"{self.zip_folder.value}_{self.date_.strftime('%y%m%d')}"
+
 
     @property
     def zip_folder_path(self):
@@ -111,6 +118,8 @@ class BarraFile:
                         skip = 2
                     case File.USSLOWL_100_Covariance:
                         skip = 2
+                    case File.USSLOWL_100_DlyFacRet:
+                        skip = 2
                     case _:
                         msg = "Not a valid barra_file.file."
                         raise ValueError(msg)
@@ -120,13 +129,10 @@ class BarraFile:
 
 if __name__ == "__main__":
     barra_file = BarraFile(
-        folder=Folder.HISTORY,
-        model=Model.USSLOW,
-        model_folder=ModelFolder.SM,
-        frequency=Frequency.DAILY,
-        zip_folder=ZipFolder.SMD_USSLOWL_100_D,
-        file=File.USSLOWL_100_Asset_Exposure,
-        date_=date(2025, 2, 21),
+        folder=Folder.BIME,
+        zip_folder=ZipFolder.SMD_USSLOWL_100,
+        file=File.USSLOWL_100_DlyFacRet,
+        date_=date(2025, 3, 6),
     )
 
     print(barra_file.zip_folder_path)
