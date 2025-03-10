@@ -17,7 +17,7 @@ SELECT
     s.historical_beta,
     s.predicted_beta
 FROM {{ source_table }} AS s
-ON CONFLICT (barrid, date) DO UPDATE SET 
+ON CONFLICT (date, barrid) DO UPDATE SET 
     yield = excluded.yield,
     total_risk = excluded.total_risk,
     specific_risk = excluded.specific_risk,
