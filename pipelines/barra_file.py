@@ -39,6 +39,7 @@ class File(Enum):
     USSLOWL_100_Asset_Data = "USSLOWL_100_Asset_Data"
     USSLOWL_100_Asset_Exposure = "USSLOWL_100_Asset_Exposure"
     USSLOW_100_Asset_DlySpecRet = "USSLOW_100_Asset_DlySpecRet"
+    USSLOWL_100_Covariance = "USSLOWL_100_Covariance"
 
 @dataclass
 class BarraFile:
@@ -107,6 +108,8 @@ class BarraFile:
                     case File.USSLOWL_100_Asset_Exposure:
                         skip = 2
                     case File.USSLOW_100_Asset_DlySpecRet:
+                        skip = 2
+                    case File.USSLOWL_100_Covariance:
                         skip = 2
                     case _:
                         msg = "Not a valid barra_file.file."
