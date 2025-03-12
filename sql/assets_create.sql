@@ -1,6 +1,10 @@
 CREATE TABLE IF NOT EXISTS assets(
     date DATE,
     barrid TEXT,
+    cins TEXT,
+    cusip TEXT,
+    isin TEXT,
+    localid TEXT,
     price DOUBLE,
     market_cap DOUBLE,
     price_source TEXT,

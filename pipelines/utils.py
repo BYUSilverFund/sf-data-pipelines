@@ -2,7 +2,6 @@ from jinja2 import Template
 import polars as pl
 import exchange_calendars as xcals
 from datetime import date, timedelta
-import calendar
 
 
 def render_sql_file(sql_file: str, **kwargs) -> str:
@@ -34,21 +33,22 @@ def get_last_market_date(current_date: date) -> date:
     Returns:
         date: The last trading day before the given date.
     """
+    end_date = date.today()
+
     # Load market calendar
     market_calendar = (
         pl.DataFrame(xcals.get_calendar("XNYS").schedule)
         .with_columns(pl.col("close").dt.date())
         .select(pl.col("close").alias("date"))
         .with_columns(pl.col("date").shift(1).alias("prev_date"))
-        .filter(pl.col("date").le(current_date))
+        .filter(pl.col("date").le(end_date))
         .sort("date")
     )
 
     # Get standard calendar
     start_date = market_calendar["date"].min()
     date_list = [
-        start_date + timedelta(days=x)
-        for x in range((current_date - start_date).days + 1)
+        start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)
     ]
     standard_calendar = pl.DataFrame({"date": date_list})
 
@@ -57,7 +57,7 @@ def get_last_market_date(current_date: date) -> date:
     ).fill_null(strategy="backward")
 
     # Get previous date
-    prev_date = market_calendar.filter(pl.col("date").eq(current_date))[
+    prev_date = market_calendar.filter(pl.col("date").le(current_date))[
         "prev_date"
     ].max()
 
