@@ -14,8 +14,8 @@ class Database:
 
         self.con: duckdb.DuckDBPyConnection | None = None
 
-    def connect(self) -> duckdb.DuckDBPyConnection:
-        self.con = duckdb.connect(self.db_path)
+    def connect(self, read_only: bool = False) -> duckdb.DuckDBPyConnection:
+        self.con = duckdb.connect(self.db_path, read_only=read_only)
         return self.con
 
     def __enter__(self) -> duckdb.DuckDBPyConnection:
