@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 from prefect import task, flow
 from pipelines.database import Database
 from pipelines.barra_file import (
@@ -62,8 +62,6 @@ def load_barra_file(barra_file: BarraFile, start_date: date, end_date: date) -> 
             .sort("date")
         )
 
-        print(df)
-
         stage_query = (
             f"CREATE OR REPLACE TEMPORARY TABLE {stage_table} AS SELECT * FROM df;"
         )
@@ -80,7 +78,6 @@ def load_barra_file(barra_file: BarraFile, start_date: date, end_date: date) -> 
 def barra_ids_backfill_flow(start_date: date, end_date: date) -> None:
     """Flow for orchestrating barra ids backfill."""
     last_market_date = get_last_market_date(end_date)
-    print("LAST_MARKET_DATE", last_market_date)
 
     with Database() as db:
         create_query = render_sql_file("sql/assets_create.sql")

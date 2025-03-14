@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS assets(
     cusip TEXT,
     isin TEXT,
     localid TEXT,
+    ticker TEXT,
     price DOUBLE,
     market_cap DOUBLE,
     price_source TEXT,
@@ -16,5 +17,10 @@ CREATE TABLE IF NOT EXISTS assets(
     specific_risk DOUBLE,
     historical_beta DOUBLE,
     predicted_beta DOUBLE,
+    russell_2000 BOOLEAN,
+    russell_1000 BOOLEAN,
+    russell_3000_weight DOUBLE,
+    russell_2000_weight DOUBLE,
+    russell_1000_weight DOUBLE,
     PRIMARY KEY (date, barrid)
 );

@@ -160,12 +160,12 @@ if __name__ == "__main__":
         .filter(pl.col('barrid').ne('[End of File]'))
         .with_columns(pl.col('end_date').clip(upper_bound=date.today()))
         .pivot(index=['start_date', 'end_date', 'barrid'], on='asset_id_type', values='asset_id')
-        .with_columns(
-            pl.date_ranges("start_date", "end_date").alias("date")
-        )
-        .explode('date')
-        .rename({col: col.lower() for col in df.columns})
-        .select(['date', 'barrid', 'cins', 'cusip', 'isin', 'localid'])
+        # .with_columns(
+        #     pl.date_ranges("start_date", "end_date").alias("date")
+        # )
+        # .explode('date')
+        # .rename({col: col.lower() for col in df.columns})
+        # .select(['date', 'barrid', 'cins', 'cusip', 'isin', 'localid'])
     )
 
     print(df)
