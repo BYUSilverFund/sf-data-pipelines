@@ -14,9 +14,12 @@ class Database:
 
         self.con: duckdb.DuckDBPyConnection | None = None
 
-    def __enter__(self) -> duckdb.DuckDBPyConnection:
+    def connect(self) -> duckdb.DuckDBPyConnection:
         self.con = duckdb.connect(self.db_path)
         return self.con
+
+    def __enter__(self) -> duckdb.DuckDBPyConnection:
+        return self.connect()
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         if self.con:

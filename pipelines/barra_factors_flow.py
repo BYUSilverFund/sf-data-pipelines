@@ -103,7 +103,7 @@ def barra_factors_daily_flow() -> None:
 
 
 if __name__ == "__main__":
-    barra_factors_backfill_flow(start_date=date(2025, 1, 1), end_date=date.today())
+    barra_factors_backfill_flow(start_date=date(2025, 1, 1), end_date=date(2025, 3, 7))
 
     with Database() as db:
         print(db.execute("SELECT * FROM factors;").pl())
