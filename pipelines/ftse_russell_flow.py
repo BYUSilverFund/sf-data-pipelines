@@ -94,26 +94,26 @@ def ftse_russell_daily_flow() -> None:
 
 
 if __name__ == "__main__":
-    # ftse_russell_backfill_flow(start_date=date(2025, 1, 1), end_date=date(2025, 3, 8))
+    ftse_russell_backfill_flow(start_date=date(2025, 1, 1), end_date=date(2025, 3, 8))
 
-    with Database() as db:
-        print(
-            db.execute(
-                """
-                SELECT 
-                    date, 
-                    barrid, 
-                    cusip, 
-                    ticker, 
-                    price,
-                    return, 
-                    russell_2000, 
-                    -- russell_1000, 
-                    russell_3000_weight 
-                FROM assets 
-                WHERE russell_2000 OR russell_1000
-                    AND date == '2025-01-31'
-                ORDER BY cusip , date;
-                """
-            ).pl()
-        )
+    # with Database() as db:
+    #     print(
+    #         db.execute(
+    #             """
+    #             SELECT 
+    #                 date, 
+    #                 barrid, 
+    #                 cusip, 
+    #                 ticker, 
+    #                 price,
+    #                 return, 
+    #                 russell_2000, 
+    #                 -- russell_1000, 
+    #                 russell_3000_weight 
+    #             FROM assets 
+    #             WHERE russell_2000 OR russell_1000
+    #                 AND date == '2025-01-31'
+    #             ORDER BY cusip , date;
+    #             """
+    #         ).pl()
+    #     )
