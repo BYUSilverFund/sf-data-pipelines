@@ -54,10 +54,18 @@ def load_barra_file(barra_file: BarraFile, start_date: date, end_date: date) -> 
             .with_columns(pl.date_ranges("start_date", "end_date").alias("date"))
             # Explode date range to rows
             .explode("date")
+            # Filter to date range
+            .filter(pl.col("date").is_between(start_date, end_date))
             # Rename asset id columns
             .rename({col: col.lower() for col in df.columns})
-            # Reorder columns
-            .filter(pl.col("date").is_between(start_date, end_date))
+            # Aggregate rows
+            .group_by(["date", "barrid"])
+            .agg(
+                pl.col("cins").max(),
+                pl.col("cusip").max(),
+                pl.col("isin").max(),
+                pl.col("localid").max(),
+            )
         )
 
         stage_query = (
