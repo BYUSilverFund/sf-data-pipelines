@@ -9,7 +9,7 @@ def get_barrids_by_date(date_: date) -> list[str]:
         # Get barrids for date
         barrids = db.execute(
             f"""
-            SELECT distinct barrid FROM assets WHERE barrid = rootid AND date = '{date_}';
+            SELECT distinct barrid FROM assets_clean WHERE date = '{date_}';
             """
         ).pl()
 
@@ -137,7 +137,7 @@ def construct_specific_risk_matrix(barrids: list[str], date_: date) -> pl.DataFr
         df = db.execute(
             f"""
             SELECT barrid, specific_risk
-            FROM assets
+            FROM assets_clean
             WHERE date = '{date_}'
                 AND barrid IN ({barrids_str})
             ORDER By barrid
