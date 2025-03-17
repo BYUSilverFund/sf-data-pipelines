@@ -19,6 +19,9 @@ from ftse_russell_flow import ftse_russell_daily_flow, ftse_russell_backfill_flo
 
 from datetime import date
 
+from utils import render_sql_file
+from utils.database import Database
+
 
 def backfill_orchestration_flow(start_date: date, end_date: date) -> None:
     # Backfill complete ID space
@@ -37,6 +40,11 @@ def backfill_orchestration_flow(start_date: date, end_date: date) -> None:
 
     # Factors Table
     barra_factors_backfill_flow(start_date, end_date)
+
+    # Views
+    with Database() as db:
+        asset_clean_query = render_sql_file("sql/assets_clean_view.sql")
+        db.execute(asset_clean_query)
 
 
 def daily_orchestration_flow() -> None:
