@@ -1,7 +1,7 @@
 from datetime import date
 from prefect import task, flow
-from pipelines.database import Database
-from pipelines.barra_file import (
+from pipelines.utils.database import Database
+from pipelines.utils.barra_file import (
     BarraFile,
     Folder,
     ZipFolder,

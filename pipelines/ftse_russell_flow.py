@@ -1,6 +1,6 @@
 from datetime import date
 from prefect import task, flow
-from pipelines.database import Database
+from pipelines.utils.database import Database
 from utils import render_sql_file, get_last_market_date
 import polars as pl
 import wrds
