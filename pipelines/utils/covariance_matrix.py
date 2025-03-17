@@ -226,7 +226,18 @@ def construct_specific_risk_matrix(barrids: list[str], date_: date) -> pl.DataFr
         # Fill null values with 0
         df = df.fill_null(0)
 
-        return df
+        # Convert vector to diagonal matrix
+        diagonal_matrix = np.power(np.diag(df["specific_risk"]), 2)
+
+        # Package
+        specific_risk_matrix = pl.DataFrame(
+            {
+                "barrid": barrids,
+                **{id: diagonal_matrix[:, i] for i, id in enumerate(barrids)},
+            }
+        )
+
+        return specific_risk_matrix
     
 
 if __name__ == '__main__':
