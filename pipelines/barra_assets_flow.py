@@ -1,5 +1,4 @@
 from datetime import date
-from prefect import task, flow
 from pipelines.utils.database import Database
 from pipelines.utils.barra_file import (
     BarraFile,
@@ -11,9 +10,9 @@ from utils import render_sql_file, get_last_market_date
 import polars as pl
 
 
-@task(task_run_name="barra-file-pipeline_{barra_file.date_}")
 def load_barra_file(barra_file: BarraFile, start_date: date, end_date: date) -> None:
     """Task for loading a BarraFile into duckdb."""
+    print(f"Loading barra file: {barra_file.file_name}")
     date_string = barra_file.date_.strftime("%Y%m%d")
     stage_table = f"barra_assets_{date_string}_stage"
 
@@ -61,7 +60,6 @@ def load_barra_file(barra_file: BarraFile, start_date: date, end_date: date) -> 
         db.execute(merge_query)
 
 
-@flow(name="barra-assets-backfill-flow")
 def barra_assets_backfill_flow(start_date: date, end_date: date) -> None:
     """Flow for orchestrating barra assets backfill."""
     last_market_date = get_last_market_date(end_date)
@@ -84,7 +82,6 @@ def barra_assets_backfill_flow(start_date: date, end_date: date) -> None:
         raise RuntimeError(msg)
 
 
-@flow(name="barra-assets-daily-flow")
 def barra_assets_daily_flow() -> None:
     """Flow for orchestrating barra assets each day."""
 
@@ -104,12 +101,3 @@ def barra_assets_daily_flow() -> None:
     else:
         msg = f"BarraFile '{barra_file.file_name}' does not exist!"
         raise RuntimeError(msg)
-
-
-if __name__ == "__main__":
-    # with Database() as db:
-    #     db.execute("DROP TABLE assets;")
-    barra_assets_backfill_flow(start_date=date(2025, 1, 1), end_date=date(2025, 3, 8))
-
-    with Database() as db:
-        print(db.execute("SELECT * FROM assets ORDER BY barrid, date;").pl())

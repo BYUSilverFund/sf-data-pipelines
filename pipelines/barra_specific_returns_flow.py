@@ -13,9 +13,9 @@ from pipelines.utils.barra_file import (
 from utils import render_sql_file
 
 
-@task(task_run_name="barra-file-pipeline_{barra_file.date_}")
 def load_barra_file(barra_file: BarraFile) -> None:
     """Task for loading a BarraFile into duckdb."""
+    print(f"Loading barra file: {barra_file.file_name}")
     date_string = barra_file.date_.strftime("%Y%m%d")
     stage_table = f"specific_returns_{date_string}_stage"
     transform_table = f"specific_returns_{date_string}_transform"
@@ -41,7 +41,6 @@ def load_barra_file(barra_file: BarraFile) -> None:
         db.execute(merge_query)
 
 
-@flow(name="barra-specific-returns-backfill-flow")
 def barra_speicifc_returns_backfill_flow(start_date: date, end_date: date) -> None:
     """Flow for orchestrating barra specific reutrns backfill."""
 
@@ -67,7 +66,6 @@ def barra_speicifc_returns_backfill_flow(start_date: date, end_date: date) -> No
         current_date += timedelta(days=1)
 
 
-@flow(name="barra-specific-returns-daily-flow")
 def barra_specific_returns_daily_flow() -> None:
     """Flow for orchestrating barra specific reutrns each day."""
 
@@ -90,10 +88,3 @@ def barra_specific_returns_daily_flow() -> None:
     else:
         msg = f"BarraFile '{barra_file.file_name}' does not exist!"
         raise RuntimeError(msg)
-
-
-if __name__ == "__main__":
-    barra_speicifc_returns_backfill_flow(start_date=date(2025, 1, 1), end_date=date.today())
-
-    with Database() as db:
-        print(db.execute("SELECT date, barrid, price, specific_return FROM assets ORDER BY barrid, date;").pl())

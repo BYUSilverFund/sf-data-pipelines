@@ -62,7 +62,7 @@ class BarraFile:
         load_dotenv(override=True)
 
         home, user = os.getenv("ROOT").split("/")[1:3]
-        self.base_path = Path(f"/{home}/{user}/groups/grp_barra/barra")
+        self.base_path = Path(f"/{home}/{user}/groups/grp_msci_barra/nobackup/archive")
 
         for path_part in [
             self.folder,
@@ -106,6 +106,10 @@ class BarraFile:
     @property
     def df(self) -> pl.DataFrame:
         """Task for getting a file given a BarraFile."""
+
+        schema = {
+            'DlyReturn%': pl.Float64
+        }
         with ZipFile(self.zip_folder_path, "r") as zip_ref:
             with zip_ref.open(self.file_name) as file:
                 skip = 0
@@ -131,4 +135,19 @@ class BarraFile:
                         msg = "Not a valid barra_file.file."
                         raise ValueError(msg)
 
-                return pl.read_csv(BytesIO(file.read()), skip_rows=skip, separator="|")
+                return pl.read_csv(BytesIO(file.read()), skip_rows=skip, separator="|", schema_overrides=schema)
+            
+
+if __name__ == '__main__':
+    file = BarraFile(
+        folder=Folder.HISTORY,
+        file=File.USSLOWL_100_Asset_Data,
+        date_=date(2025, 3, 7),
+        model=Model.USSLOW,
+        model_folder=ModelFolder.SM,
+        frequency=Frequency.DAILY,
+        zip_folder=ZipFolder.SMD_USSLOWL_100_D,
+    )
+
+    print(file.zip_folder_path)
+    print(file.df)

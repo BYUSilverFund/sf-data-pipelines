@@ -6,9 +6,9 @@ import polars as pl
 import wrds
 
 
-@task(task_run_name="ftse-russell-pipeline_{end_date.year}")
 def load_ftse_russell_df(start_date: date, end_date: date) -> None:
     """Task for loading a dataframe of FTSE Russell data into duckdb."""
+    print(f"Loading ftse file")
     date_string = end_date.strftime("%Y%m%d")
     stage_table = f"ftse_russell_{date_string}_stage"
 
@@ -56,7 +56,6 @@ def load_ftse_russell_df(start_date: date, end_date: date) -> None:
         db.execute(merge_query)
 
 
-@flow(name="ftse-russell-backfill-flow")
 def ftse_russell_backfill_flow(start_date: date, end_date: date) -> None:
     """Flow for orchestrating barra ids backfill."""
 
@@ -78,7 +77,6 @@ def ftse_russell_backfill_flow(start_date: date, end_date: date) -> None:
         )
 
 
-@flow(name="ftse-russell-daily-flow")
 def ftse_russell_daily_flow() -> None:
     """Flow for orchestrating Russell constituents each day."""
 
@@ -91,29 +89,3 @@ def ftse_russell_daily_flow() -> None:
     load_ftse_russell_df(
         start_date=date(current_year, 1, 1), end_date=date(current_year, 12, 31)
     )
-
-
-if __name__ == "__main__":
-    ftse_russell_backfill_flow(start_date=date(2025, 1, 1), end_date=date(2025, 3, 8))
-
-    # with Database() as db:
-    #     print(
-    #         db.execute(
-    #             """
-    #             SELECT 
-    #                 date, 
-    #                 barrid, 
-    #                 cusip, 
-    #                 ticker, 
-    #                 price,
-    #                 return, 
-    #                 russell_2000, 
-    #                 -- russell_1000, 
-    #                 russell_3000_weight 
-    #             FROM assets 
-    #             WHERE russell_2000 OR russell_1000
-    #                 AND date == '2025-01-31'
-    #             ORDER BY cusip , date;
-    #             """
-    #         ).pl()
-    #     )

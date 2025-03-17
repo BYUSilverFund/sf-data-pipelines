@@ -1,5 +1,4 @@
 from datetime import date, timedelta
-from prefect import task, flow
 from pipelines.utils.database import Database
 from pipelines.utils.barra_file import (
     BarraFile,
@@ -13,9 +12,9 @@ from pipelines.utils.barra_file import (
 from utils import render_sql_file
 
 
-@task(task_run_name="barra-file-pipeline_{barra_file.date_}")
 def load_barra_file(barra_file: BarraFile) -> None:
     """Task for loading a BarraFile into duckdb."""
+    print(f"Loading barra file: {barra_file.file_name}")
     date_string = barra_file.date_.strftime("%Y%m%d")
     stage_table = f"covariances_{date_string}_stage"
     transform_table = f"covariances_{date_string}_transform"
@@ -55,7 +54,6 @@ def load_barra_file(barra_file: BarraFile) -> None:
         db.execute(merge_pivot_query)
 
 
-@flow(name="barra-covariances-backfill-flow")
 def barra_covariances_backfill_flow(start_date: date, end_date: date) -> None:
     """Flow for orchestrating barra covariances backfill."""
 
@@ -83,7 +81,6 @@ def barra_covariances_backfill_flow(start_date: date, end_date: date) -> None:
         current_date += timedelta(days=1)
 
 
-@flow(name="barra-covariances-daily-flow")
 def barra_covariances_daily_flow() -> None:
     """Flow for orchestrating barra covariances each day."""
 
@@ -108,11 +105,3 @@ def barra_covariances_daily_flow() -> None:
     else:
         msg = f"BarraFile '{barra_file.file_name}' does not exist!"
         raise RuntimeError(msg)
-
-
-if __name__ == "__main__":
-    barra_covariances_backfill_flow(start_date=date(2025, 1, 1), end_date=date.today())
-
-    with Database() as db:
-        print(db.execute("SELECT * FROM covariances ORDER BY factor1, factor2, date;").pl())
-        print(db.execute("SELECT * FROM covariances_wide ORDER BY factor1, date;").pl())

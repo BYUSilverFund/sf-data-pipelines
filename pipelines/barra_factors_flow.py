@@ -1,5 +1,4 @@
 from datetime import date
-from prefect import task, flow
 from pipelines.utils.database import Database
 from pipelines.utils.barra_file import (
     BarraFile,
@@ -10,9 +9,9 @@ from pipelines.utils.barra_file import (
 from utils import render_sql_file, get_last_market_date
 
 
-@task(task_run_name="barra-file-pipeline_{barra_file.date_}")
 def load_barra_file(barra_file: BarraFile) -> None:
     """Task for loading a BarraFile into duckdb."""
+    print(f"Loading barra file: {barra_file.file_name}")
     date_string = barra_file.date_.strftime("%Y%m%d")
     stage_table = f"factors_{date_string}_stage"
     transform_table = f"factors_{date_string}_transform"
@@ -49,7 +48,6 @@ def load_barra_file(barra_file: BarraFile) -> None:
         db.execute(merge_pivot_query)
 
 
-@flow(name="barra-factors-backfill-flow")
 def barra_factors_backfill_flow(start_date: date, end_date: date) -> None:
     """Flow for orchestrating barra factors backfill."""
 
@@ -68,8 +66,6 @@ def barra_factors_backfill_flow(start_date: date, end_date: date) -> None:
         date_=last_market_date,
     )
 
-    print(barra_file.zip_folder_path)
-
     if barra_file.exists:
         load_barra_file(barra_file=barra_file)
     else:
@@ -77,7 +73,6 @@ def barra_factors_backfill_flow(start_date: date, end_date: date) -> None:
         raise RuntimeError(msg)
 
 
-@flow(name="barra-factors-daily-flow")
 def barra_factors_daily_flow() -> None:
     """Flow for orchestrating barra factors each day."""
     last_market_date = get_last_market_date(date.today())
@@ -100,11 +95,3 @@ def barra_factors_daily_flow() -> None:
     else:
         msg = f"BarraFile '{barra_file.file_name}' does not exist!"
         raise RuntimeError(msg)
-
-
-if __name__ == "__main__":
-    barra_factors_backfill_flow(start_date=date(2025, 1, 1), end_date=date(2025, 3, 7))
-
-    with Database() as db:
-        print(db.execute("SELECT * FROM factors;").pl())
-        print(db.execute("SELECT * FROM factors_wide;").pl())

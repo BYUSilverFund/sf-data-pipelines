@@ -9,7 +9,8 @@ class Database:
         load_dotenv(override=True)
 
         home, user = os.getenv("ROOT").split("/")[1:3]
-        path = Path(f"/{home}/{user}/groups/grp_quant/data")
+        # path = Path(f"/{home}/{user}/groups/grp_quant/data")
+        path = Path(f"/{home}/{user}/groups/grp_quant/sf-data-pipelines") # temp
         self.db_path = path / db_name
 
         self.con: duckdb.DuckDBPyConnection | None = None
