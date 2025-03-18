@@ -163,8 +163,25 @@ def construct_specific_risk_matrix(barrids: list[str], date_: date) -> pl.DataFr
     
 
 if __name__ == '__main__':
-    date_ = date(2025, 3, 7)
-    cov_mat = construct_covariance_matrix(date_)
-    print(cov_mat)
+    # date_ = date(2025, 3, 7)
+    # cov_mat = construct_covariance_matrix(date_)
+    # print(cov_mat)
+    from database import Database
+
+    with Database() as db:
+        df = db.execute(
+"""
+    SELECT 
+        barrid,
+        ticker,
+        price
+    FROM assets_clean 
+    WHERE date >= '2025-01-31' 
+        AND (russell_1000 OR russell_2000) 
+    ORDER BY date, barrid;
+"""
+        ).pl()
+
+        print(df)
 
     

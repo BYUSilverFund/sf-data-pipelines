@@ -26,8 +26,8 @@ from utils.database import Database
 def backfill_orchestration_flow(start_date: date, end_date: date) -> None:
     # Backfill complete ID space
     barra_returns_backfill_flow(start_date, end_date)
-    barra_ids_backfill_flow(start_date, end_date)
-    ftse_russell_backfill_flow(start_date, end_date)
+    # barra_ids_backfill_flow(start_date, end_date)
+    # ftse_russell_backfill_flow(start_date, end_date)
 
     # Assets table
     barra_assets_backfill_flow(start_date, end_date)
@@ -67,4 +67,4 @@ def daily_orchestration_flow() -> None:
 
 
 if __name__ == "__main__":
-    backfill_orchestration_flow(start_date=date(2025, 1, 1), end_date=date(2025, 3, 7))
+    backfill_orchestration_flow(start_date=date(2024, 1, 1), end_date=date(2025, 1, 1))

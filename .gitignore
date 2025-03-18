@@ -1,6 +1,9 @@
 # Archive folder
 /.archive
 
+# Sbatch
+*.sh
+
 # Database
 *.duckdb
 
