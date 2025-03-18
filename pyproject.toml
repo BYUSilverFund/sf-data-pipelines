@@ -5,9 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "duckdb>=1.2.0",
+    "exchange-calendars>=4.9",
+    "ipykernel>=6.29.5",
+    "jinja2>=3.1.5",
     "numpy>=2.2.3",
     "polars>=1.24.0",
+    "prefect>=3.2.9",
     "pyarrow>=19.0.1",
     "python-dotenv>=1.0.1",
     "tqdm>=4.67.1",
+    "wrds>=3.3.0",
 ]
