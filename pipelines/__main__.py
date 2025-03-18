@@ -39,12 +39,12 @@ def backfill_orchestration_flow(start_date: date, end_date: date) -> None:
     barra_exposures_backfill_flow(start_date, end_date)
 
     # Factors Table
-    barra_factors_backfill_flow(start_date, end_date)
+    # barra_factors_backfill_flow(start_date, end_date)
 
     # Views
-    with Database() as db:
-        asset_clean_query = render_sql_file("sql/assets_clean_view.sql")
-        db.execute(asset_clean_query)
+    # with Database() as db:
+    #     asset_clean_query = render_sql_file("sql/assets_clean_view.sql")
+    #     db.execute(asset_clean_query)
 
 
 def daily_orchestration_flow() -> None:
@@ -67,4 +67,4 @@ def daily_orchestration_flow() -> None:
 
 
 if __name__ == "__main__":
-    backfill_orchestration_flow(start_date=date(2024, 1, 1), end_date=date(2025, 1, 1))
+    backfill_orchestration_flow(start_date=date(2014, 1, 1), end_date=date(2024, 1, 1))
