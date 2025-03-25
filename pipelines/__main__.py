@@ -9,7 +9,7 @@ from barra_exposures_flow import (
 )
 from barra_factors_flow import barra_factors_daily_flow, barra_factors_backfill_flow
 from barra_ids_flow import barra_ids_daily_flow, barra_ids_backfill_flow
-from barra_returns_flow import barra_returns_daily_flow, barra_returns_backfill_flow
+from barra_returns_flow import barra_returns_daily_flow, barra_returns_history_flow
 from barra_risk_flow import barra_risk_daily_flow, barra_risk_backfill_flow
 from barra_specific_returns_flow import (
     barra_specific_returns_daily_flow,
@@ -25,7 +25,7 @@ from utils.database import Database
 
 def backfill_orchestration_flow(start_date: date, end_date: date) -> None:
     # Backfill complete ID space
-    barra_returns_backfill_flow(start_date, end_date)
+    barra_returns_history_flow(start_date, end_date)
     # barra_ids_backfill_flow(start_date, end_date)
     # ftse_russell_backfill_flow(start_date, end_date)
 
