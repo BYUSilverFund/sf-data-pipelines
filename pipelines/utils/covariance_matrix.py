@@ -1,9 +1,9 @@
 from datetime import date
 import polars as pl
 import numpy as np
-from factors import factors
+from pipelines.utils.factors import factors
 import polars as pl
-from tables import assets_clean
+from pipelines.utils.tables import assets_clean
 
 def get_barrids_by_date(date_: date) -> list[str]:
 
