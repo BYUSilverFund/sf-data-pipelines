@@ -1,13 +1,13 @@
-from datetime import date, datetime
+from datetime import date
 import zipfile
 import polars as pl
 from io import BytesIO
 from tools import raw_schema, barra_columns, clean_schema
 import os
 import exchange_calendars as xcals
+from tqdm import tqdm
 
-
-def get_last_market_date() -> date:
+def get_last_market_date(n_days: int = 1) -> list[date]:
     df = (
         pl.from_pandas(xcals.get_calendar("XNYS").schedule)
         # Cast date types
@@ -19,14 +19,15 @@ def get_last_market_date() -> date:
         # Sort
         .sort("date")["previous_date"]
         # Get last previous date
-        .last()
+        .tail(n_days)
+        .to_list()
     )
 
     return df
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
-    zip_folder_path = f"/Users/andrew/groups/grp_msci_barra/nobackup/archive/history/usslow/sm/daily/SMD_USSLOW_100_D_{year}.zip"
+    zip_folder_path = f"/home/amh1124/groups/grp_msci_barra/nobackup/archive/history/usslow/sm/daily/SMD_USSLOW_100_D_{year}.zip"
 
     # Open zip folder
     with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
@@ -48,21 +49,23 @@ def load_barra_history_files(year: int) -> pl.DataFrame:
 
 
 def load_current_barra_files() -> pl.DataFrame:
-    current_dir = "/Users/andrew/groups/grp_msci_barra/nobackup/archive/us/usslow/"
+    usslow_dir = "/home/amh1124/groups/grp_msci_barra/nobackup/archive/us/usslow/"
 
     dfs = []
-    for zip_path in os.listdir(current_dir):
-        if zip_path.startswith("SMD_USSLOWL_100_") and zip_path.endswith(".zip"):
 
-            # Date strings
-            date_short = zip_path.split(".")[0].split("_")[-1]
-            date_long = datetime.strptime(date_short, "%y%m%d").strftime("%Y%m%d")
+    dates = get_last_market_date(n_days=20)
 
-            # File path
-            file_path = f"USSLOW_Daily_Asset_Price.{date_long}"
+    for date_ in tqdm(dates, desc="Searching Files"):
+        date_long = date_.strftime("%Y%m%d")
+        date_short = date_.strftime("%y%m%d") 
+        zip_path = f"SMD_USSLOWL_100_{date_short}.zip"
+        file_path = f"USSLOW_Daily_Asset_Price.{date_long}"
+
+        # Check zip folder exists
+        if os.path.exists(usslow_dir + zip_path):
 
             # Open zip folder
-            with zipfile.ZipFile(current_dir + zip_path, "r") as zip_folder:
+            with zipfile.ZipFile(usslow_dir + zip_path, "r") as zip_folder:
                 dfs.append(
                     # Read each file
                     pl.read_csv(
@@ -110,8 +113,8 @@ def barra_returns_history_flow(start_date: date, end_date: date) -> None:
     # Get years
     years = list(range(start_date.year, end_date.year + 1))
 
-    for year in years:
-        master_file = f"assets_{year}.parquet"
+    for year in tqdm(years, desc="Backfilling"):
+        master_file = f"data/assets/assets_{year}.parquet"
 
         # Create master file if not exists
         if not os.path.exists(master_file):
@@ -142,21 +145,28 @@ def barra_returns_current_flow() -> None:
     )
 
     # Update master files by year
-    for year in years:
+    for year in tqdm(years, desc="Loading into parquet files"):
         # Subset df to year
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
         # Merge into master
-        master_file = f"assets_{year}.parquet"
+        master_file = f"data/assets/assets_{year}.parquet"
+
+        # Create master file if not exists
+        if not os.path.exists(master_file):
+            pl.DataFrame([], schema=clean_schema).write_parquet(master_file)
+
         merge_into_master(master_file, year_df)
 
 
 if __name__ == "__main__":
+    os.makedirs("data", exist_ok=True)
+
     # ----- History Flow -----
-    barra_returns_history_flow(start_date=date(2025, 1, 1), end_date=date(2025, 3, 7))
+    barra_returns_history_flow(start_date=date(1995, 12, 31), end_date=date.today())
 
     # ----- Current Flow -----
     barra_returns_current_flow()
 
     # ----- Print -----
-    print(pl.read_parquet("assets_2025.parquet"))
+    print(pl.read_parquet("data/assets_*.parquet"))
