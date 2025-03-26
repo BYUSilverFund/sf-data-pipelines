@@ -56,7 +56,7 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
         .with_columns(pl.date_ranges("start_date", "end_date").alias("date"))
         .explode("date")
         .drop("start_date", "end_date", "asset_id_type")
-        .rename({"asset_id": "cusip"})
+        .rename({"assetid": "cusip"})
         # Sort
         .sort(["barrid", "date"])
     )
