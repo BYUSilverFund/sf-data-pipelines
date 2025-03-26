@@ -27,6 +27,9 @@ barra_columns = {
     "PredBeta": "predicted_beta",
     "Factor": "factor",
     "Exposure": "exposures",
+    "!Factor1": "factor_1",
+    "Factor2": "factor_2",
+    'VarCovar': 'covariance',
 }
 
 barra_schema = {
@@ -54,6 +57,9 @@ barra_schema = {
     "PredBeta": pl.Float64,
     "Factor": pl.String,
     "Exposures": pl.Float64,
+    "!Factor1": pl.String,
+    "Factor2": pl.String,
+    'VarCovar': pl.Float64
 }
 
 russell_columns = {
