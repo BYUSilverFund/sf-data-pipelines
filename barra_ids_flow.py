@@ -15,10 +15,9 @@ def load_current_barra_files() -> pl.DataFrame:
     dates = get_last_market_date(n_days=40)
 
     for date_ in reversed(dates):
-
         # Date strings
         date_long = date_.strftime("%Y%m%d")
-        date_short = date_.strftime("%y%m%d") 
+        date_short = date_.strftime("%y%m%d")
 
         # File paths
         zip_path = f"SMD_USSLOW_XSEDOL_ID_{date_short}.zip"
@@ -26,19 +25,16 @@ def load_current_barra_files() -> pl.DataFrame:
 
         # Check zip folder exists
         if os.path.exists(bime_dir + zip_path):
-
             # Open zip folder
             with zipfile.ZipFile(bime_dir + zip_path, "r") as zip_folder:
-                return (
-                    pl.read_csv(
-                        BytesIO(zip_folder.read(file_path)),
-                        skip_rows=1,
-                        separator="|",
-                        schema_overrides=barra_schema,
-                        try_parse_dates=True,
-                    )
+                return pl.read_csv(
+                    BytesIO(zip_folder.read(file_path)),
+                    skip_rows=1,
+                    separator="|",
+                    schema_overrides=barra_schema,
+                    try_parse_dates=True,
                 )
-    
+
     return pl.DataFrame()
 
 
@@ -48,22 +44,19 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
         # Rename columns
         .rename(barra_columns, strict=False)
         # Clean date column
-        .with_columns(pl.col('start_date', 'end_date').str.strptime(pl.Date, "%Y%m%d"))
+        .with_columns(pl.col("start_date", "end_date").str.strptime(pl.Date, "%Y%m%d"))
         # Filter out End of File lines
         .filter(pl.col("barrid").ne("[End of File]"))
         # Keep only cusip ids
-        .filter(pl.col('asset_id_type').eq('CUSIP'))
+        .filter(pl.col("asset_id_type").eq("CUSIP"))
     )
 
     return (
-        df
-        .with_columns(pl.col('end_date').clip(upper_bound=date.today()))
-        .with_columns(
-            pl.date_ranges("start_date", "end_date").alias("date")
-        )
-        .explode('date')
-        .drop('start_date', 'end_date', 'asset_id_type')
-        .rename({'asset_id': 'cusip'})
+        df.with_columns(pl.col("end_date").clip(upper_bound=date.today()))
+        .with_columns(pl.date_ranges("start_date", "end_date").alias("date"))
+        .explode("date")
+        .drop("start_date", "end_date", "asset_id_type")
+        .rename({"asset_id": "cusip"})
         # Sort
         .sort(["barrid", "date"])
     )
@@ -72,7 +65,7 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
 def merge_into_master(master_file: str, df: pl.DataFrame) -> None:
     # Get master columns lazily
     master_columns = pl.scan_parquet(master_file).collect_schema().names()
-    
+
     # Add missing columns
     missing_columns = set(df.columns) - set(master_columns)
     for col in missing_columns:
@@ -85,7 +78,7 @@ def merge_into_master(master_file: str, df: pl.DataFrame) -> None:
         )
 
     # Update rows
-    (   
+    (
         # Scan master parquet file
         pl.scan_parquet(master_file)
         # Update
@@ -102,7 +95,7 @@ def barra_ids_current_flow() -> None:
 
     # Clean
     clean_df = clean_barra_df(raw_df)
-    
+
     # Get all years
     years = (
         clean_df
@@ -119,8 +112,14 @@ def barra_ids_current_flow() -> None:
             year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
             # Filter to market dates
-            dates = pl.scan_parquet(master_file).select('date').unique().sort('date').collect()
-            year_df = year_df.filter(pl.col('date').is_in(dates))
+            dates = (
+                pl.scan_parquet(master_file)
+                .select("date")
+                .unique()
+                .sort("date")
+                .collect()
+            )
+            year_df = year_df.filter(pl.col("date").is_in(dates))
 
             # Merge
             merge_into_master(master_file, year_df)

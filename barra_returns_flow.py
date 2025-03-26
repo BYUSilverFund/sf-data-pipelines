@@ -7,6 +7,7 @@ import os
 import exchange_calendars as xcals
 from tqdm import tqdm
 
+
 def get_last_market_date(n_days: int = 1) -> list[date]:
     df = (
         pl.from_pandas(xcals.get_calendar("XNYS").schedule)
@@ -57,13 +58,12 @@ def load_current_barra_files() -> pl.DataFrame:
 
     for date_ in tqdm(dates, desc="Searching Files"):
         date_long = date_.strftime("%Y%m%d")
-        date_short = date_.strftime("%y%m%d") 
+        date_short = date_.strftime("%y%m%d")
         zip_path = f"SMD_USSLOWL_100_{date_short}.zip"
         file_path = f"USSLOW_Daily_Asset_Price.{date_long}"
 
         # Check zip folder exists
         if os.path.exists(usslow_dir + zip_path):
-
             # Open zip folder
             with zipfile.ZipFile(usslow_dir + zip_path, "r") as zip_folder:
                 dfs.append(
@@ -97,7 +97,7 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
 
 
 def merge_into_master(master_file: str, df: pl.DataFrame) -> None:
-    (   
+    (
         # Scan master parquet file
         pl.scan_parquet(master_file)
         # Update
@@ -118,7 +118,7 @@ def barra_returns_history_flow(start_date: date, end_date: date) -> None:
         # Load raw df
         raw_df = load_barra_history_files(year)
 
-        # Clean 
+        # Clean
         clean_df = clean_barra_df(raw_df)
 
         # Merge
@@ -136,7 +136,7 @@ def barra_returns_current_flow() -> None:
 
     # Clean
     clean_df = clean_barra_df(raw_df)
-    
+
     # Get all years
     years = (
         clean_df

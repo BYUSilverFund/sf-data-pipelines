@@ -15,13 +15,12 @@ def load_current_barra_files() -> pl.DataFrame:
 
     for date_ in reversed(dates):
         date_long = date_.strftime("%Y%m%d")
-        date_short = date_.strftime("%y%m%d") 
+        date_short = date_.strftime("%y%m%d")
         zip_path = f"SMD_USSLOW_XSEDOL_ID_{date_short}.zip"
         file_path = f"USA_Asset_Identity.{date_long}"
 
         # Check zip folder exists
         if os.path.exists(bime_dir + zip_path):
-
             # Open zip folder
             with zipfile.ZipFile(bime_dir + zip_path, "r") as zip_folder:
                 return (
@@ -34,7 +33,7 @@ def load_current_barra_files() -> pl.DataFrame:
                         try_parse_dates=True,
                     )
                 )
-    
+
     return pl.DataFrame()
 
 
@@ -44,19 +43,16 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
         # Rename columns
         .rename(barra_columns, strict=False)
         # Clean date column
-        .with_columns(pl.col('start_date', 'end_date').str.strptime(pl.Date, "%Y%m%d"))
+        .with_columns(pl.col("start_date", "end_date").str.strptime(pl.Date, "%Y%m%d"))
         # Filter out End of File lines
         .filter(pl.col("barrid").ne("[End of File]"))
     )
 
     return (
-        df
-        .with_columns(pl.col('end_date').clip(upper_bound=date.today()))
-        .with_columns(
-            pl.date_ranges("start_date", "end_date").alias("date")
-        )
-        .explode('date')
-        .drop('start_date', 'end_date')
+        df.with_columns(pl.col("end_date").clip(upper_bound=date.today()))
+        .with_columns(pl.date_ranges("start_date", "end_date").alias("date"))
+        .explode("date")
+        .drop("start_date", "end_date")
         # Sort
         .sort(["barrid", "date"])
     )
@@ -65,7 +61,7 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
 def merge_into_master(master_file: str, df: pl.DataFrame) -> None:
     # Get master columns lazily
     master_columns = pl.scan_parquet(master_file).collect_schema().names()
-    
+
     # Add missing columns
     missing_columns = set(df.columns) - set(master_columns)
     for col in missing_columns:
@@ -78,7 +74,7 @@ def merge_into_master(master_file: str, df: pl.DataFrame) -> None:
         )
 
     # Update rows
-    (   
+    (
         # Scan master parquet file
         pl.scan_parquet(master_file)
         # Update
@@ -95,7 +91,7 @@ def barra_ids_current_flow() -> None:
 
     # Clean
     clean_df = clean_barra_df(raw_df)
-    
+
     # Get all years
     years = (
         clean_df
@@ -112,8 +108,14 @@ def barra_ids_current_flow() -> None:
             year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
             # Filter to market dates
-            dates = pl.scan_parquet(master_file).select('date').unique().sort('date').collect()
-            year_df = year_df.filter(pl.col('date').is_in(dates))
+            dates = (
+                pl.scan_parquet(master_file)
+                .select("date")
+                .unique()
+                .sort("date")
+                .collect()
+            )
+            year_df = year_df.filter(pl.col("date").is_in(dates))
 
             # Merge
             merge_into_master(master_file, year_df)
