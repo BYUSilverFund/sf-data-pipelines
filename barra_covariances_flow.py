@@ -142,8 +142,8 @@ if __name__ == "__main__":
 
     print(pl.read_parquet("data/covariances/covariances_*.parquet"))
 
-    # # # ----- Current Flow -----
+    # ----- Current Flow -----
     barra_covariances_daily_flow()
 
-    # # ----- Print -----
+    # ----- Print -----
     print(pl.read_parquet("data/covariances/covariances_*.parquet"))
