@@ -2,7 +2,7 @@ from datetime import date
 import zipfile
 import polars as pl
 from io import BytesIO
-from tools import raw_schema, barra_columns, clean_schema
+from tools import barra_schema, barra_columns
 import os
 import exchange_calendars as xcals
 from tqdm import tqdm
@@ -27,7 +27,7 @@ def get_last_market_date(n_days: int = 1) -> list[date]:
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
-    zip_folder_path = f"/home/amh1124/groups/grp_msci_barra/nobackup/archive/history/usslow/sm/daily/SMD_USSLOW_100_D_{year}.zip"
+    zip_folder_path = f"/Users/andrew/groups/grp_msci_barra/nobackup/archive/history/usslow/sm/daily/SMD_USSLOW_100_D_{year}.zip"
 
     # Open zip folder
     with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
@@ -37,7 +37,7 @@ def load_barra_history_files(year: int) -> pl.DataFrame:
                 BytesIO(zip_folder.read(file_name)),
                 skip_rows=1,
                 separator="|",
-                schema_overrides=raw_schema,
+                schema_overrides=barra_schema,
                 try_parse_dates=True,
             )
             for file_name in zip_folder.namelist()
@@ -49,7 +49,7 @@ def load_barra_history_files(year: int) -> pl.DataFrame:
 
 
 def load_current_barra_files() -> pl.DataFrame:
-    usslow_dir = "/home/amh1124/groups/grp_msci_barra/nobackup/archive/us/usslow/"
+    usslow_dir = "/Users/andrew/groups/grp_msci_barra/nobackup/archive/us/usslow/"
 
     dfs = []
 
@@ -72,7 +72,7 @@ def load_current_barra_files() -> pl.DataFrame:
                         BytesIO(zip_folder.read(file_path)),
                         skip_rows=1,
                         separator="|",
-                        schema_overrides=raw_schema,
+                        schema_overrides=barra_schema,
                         try_parse_dates=True,
                     )
                 )
@@ -86,10 +86,9 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     return (
         df
         # Rename columns
-        .rename(barra_columns)
+        .rename(barra_columns, strict=False)
         # Clean date column
         .with_columns(pl.col("date").str.strptime(pl.Date, "%Y%m%d"))
-        .cast(clean_schema)
         # Filter out End of File lines
         .filter(pl.col("barrid").ne("[End of File]"))
         # Sort
@@ -116,18 +115,19 @@ def barra_returns_history_flow(start_date: date, end_date: date) -> None:
     for year in tqdm(years, desc="Backfilling"):
         master_file = f"data/assets/assets_{year}.parquet"
 
-        # Create master file if not exists
-        if not os.path.exists(master_file):
-            pl.DataFrame([], schema=clean_schema).write_parquet(master_file)
-
         # Load raw df
         raw_df = load_barra_history_files(year)
 
         # Clean 
         clean_df = clean_barra_df(raw_df)
 
-        # Merge into master
-        merge_into_master(master_file, clean_df)
+        # Merge
+        if os.path.exists(master_file):
+            merge_into_master(master_file, clean_df)
+
+        # or Create
+        else:
+            clean_df.write_parquet(master_file)
 
 
 def barra_returns_current_flow() -> None:
@@ -152,21 +152,23 @@ def barra_returns_current_flow() -> None:
         # Merge into master
         master_file = f"data/assets/assets_{year}.parquet"
 
-        # Create master file if not exists
-        if not os.path.exists(master_file):
-            pl.DataFrame([], schema=clean_schema).write_parquet(master_file)
+        # Merge
+        if os.path.exists(master_file):
+            merge_into_master(master_file, year_df)
 
-        merge_into_master(master_file, year_df)
+        # or Create
+        else:
+            year_df.write_parquet(master_file)
 
 
 if __name__ == "__main__":
-    os.makedirs("data", exist_ok=True)
+    os.makedirs("data/assets", exist_ok=True)
 
     # ----- History Flow -----
-    barra_returns_history_flow(start_date=date(1995, 12, 31), end_date=date.today())
+    barra_returns_history_flow(start_date=date(2025, 1, 1), end_date=date.today())
 
     # ----- Current Flow -----
     barra_returns_current_flow()
 
     # ----- Print -----
-    print(pl.read_parquet("data/assets_*.parquet"))
+    print(pl.read_parquet("data/assets/assets_*.parquet"))
