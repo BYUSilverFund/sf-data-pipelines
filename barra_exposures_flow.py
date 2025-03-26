@@ -138,7 +138,7 @@ if __name__ == "__main__":
     print(pl.read_parquet("data/exposures/exposures_*.parquet"))
 
     # ----- History Flow -----
-    barra_exposures_history_flow(start_date=date(2025, 1, 1), end_date=date.today())
+    barra_exposures_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
 
     print(pl.read_parquet("data/exposures/exposures_*.parquet"))
 
