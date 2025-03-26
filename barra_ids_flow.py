@@ -89,7 +89,7 @@ def merge_into_master(master_file: str, df: pl.DataFrame) -> None:
     )
 
 
-def barra_ids_current_flow() -> None:
+def barra_ids_daily_flow() -> None:
     # Load raw df
     raw_df = load_current_barra_files()
 
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     print(pl.read_parquet("data/assets/assets_*.parquet"))
 
     # ----- Current Flow -----
-    barra_ids_current_flow()
+    barra_ids_daily_flow()
 
     # ----- Print -----
     print(pl.read_parquet("data/assets/assets_*.parquet"))

@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
-    zip_folder_path = f"/home/amh1124/groups/grp_msci_barra/nobackup/archive/history/usslow/sm/daily/SMD_USSLOWL_100_D_{year}.zip"
+    zip_folder_path = f"/Users/andrew/groups/grp_msci_barra/nobackup/archive/history/usslow/sm/daily/SMD_USSLOWL_100_D_{year}.zip"
 
     # Open zip folder
     with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
@@ -16,7 +16,7 @@ def load_barra_history_files(year: int) -> pl.DataFrame:
         dfs = [
             pl.read_csv(
                 BytesIO(zip_folder.read(file_name)),
-                skip_rows=2,
+                skip_rows=1,
                 separator="|",
                 schema_overrides=barra_schema,
                 try_parse_dates=True,
@@ -76,7 +76,7 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def barra_risk_history_flow(start_date: date, end_date: date) -> None:
+def barra_exposures_history_flow(start_date: date, end_date: date) -> None:
     # Get years
     years = list(range(start_date.year, end_date.year + 1))
 
@@ -98,7 +98,7 @@ def barra_risk_history_flow(start_date: date, end_date: date) -> None:
             clean_df.write_parquet(master_file)
 
 
-def barra_returns_daily_flow() -> None:
+def barra_exposures_daily_flow() -> None:
     # Load raw df
     raw_df = load_current_barra_files()
 
@@ -130,17 +130,17 @@ def barra_returns_daily_flow() -> None:
 
 
 if __name__ == "__main__":
-    os.makedirs("data/assets", exist_ok=True)
+    os.makedirs("data/exposures", exist_ok=True)
 
-    print(pl.read_parquet("data/assets/assets_*.parquet"))
+    # print(pl.read_parquet("data/exposures/exposures_*.parquet"))
 
     # ----- History Flow -----
-    barra_risk_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
+    barra_exposures_history_flow(start_date=date(2025, 1, 1), end_date=date.today())
 
-    print(pl.read_parquet("data/assets/assets_*.parquet"))
+    print(pl.read_parquet("data/exposures/exposures_*.parquet"))
 
-    # ----- Current Flow -----
-    barra_returns_daily_flow()
+    # # ----- Current Flow -----
+    # barra_returns_current_flow()
 
-    # ----- Print -----
-    print(pl.read_parquet("data/assets/assets_*.parquet"))
+    # # ----- Print -----
+    # print(pl.read_parquet("data/assets/assets_*.parquet"))
