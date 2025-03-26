@@ -20,6 +20,11 @@ barra_columns = {
     "ISOCountryCode": "iso_country_code",
     "ISOCurrencyCode": "iso_currency_code",
     "RootID": "rootid",
+    "Yield%": "yield",
+    "TotalRisk%": "total_risk",
+    "SpecRisk%": "specific_risk",
+    "HistBeta": "historical_beta",
+    "PredBeta": "predicted_beta",
 }
 
 barra_schema = {
@@ -40,14 +45,19 @@ barra_schema = {
     "ISOCountryCode": pl.String,
     "ISOCurrencyCode": pl.String,
     "RootID": pl.String,
+    "Yield%": pl.Float64,
+    "TotalRisk%": pl.Float64,
+    "SpecRisk%": pl.Float64,
+    "HistBeta": pl.Float64,
+    "PredBeta": pl.Float64,
 }
 
 russell_columns = {
-    "russell2000": 'russell_2000',
-    "russell1000": 'russell_1000',
-    "r3000_wt": 'russell_3000_weight',
-    "r2000_wt": 'russell_2000_weight',
-    "r1000_wt": 'russell_1000_weight',
+    "russell2000": "russell_2000",
+    "russell1000": "russell_1000",
+    "r3000_wt": "russell_3000_weight",
+    "r2000_wt": "russell_2000_weight",
+    "r1000_wt": "russell_1000_weight",
 }
 
 russell_schema = {
@@ -81,7 +91,9 @@ def get_last_market_date(n_days: int = 1) -> list[date]:
     return df
 
 
-def merge_into_master(master_file: str, df: pl.DataFrame, on: list[str], how: str) -> None:
+def merge_into_master(
+    master_file: str, df: pl.DataFrame, on: list[str], how: str
+) -> None:
     # Get master columns lazily
     master_columns = pl.scan_parquet(master_file).collect_schema().names()
 
