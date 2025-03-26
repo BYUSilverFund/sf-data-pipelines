@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
-    zip_folder_path = f"/Users/andrew/groups/grp_msci_barra/nobackup/archive/history/usslow/sm/daily/SMD_USSLOWL_100_D_{year}.zip"
+    zip_folder_path = f"/home/amh1124/groups/grp_msci_barra/nobackup/archive/history/usslow/sm/daily/SMD_USSLOWL_100_D_{year}.zip"
 
     # Open zip folder
     with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
@@ -16,13 +16,13 @@ def load_barra_history_files(year: int) -> pl.DataFrame:
         dfs = [
             pl.read_csv(
                 BytesIO(zip_folder.read(file_name)),
-                skip_rows=1,
+                skip_rows=2,
                 separator="|",
                 schema_overrides=barra_schema,
                 try_parse_dates=True,
             )
             for file_name in zip_folder.namelist()
-            if file_name.startswith("USSLOWL_100_Asset_Data")
+            if file_name.startswith("USSLOWL_100_Asset_Exposure")
         ]
 
     # Concate
@@ -40,7 +40,7 @@ def load_current_barra_files() -> pl.DataFrame:
         date_long = date_.strftime("%Y%m%d")
         date_short = date_.strftime("%y%m%d")
         zip_path = f"SMD_USSLOWL_100_{date_short}.zip"
-        file_path = f"USSLOWL_100_Asset_Data.{date_long}"
+        file_path = f"USSLOWL_100_Asset_Exposure.{date_long}"
 
         # Check zip folder exists
         if os.path.exists(usslow_dir + zip_path):
@@ -72,7 +72,10 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
         # Filter out End of File lines
         .filter(pl.col("barrid").ne("[End of File]"))
         # Sort
-        .sort(["barrid", "date"])
+        .sort('factor')
+        # Pivot out factors
+        .pivot(index=['date', 'barrid'], on='factor', values='exposures')
+        .sort(['barrid', 'date'])
     )
 
 
@@ -81,7 +84,7 @@ def barra_exposures_history_flow(start_date: date, end_date: date) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="Backfilling"):
-        master_file = f"data/assets/assets_{year}.parquet"
+        master_file = f"data/exposures/exposures_{year}.parquet"
 
         # Load raw df
         raw_df = load_barra_history_files(year)
@@ -118,11 +121,11 @@ def barra_exposures_daily_flow() -> None:
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
         # Merge into master
-        master_file = f"data/assets/assets_{year}.parquet"
+        master_file = f"data/exposures/exposures_{year}.parquet"
 
         # Merge
         if os.path.exists(master_file):
-            merge_into_master(master_file, clean_df, on=['barrid', 'date'], how='full')
+            merge_into_master(master_file, clean_df, on=["barrid", "date"], how="full")
 
         # or Create
         else:
@@ -132,7 +135,7 @@ def barra_exposures_daily_flow() -> None:
 if __name__ == "__main__":
     os.makedirs("data/exposures", exist_ok=True)
 
-    # print(pl.read_parquet("data/exposures/exposures_*.parquet"))
+    print(pl.read_parquet("data/exposures/exposures_*.parquet"))
 
     # ----- History Flow -----
     barra_exposures_history_flow(start_date=date(2025, 1, 1), end_date=date.today())
@@ -140,7 +143,7 @@ if __name__ == "__main__":
     print(pl.read_parquet("data/exposures/exposures_*.parquet"))
 
     # # ----- Current Flow -----
-    # barra_returns_current_flow()
+    barra_exposures_daily_flow()
 
-    # # ----- Print -----
-    # print(pl.read_parquet("data/assets/assets_*.parquet"))
+    # ----- Print -----
+    print(pl.read_parquet("data/exposures/exposures_*.parquet"))

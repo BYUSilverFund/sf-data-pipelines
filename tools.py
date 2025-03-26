@@ -25,6 +25,8 @@ barra_columns = {
     "SpecRisk%": "specific_risk",
     "HistBeta": "historical_beta",
     "PredBeta": "predicted_beta",
+    "Factor": "factor",
+    "Exposure": "exposures",
 }
 
 barra_schema = {
@@ -50,6 +52,8 @@ barra_schema = {
     "SpecRisk%": pl.Float64,
     "HistBeta": pl.Float64,
     "PredBeta": pl.Float64,
+    "Factor": pl.String,
+    "Exposures": pl.Float64,
 }
 
 russell_columns = {
