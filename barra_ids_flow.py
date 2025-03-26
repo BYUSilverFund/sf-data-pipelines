@@ -9,13 +9,18 @@ from tools import get_last_market_date
 
 
 def load_current_barra_files() -> pl.DataFrame:
-    bime_dir = "/Users/andrew/groups/grp_msci_barra/nobackup/archive/bime/"
+    bime_dir = "/home/amh1124/groups/grp_msci_barra/nobackup/archive/bime/"
 
+    # Most recent market dates
     dates = get_last_market_date(n_days=40)
 
     for date_ in reversed(dates):
+
+        # Date strings
         date_long = date_.strftime("%Y%m%d")
         date_short = date_.strftime("%y%m%d") 
+
+        # File paths
         zip_path = f"SMD_USSLOW_XSEDOL_ID_{date_short}.zip"
         file_path = f"USA_XSEDOL_Asset_ID.{date_long}"
 
@@ -25,7 +30,6 @@ def load_current_barra_files() -> pl.DataFrame:
             # Open zip folder
             with zipfile.ZipFile(bime_dir + zip_path, "r") as zip_folder:
                 return (
-                    # Read each file
                     pl.read_csv(
                         BytesIO(zip_folder.read(file_path)),
                         skip_rows=1,
@@ -47,6 +51,7 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
         .with_columns(pl.col('start_date', 'end_date').str.strptime(pl.Date, "%Y%m%d"))
         # Filter out End of File lines
         .filter(pl.col("barrid").ne("[End of File]"))
+        # Keep only cusip ids
         .filter(pl.col('asset_id_type').eq('CUSIP'))
     )
 
@@ -84,7 +89,7 @@ def merge_into_master(master_file: str, df: pl.DataFrame) -> None:
         # Scan master parquet file
         pl.scan_parquet(master_file)
         # Update
-        .update(df.lazy(), on=["date", "barrid"], how="full")
+        .update(df.lazy(), on=["date", "barrid"], how="left")
         .collect()
         # Write
         .write_parquet(master_file)
@@ -129,5 +134,5 @@ if __name__ == "__main__":
     # ----- Current Flow -----
     barra_ids_current_flow()
 
-    # # ----- Print -----
+    # ----- Print -----
     print(pl.read_parquet("data/assets/assets_*.parquet"))

@@ -27,7 +27,7 @@ def get_last_market_date(n_days: int = 1) -> list[date]:
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
-    zip_folder_path = f"/Users/andrew/groups/grp_msci_barra/nobackup/archive/history/usslow/sm/daily/SMD_USSLOW_100_D_{year}.zip"
+    zip_folder_path = f"/home/amh1124/groups/grp_msci_barra/nobackup/archive/history/usslow/sm/daily/SMD_USSLOW_100_D_{year}.zip"
 
     # Open zip folder
     with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
@@ -49,7 +49,7 @@ def load_barra_history_files(year: int) -> pl.DataFrame:
 
 
 def load_current_barra_files() -> pl.DataFrame:
-    usslow_dir = "/Users/andrew/groups/grp_msci_barra/nobackup/archive/us/usslow/"
+    usslow_dir = "/home/amh1124/groups/grp_msci_barra/nobackup/archive/us/usslow/"
 
     dfs = []
 
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     os.makedirs("data/assets", exist_ok=True)
 
     # ----- History Flow -----
-    barra_returns_history_flow(start_date=date(2025, 1, 1), end_date=date.today())
+    barra_returns_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
 
     # ----- Current Flow -----
     barra_returns_current_flow()
