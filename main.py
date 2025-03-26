@@ -91,7 +91,7 @@ composite = (
     .with_columns(
         pl.sum_horizontal(signal_names).alias('composite')
     )
-    .select(['date', 'barrid', 'composite'])
+    .select(['date', 'barrid', 'specific_risk', 'composite'])
 )
 
 print(composite)
@@ -105,7 +105,7 @@ scores = (
         .over('barrid')
         .alias('score')
     )
-    .select(['date', 'barrid', 'score'])
+    .select(['date', 'barrid', 'specific_risk', 'score'])
 )
 
 print(scores)
