@@ -1,4 +1,4 @@
-factors = [
+factors = sorted([
     "USSLOWL_BETA",
     "USSLOWL_COUNTRY",
     "USSLOWL_DIVYILD",
@@ -75,4 +75,4 @@ factors = [
     "USSLOWL_TRADECO",
     "USSLOWL_TRANSPRT",
     "USSLOWL_WIRELESS",
-]
+])
