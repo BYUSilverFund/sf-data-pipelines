@@ -77,35 +77,27 @@ signal_names = sorted([fn.__name__ for fn in signal_fns])
 for signal_fn in signal_fns:
     data = signal_fn(data)
 
-signals = data.select(
-    ["date", "barrid", "specific_risk"] + signal_names
+signals = (
+    data.select(
+        ["date", "barrid", "specific_risk"] + signal_names
+    )
+    .filter(pl.col('date').eq(end_date))
+    .unpivot(index=['date', 'barrid', 'specific_risk'], on=signal_names, variable_name='name', value_name='signal')
+    .sort(['barrid', 'date', 'name'])
 )
 
 print(signals)
 
-composite = (
+scores = (
     signals
     .with_columns(
-        pl.col(signal_names).truediv(3)
-    )
-    .with_columns(
-        pl.sum_horizontal(signal_names).alias('composite')
-    )
-    .select(['date', 'barrid', 'specific_risk', 'composite'])
-)
-
-print(composite)
-
-scores = (
-    composite
-    .with_columns(
-        pl.col('composite')
-        .sub(pl.col('composite').mean())
-        .truediv(pl.col('composite').std())
-        .over('barrid')
+        pl.col('signal')
+        .sub(pl.col('signal').mean())
+        .truediv(pl.col('signal').std())
+        .over(['date', 'name'])
         .alias('score')
     )
-    .select(['date', 'barrid', 'specific_risk', 'score'])
+    .select(['date', 'barrid', 'specific_risk', 'name', 'score'])
 )
 
 print(scores)
@@ -115,13 +107,24 @@ alphas = (
     .with_columns(
         pl.col('score').mul(.05).mul('specific_risk').alias('alpha')
     )
-    .filter(pl.col('date').eq(end_date))
     .select(['date', 'barrid', 'alpha'])
 )
 
 print(alphas)
 
-barrids = alphas['barrid'].unique().sort().to_list()
+composite_alphas = (
+    alphas
+    .with_columns(
+        pl.col('alpha').truediv(3)
+    )
+    .group_by(['date', 'barrid'])
+    .agg(pl.col('alpha').sum())
+    .select(['date', 'barrid', 'alpha'])
+)
+
+print(composite_alphas)
+
+barrids = composite_alphas['barrid'].unique().sort().to_list()
 
 constraints = [
     full_investment,
@@ -130,7 +133,7 @@ constraints = [
     long_only
 ]
 
-weights = mean_variance_efficient(end_date, barrids, Alpha(alphas), constraints, gamma=10000)
+weights = mean_variance_efficient(end_date, barrids, Alpha(composite_alphas), constraints, gamma=1000)
 
 print(weights)
 

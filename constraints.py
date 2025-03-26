@@ -80,7 +80,7 @@ def unit_beta(
         cp.Constraint: The unit beta constraint that ensures the weighted sum of betas equals 1.
     """
     betas = (
-        pl.scan_parquet("data/assets/assets_*.parquet")
+        pl.scan_parquet(f"data/assets/assets_{date_.year}.parquet")
         .filter(pl.col('date').eq(date_))
         .filter(pl.col('barrid').is_in(barrids))
         .select('barrid', 'predicted_beta')
