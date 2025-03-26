@@ -130,8 +130,17 @@ constraints = [
     long_only
 ]
 
-weights = mean_variance_efficient(end_date, barrids, Alpha(alphas), constraints, gamma=2)
+weights = mean_variance_efficient(end_date, barrids, Alpha(alphas), constraints, gamma=10000)
 
 print(weights)
 
 weights.write_csv("optimal_portfolio_weights.csv")
+
+ticker_map = (
+    assets_clean
+    .filter(pl.col('date').eq(end_date))
+    .sort(['date', 'barrid'])
+    .select('date', 'barrid', 'ticker')
+    .collect()
+    .write_csv("ticker_map.csv")
+)
