@@ -11,9 +11,15 @@ barra_columns = {
     'DlyReturn%': 'return',
     'DataDate': 'date',
     'AssetIDType': 'asset_id_type',
-    'AssetID': 'asset_id',
+    'AssetID': 'assetid',
     'StartDate': 'start_date',
-    'EndDate': 'end_date'
+    'EndDate': 'end_date',
+    'Name': 'name',
+    'Instrument': 'instrument',
+    'IssuerID': 'issuerid',
+    'ISOCountryCode': 'iso_country_code',
+    'ISOCurrencyCode': 'iso_currency_code',
+    'RootID': 'rootid',
 }
 
 barra_schema = {
@@ -27,7 +33,13 @@ barra_schema = {
     'AssetIDType': pl.String,
     'AssetID': pl.String,
     'StartDate': pl.String,
-    'EndDate': pl.String
+    'EndDate': pl.String,
+    'Name': pl.String,
+    'Instrument': pl.String,
+    'IssuerID': pl.String,
+    'ISOCountryCode': pl.String,
+    'ISOCurrencyCode': pl.String,
+    'RootID': pl.String,
 }
 
 
