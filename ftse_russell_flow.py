@@ -69,8 +69,13 @@ if __name__ == "__main__":
     # ----- Print -----
     print(
         pl.scan_parquet("data/assets/assets_*.parquet")
-        .filter(pl.col("russell_1000") | pl.col("russell_2000"))
         .filter(pl.col("rootid").eq(pl.col("barrid")))
+        .with_columns(
+            pl.col('ticker', 'russell_1000', 'russell_2000').fill_null(strategy='forward')
+        )
+        .filter(pl.col("russell_1000") | pl.col("russell_2000"))
+        .filter(pl.col('date').ge(date(2025, 1, 1)))
+        .sort(['barrid', 'date'])
         .select("date", "barrid", "cusip", "ticker", "russell_1000", "russell_2000")
         .collect()
     )
