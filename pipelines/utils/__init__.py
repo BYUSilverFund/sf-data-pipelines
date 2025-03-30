@@ -145,4 +145,4 @@ def merge_into_master(
 
 
 if __name__ == '__main__':
-    print(get_last_market_date())
+    print(get_last_market_date(n_days=5))

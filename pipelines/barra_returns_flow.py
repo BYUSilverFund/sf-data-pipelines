@@ -4,27 +4,8 @@ import polars as pl
 from io import BytesIO
 from pipelines.utils import barra_schema, barra_columns
 import os
-import exchange_calendars as xcals
 from tqdm import tqdm
-
-
-def get_last_market_date(n_days: int = 1) -> list[date]:
-    df = (
-        pl.from_pandas(xcals.get_calendar("XNYS").schedule)
-        # Cast date types
-        .with_columns(pl.col("close").cast(pl.Date).alias("date"))
-        # Get previous date
-        .with_columns(pl.col("date").shift(1).alias("previous_date"))
-        # Filter
-        .filter(pl.col("date").le(date.today()))
-        # Sort
-        .sort("date")["previous_date"]
-        # Get last previous date
-        .tail(n_days)
-        .to_list()
-    )
-
-    return df
+from utils import get_last_market_date
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
@@ -166,11 +147,11 @@ def barra_returns_daily_flow() -> None:
 
 
 if __name__ == "__main__":
-    # # ----- History Flow -----
-    # barra_returns_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
+    # ----- History Flow -----
+    barra_returns_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
 
-    # # ----- Current Flow -----
-    # barra_returns_daily_flow()
+    # ----- Current Flow -----
+    barra_returns_daily_flow()
 
     # ----- Print -----
-    print(pl.read_parquet("data/assets/assets_*.parquet").tail(1).glimpse())
+    print(pl.read_parquet("data/assets/assets_*.parquet"))
