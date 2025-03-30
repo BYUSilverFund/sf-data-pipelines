@@ -2,7 +2,7 @@ from datetime import date
 import zipfile
 import polars as pl
 from io import BytesIO
-from pipelines.tools import barra_schema, barra_columns, merge_into_master, get_last_market_date
+from pipelines.utils import barra_schema, barra_columns, merge_into_master, get_last_market_date
 import os
 from tqdm import tqdm
 
@@ -98,7 +98,7 @@ def barra_risk_history_flow(start_date: date, end_date: date) -> None:
             clean_df.write_parquet(master_file)
 
 
-def barra_returns_daily_flow() -> None:
+def barra_risk_daily_flow() -> None:
     # Load raw df
     raw_df = load_current_barra_files()
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     print(pl.read_parquet("data/assets/assets_*.parquet"))
 
     # ----- Current Flow -----
-    barra_returns_daily_flow()
+    barra_risk_daily_flow()
 
     # ----- Print -----
     print(pl.read_parquet("data/assets/assets_*.parquet"))

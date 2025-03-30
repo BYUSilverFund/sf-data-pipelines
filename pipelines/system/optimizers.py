@@ -3,7 +3,7 @@ from typing import Protocol
 import cvxpy as cp
 import numpy as np
 
-from constraints import ConstraintConstructor
+from pipelines.system.constraints import ConstraintConstructor
 
 
 class Optimizer(Protocol):
@@ -54,6 +54,6 @@ def quadratic_program(
     problem = cp.Problem(objective=objective, constraints=constraints)
 
     # Solve
-    problem.solve(solver=cp.OSQP, verbose=True)
+    problem.solve(solver=cp.OSQP)
 
     return weights.value

@@ -2,7 +2,7 @@ from datetime import date
 import zipfile
 import polars as pl
 from io import BytesIO
-from pipelines.tools import barra_schema, barra_columns
+from pipelines.utils import barra_schema, barra_columns
 import os
 import exchange_calendars as xcals
 from tqdm import tqdm
@@ -130,7 +130,7 @@ def barra_returns_history_flow(start_date: date, end_date: date) -> None:
             clean_df.write_parquet(master_file)
 
 
-def barra_returns_current_flow() -> None:
+def barra_returns_daily_flow() -> None:
     # Load raw df
     raw_df = load_current_barra_files()
 
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     barra_returns_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
 
     # ----- Current Flow -----
-    barra_returns_current_flow()
+    barra_returns_daily_flow()
 
     # ----- Print -----
     print(pl.read_parquet("data/assets/assets_*.parquet"))

@@ -6,7 +6,7 @@ from pipelines.utils.barra_file import (
     ZipFolder,
     File,
 )
-from utils import render_sql_file, get_last_market_date
+from pipelines.utils import render_sql_file, get_last_market_date
 
 
 def load_barra_file(barra_file: BarraFile) -> None:

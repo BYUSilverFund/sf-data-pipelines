@@ -10,7 +10,7 @@ from pipelines.utils.barra_file import (
     ZipFolder,
     File,
 )
-from utils import render_sql_file
+from pipelines.utils import render_sql_file
 
 
 def load_barra_file(barra_file: BarraFile) -> None:

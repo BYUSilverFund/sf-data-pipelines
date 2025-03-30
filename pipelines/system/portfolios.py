@@ -6,11 +6,11 @@ from typing import Protocol
 import polars as pl
 from tqdm import tqdm
 
-from alphas import Alpha
-from constraints import ConstraintConstructor
-from pipelines.utils.covariance_matrix import construct_covariance_matrix
-from optimizers import quadratic_program
-from records import Portfolio, CovarianceMatrix
+from pipelines.system.alphas import Alpha
+from pipelines.system.constraints import ConstraintConstructor
+from pipelines.system.covariance_matrix import construct_covariance_matrix
+from pipelines.system.optimizers import quadratic_program
+from pipelines.system.records import Portfolio, CovarianceMatrix
 
 
 def mean_variance_efficient(

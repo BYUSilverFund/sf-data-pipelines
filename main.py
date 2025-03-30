@@ -2,29 +2,10 @@ import polars as pl
 from datetime import date
 from pipelines.utils.tables import assets_clean
 import exchange_calendars as xcals
-from portfolios import mean_variance_efficient
-from records import Alpha
-from constraints import full_investment, unit_beta, no_buying_on_margin, long_only
-
-def get_market_date_with_look_back(current_date: date, look_back: int) -> date:
-    # Load market calendar
-    market_calendar = (
-        pl.DataFrame(xcals.get_calendar("XNYS").schedule)
-        .with_columns(pl.col("close").dt.date())
-        .select(pl.col("close").alias("date"))
-        .with_columns(pl.col("date").shift(look_back - 1).alias("prev_date"))
-    )
-
-    # Get previous date
-    prev_date = market_calendar.filter(pl.col("date").eq(current_date))[
-        "prev_date"
-    ].max()
-
-    if prev_date is None:
-        raise ValueError(f"Not a valid market date: {current_date}")
-
-    return prev_date
-
+from pipelines.system.portfolios import mean_variance_efficient
+from pipelines.system.records import Alpha
+from pipelines.system.constraints import full_investment, unit_beta, no_buying_on_margin, long_only
+from pipelines.utils import get_last_market_date
 
 # ----- Look Back Parameters -----
 max_signal_look_back = 252  # momentum
@@ -33,12 +14,13 @@ look_back = max_signal_look_back + volatility_look_back - 1
 
 # ----- Data Parameters -----
 end_date = date(2025, 3, 25)
-start_date = get_market_date_with_look_back(end_date, look_back)
+start_date = get_last_market_date(end_date, look_back)
 
 data = (
     assets_clean
     .filter(pl.col('date').is_between(start_date, end_date))
     .select('date', 'barrid', 'ticker', 'price', 'return', 'specific_risk', 'predicted_beta')
+    # .filter(pl.col('price').gt(5))
     .collect()
 )
 
@@ -130,14 +112,14 @@ constraints = [
     full_investment,
     no_buying_on_margin,
     unit_beta,
-    long_only
+    long_only,
 ]
 
-weights = mean_variance_efficient(end_date, barrids, Alpha(composite_alphas), constraints, gamma=1000)
+weights = mean_variance_efficient(end_date, barrids, Alpha(composite_alphas), constraints, gamma=100)
 
 print(weights)
 
-weights.write_csv("optimal_portfolio_weights.csv")
+weights.write_csv("optimal_portfolio_weights_gamma_100.csv")
 
 ticker_map = (
     assets_clean

@@ -41,9 +41,6 @@ def construct_covariance_matrix(date_: date, barrids: list[str] | None = None) -
     # Construct asset covariance matrix
     covariance_matrix = exposures_matrix @ factor_covariance_matrix @ exposures_matrix.T + specific_risk_matrix
 
-    # Put in decimal space
-    covariance_matrix = covariance_matrix / (100**2)
-
     # Package
     covariance_matrix = pl.DataFrame(
         {

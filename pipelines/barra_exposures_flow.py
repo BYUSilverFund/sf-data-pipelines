@@ -2,7 +2,7 @@ from datetime import date
 import zipfile
 import polars as pl
 from io import BytesIO
-from pipelines.tools import barra_schema, barra_columns, merge_into_master, get_last_market_date
+from pipelines.utils import barra_schema, barra_columns, merge_into_master, get_last_market_date
 import os
 from tqdm import tqdm
 

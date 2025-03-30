@@ -1,5 +1,5 @@
 from datetime import date
-from pipelines.tools import merge_into_master, russell_schema, russell_columns
+from pipelines.utils import merge_into_master, russell_schema, russell_columns
 import polars as pl
 import wrds
 import os
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     os.makedirs("data/assets", exist_ok=True)
 
     # ----- History Flow -----
-    ftse_russell_backfill_flow(start_date=date(2024, 1, 1), end_date=date(2025, 12, 31))
+    # ftse_russell_backfill_flow(start_date=date(2024, 1, 1), end_date=date(2025, 12, 31))
 
     # ----- Print -----
     print(
