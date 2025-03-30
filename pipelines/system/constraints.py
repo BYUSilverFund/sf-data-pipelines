@@ -64,21 +64,9 @@ def long_only(weights: cp.Variable, date_: date, barrids: list[str]) -> cp.Const
     return weights >= 0
 
 
-def unit_beta(
+def zero_beta(
     weights: cp.Variable, date_: date, barrids: list[str]
 ) -> cp.Constraint:
-    """
-    Enforces a unit beta constraint, where the weighted sum of asset betas must equal 1.
-
-    Args:
-        weights (cp.Variable): The decision variable representing portfolio weights.
-        date_ (date): The date for which the constraint is applied.
-        barrids (list[str]): A list of asset identifiers (barrids) in the portfolio.
-        interval (Interval): The time interval used to fetch risk data for the assets.
-
-    Returns:
-        cp.Constraint: The unit beta constraint that ensures the weighted sum of betas equals 1.
-    """
     betas = (
         pl.scan_parquet(f"data/assets/assets_{date_.year}.parquet")
         .filter(pl.col('date').eq(date_))
@@ -90,4 +78,4 @@ def unit_beta(
         .to_numpy()
     )
 
-    return cp.sum(cp.multiply(weights, betas)) == 1
+    return cp.sum(cp.multiply(weights, betas)) == 0

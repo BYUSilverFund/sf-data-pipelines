@@ -4,21 +4,9 @@ import os
 from tqdm import tqdm
 from utils.tables import assets_clean
 from system.signals import momentum, beta, reversal
-from utils import get_last_market_date
+from utils import get_last_market_date, merge_into_master
 
-
-def merge_into_master(master_file: str, df: pl.DataFrame) -> None:
-    (
-        # Scan master parquet file
-        pl.scan_parquet(master_file)
-        # Update
-        .update(df.lazy(), on=["date", "barrid"], how="full")
-        .collect()
-        # Write
-        .write_parquet(master_file)
-    )
-
-def compute_signals(start_date: date, end_date: date) -> None:
+def compute_signals(start_date: date, end_date: date) -> pl.DataFrame:
     data_start_date = min(get_last_market_date(start_date, 252)) # momentum signal lookback
 
     signals = (
@@ -111,7 +99,7 @@ def signals_history_flow(start_date: date, end_date: date) -> None:
 
         # Merge
         if os.path.exists(master_file):
-            merge_into_master(master_file, year_df)
+            merge_into_master(master_file, year_df,  on=['date', 'barrid', 'name'], how='full')
 
         # or Create
         else:
