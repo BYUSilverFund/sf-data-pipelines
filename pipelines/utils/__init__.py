@@ -82,7 +82,9 @@ russell_schema = {
 }
 
 
-def get_last_market_date(current_date: date = date.today(), n_days: int = 1) -> list[date]:
+def get_last_market_date(current_date: date | None = None, n_days: int = 1) -> list[date]:
+    current_date = current_date or date.today()
+
     df = (
         pl.from_pandas(xcals.get_calendar("XNYS").schedule)
         # Cast date types

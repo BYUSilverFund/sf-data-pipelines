@@ -77,6 +77,8 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
 
 
 def barra_risk_history_flow(start_date: date, end_date: date) -> None:
+    os.makedirs("data/assets", exist_ok=True)
+
     # Get years
     years = list(range(start_date.year, end_date.year + 1))
 
@@ -91,7 +93,7 @@ def barra_risk_history_flow(start_date: date, end_date: date) -> None:
 
         # Merge
         if os.path.exists(master_file):
-            merge_into_master(master_file, clean_df, on=['barrid', 'date'], how='full')
+            merge_into_master(master_file, clean_df, on=['barrid', 'date'], how='left')
 
         # or Create
         else:
@@ -99,6 +101,8 @@ def barra_risk_history_flow(start_date: date, end_date: date) -> None:
 
 
 def barra_risk_daily_flow() -> None:
+    os.makedirs("data/assets", exist_ok=True)
+
     # Load raw df
     raw_df = load_current_barra_files()
 
@@ -122,7 +126,7 @@ def barra_risk_daily_flow() -> None:
 
         # Merge
         if os.path.exists(master_file):
-            merge_into_master(master_file, clean_df, on=['barrid', 'date'], how='full')
+            merge_into_master(master_file, clean_df, on=['barrid', 'date'], how='left')
 
         # or Create
         else:

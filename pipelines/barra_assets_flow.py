@@ -86,6 +86,8 @@ def merge_into_master(master_file: str, df: pl.DataFrame) -> None:
 
 
 def barra_assets_daily_flow() -> None:
+    os.makedirs("data/assets", exist_ok=True)
+    
     # Load raw df
     raw_df = load_current_barra_files()
 

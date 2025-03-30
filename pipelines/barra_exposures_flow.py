@@ -80,6 +80,8 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
 
 
 def barra_exposures_history_flow(start_date: date, end_date: date) -> None:
+    os.makedirs("data/exposures", exist_ok=True)
+
     # Get years
     years = list(range(start_date.year, end_date.year + 1))
 
@@ -102,6 +104,8 @@ def barra_exposures_history_flow(start_date: date, end_date: date) -> None:
 
 
 def barra_exposures_daily_flow() -> None:
+    os.makedirs("data/exposures", exist_ok=True)
+
     # Load raw df
     raw_df = load_current_barra_files()
 

@@ -109,6 +109,8 @@ def merge_into_master(master_file: str, df: pl.DataFrame) -> None:
 
 
 def barra_returns_history_flow(start_date: date, end_date: date) -> None:
+    os.makedirs("data/assets", exist_ok=True)
+
     # Get years
     years = list(range(start_date.year, end_date.year + 1))
 
@@ -131,6 +133,8 @@ def barra_returns_history_flow(start_date: date, end_date: date) -> None:
 
 
 def barra_returns_daily_flow() -> None:
+    os.makedirs("data/assets", exist_ok=True)
+    
     # Load raw df
     raw_df = load_current_barra_files()
 
@@ -162,13 +166,11 @@ def barra_returns_daily_flow() -> None:
 
 
 if __name__ == "__main__":
-    os.makedirs("data/assets", exist_ok=True)
+    # # ----- History Flow -----
+    # barra_returns_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
 
-    # ----- History Flow -----
-    barra_returns_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
-
-    # ----- Current Flow -----
-    barra_returns_daily_flow()
+    # # ----- Current Flow -----
+    # barra_returns_daily_flow()
 
     # ----- Print -----
-    print(pl.read_parquet("data/assets/assets_*.parquet"))
+    print(pl.read_parquet("data/assets/assets_*.parquet").tail(1).glimpse())
