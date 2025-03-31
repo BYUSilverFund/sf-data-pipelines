@@ -79,3 +79,20 @@ def zero_beta(
     )
 
     return cp.sum(cp.multiply(weights, betas)) == 0
+
+
+def unit_beta(
+    weights: cp.Variable, date_: date, barrids: list[str]
+) -> cp.Constraint:
+    betas = (
+        pl.scan_parquet(f"data/assets/assets_{date_.year}.parquet")
+        .filter(pl.col('date').eq(date_))
+        .filter(pl.col('barrid').is_in(barrids))
+        .select('barrid', 'predicted_beta')
+        .sort('barrid')
+        .collect()
+        ['predicted_beta']
+        .to_numpy()
+    )
+
+    return cp.sum(cp.multiply(weights, betas)) == 1

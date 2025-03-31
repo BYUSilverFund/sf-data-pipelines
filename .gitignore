@@ -3,6 +3,10 @@
 
 # Sbatch
 *.sh
+*.out
+
+# Data
+*.csv
 
 # Database
 *.duckdb

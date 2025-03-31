@@ -5,7 +5,7 @@ from tqdm import tqdm
 from utils.tables import signals_clean, assets_clean
 from utils import  merge_into_master
 
-def compute_composite_signal(start_date: date, end_date: date) -> pl.DataFrame:
+def compute_composite_alphas(start_date: date, end_date: date) -> pl.DataFrame:
     assets = (
         assets_clean
         # In date range
@@ -70,7 +70,7 @@ def compute_composite_signal(start_date: date, end_date: date) -> pl.DataFrame:
         )
     )
     
-    composite_signals = (
+    composite_alphas = (
         signals
         # Join risk parity weights (each signal is unit volatility)
         .join(
@@ -92,20 +92,20 @@ def compute_composite_signal(start_date: date, end_date: date) -> pl.DataFrame:
         .collect()
     )
 
-    return composite_signals
+    return composite_alphas
 
 def risk_parity_history_flow(start_date: date, end_date: date) -> None:
-    os.makedirs("data/composite_signals", exist_ok=True)
+    os.makedirs("data/composite_alphas", exist_ok=True)
 
-    composite_signals = compute_composite_signal(start_date, end_date)
+    composite_alphas = compute_composite_alphas(start_date, end_date)
 
     # Get years
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="Backfilling"):
-        master_file = f"data/composite_signals/composite_signals_{year}.parquet"
+        master_file = f"data/composite_alphas/composite_alphas_{year}.parquet"
 
-        year_df = composite_signals.filter(pl.col("date").dt.year().eq(year))
+        year_df = composite_alphas.filter(pl.col("date").dt.year().eq(year))
 
         # Merge
         if os.path.exists(master_file):
@@ -122,4 +122,4 @@ if __name__ == "__main__":
     risk_parity_history_flow(start_date=date(2025, 2, 1), end_date=date.today())
 
     # ----- Print -----
-    print(pl.read_parquet("data/composite_signals/composite_signals_*.parquet"))
+    print(pl.read_parquet("data/composite_alphas/composite_alphas_*.parquet"))

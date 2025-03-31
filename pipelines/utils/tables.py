@@ -29,3 +29,13 @@ signals_clean = (
     )
     .sort(['barrid', 'date'])
 )
+
+benchmark_weights = (
+    assets_clean
+    .select(
+        'date', 
+        'barrid', 
+        pl.col('market_cap').truediv(pl.col('market_cap').sum()).over('date').alias('weight')
+    )
+    .sort(['barrid', 'date'])
+)
