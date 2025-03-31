@@ -27,7 +27,7 @@ constraints = [
     long_only,
 ]
 
-weights = mean_variance_efficient(date_, barrids, Alpha(composite_alphas), constraints, gamma=.0006)
+weights = mean_variance_efficient(date_, barrids, Alpha(composite_alphas), constraints, gamma=.09)  # 0.0006
 
 portfolio = (
     assets_clean

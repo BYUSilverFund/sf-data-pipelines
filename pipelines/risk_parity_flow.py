@@ -68,6 +68,10 @@ def compute_composite_alphas(start_date: date, end_date: date) -> pl.DataFrame:
         .with_columns(
             pl.lit(1).truediv(pl.col('volatility')).over('date').alias('weight')
         )
+        # Scale to unity
+        .with_columns(
+            pl.col('weight').truediv(pl.col('weight').sum()).over('date')
+        )
     )
     
     composite_alphas = (
