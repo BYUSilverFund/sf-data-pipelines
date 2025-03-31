@@ -8,6 +8,7 @@ from pipelines.system.covariance_matrix import construct_covariance_matrix
 import numpy as np
 
 date_ = get_last_market_date()[0]
+filter = True
 
 composite_alphas = (
     pl.scan_parquet("data/composite_alphas/composite_alphas_*.parquet")
@@ -17,6 +18,14 @@ composite_alphas = (
     .sort('barrid')
     .collect()
 )
+
+print(composite_alphas)
+
+if filter:
+    filtered_barrids = pl.read_csv("barrid_back.csv")['barrid'].unique().sort().to_list()
+    composite_alphas = composite_alphas.filter(pl.col('barrid').is_in(filtered_barrids)).sort('barrid')
+
+print(composite_alphas)
 
 barrids = composite_alphas['barrid'].unique().sort().to_list()
 
@@ -75,7 +84,9 @@ active_weights = active_portfolio['active_weight'].to_numpy()
 
 active_risk = np.sqrt(active_weights.T @ covariance_matrix @ active_weights)
 
-print("Active Portfolio", active_portfolio)
+print("Active Portfolio", active_portfolio.sort('active_weight', descending=True))
 print(f"Active Risk: {active_risk:.2f}%")
 
-portfolio.write_csv('portfolio.csv')
+# portfolio.write_csv('filtered_portfolio.csv')
+# active_portfolio.write_csv('filtered_portfolio.csv')
+
