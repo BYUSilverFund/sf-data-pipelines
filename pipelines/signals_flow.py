@@ -7,7 +7,7 @@ from system.signals import momentum, beta, reversal
 from utils import get_last_market_date, merge_into_master
 
 def compute_signals(start_date: date, end_date: date) -> pl.DataFrame:
-    data_start_date = min(get_last_market_date(start_date, 252)) # momentum signal lookback
+    data_start_date = min(get_last_market_date(start_date, 252)) or date(1995, 6, 1) # momentum signal lookback
 
     signals = (
         assets_clean
@@ -108,7 +108,8 @@ def signals_history_flow(start_date: date, end_date: date) -> None:
 
 if __name__ == "__main__":
     # ----- History Flow -----
-    signals_history_flow(start_date=date(2025, 1, 1), end_date=date.today())
+    signals_history_flow(start_date=date(1995, 6, 1), end_date=date.today())
 
     # ----- Print -----
-    print(pl.read_parquet("data/signals/signals_*.parquet"))
+    # print(assets_clean.sort(['date', 'barrid']).select('date', 'barrid', 'ticker', 'price').collect())
+    # print(pl.read_parquet("data/signals/signals_*.parquet").sort(['date', 'barrid']))

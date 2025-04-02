@@ -20,16 +20,6 @@ universe = (
     .select('date', 'barrid')
 )
 
-signals_clean = (
-    universe
-    .join(
-        pl.scan_parquet("data/signals/signals_*.parquet"),
-        on=['date', 'barrid'],
-        how='left'
-    )
-    .sort(['barrid', 'date'])
-)
-
 benchmark_weights = (
     assets_clean
     .select(
@@ -39,3 +29,17 @@ benchmark_weights = (
     )
     .sort(['barrid', 'date'])
 )
+
+market_calendar = (
+    pl.scan_parquet("data/assets/assets_*.parquet")
+    .select('date')
+    .unique()
+    .sort('date')
+)
+
+if __name__ == '__main__':
+    print(
+        pl.scan_parquet("data/signals/signals_*.parquet")
+        .sort(['date', 'barrid'])
+        .collect()
+    )
