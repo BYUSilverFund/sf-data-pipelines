@@ -89,6 +89,7 @@ def construct_factor_covariance_matrix(date_: date) -> pl.DataFrame:
     df = (
         pl.scan_parquet("data/covariances/covariances_*.parquet")
         .filter(pl.col('date').eq(date_))
+        .filter(pl.col('factor_1').is_in(factors))
         .select(['factor_1', *factors])
         .sort('factor_1')
         .collect()

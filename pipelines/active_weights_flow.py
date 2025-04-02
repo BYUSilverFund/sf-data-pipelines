@@ -2,7 +2,7 @@ from datetime import date
 import polars as pl
 import os
 from tqdm import tqdm
-from utils.tables import assets_clean, signals_clean
+from utils.tables import assets_clean
 from system.signals import momentum, beta, reversal
 from utils import get_last_market_date, merge_into_master
 from system.records import Alpha
@@ -12,7 +12,7 @@ from system.constraints import zero_beta
 
 def get_alphas(signal: str, start_date: date, end_date: date) -> pl.DataFrame:
     return (
-        signals_clean
+        pl.scan_parquet("data/signals/signals_*.parquet")
         .filter(pl.col('date').is_between(start_date, end_date))
         .filter(pl.col('name').eq(signal))
         .with_columns(
@@ -54,15 +54,14 @@ def active_weights_history_flow(start_date: date, end_date: date) -> None:
                 gamma=2
             )
 
-             # Scale weights to 1
             period_portfolio = (
                 period_portfolio
                 .with_columns(
-                    pl.col('weight').truediv(pl.col('weight').sum()),
                     pl.lit(signal_name).alias('signal')
                 )
                 .select('date', 'barrid', 'signal', 'weight')
             )
+            print(period_portfolio)
 
             master_file = f"data/active_weights/active_weights_{period.year}.parquet"
 
