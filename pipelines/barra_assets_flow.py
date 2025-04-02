@@ -102,7 +102,7 @@ def barra_assets_daily_flow() -> None:
     )
 
     # Update master files by year
-    for year in tqdm(years, desc="Loading into parquet files"):
+    for year in tqdm(years, desc="Barra Assets"):
         master_file = f"data/assets/assets_{year}.parquet"
 
         if os.path.exists(master_file):

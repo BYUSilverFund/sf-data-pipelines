@@ -85,7 +85,7 @@ def barra_exposures_history_flow(start_date: date, end_date: date) -> None:
     # Get years
     years = list(range(start_date.year, end_date.year + 1))
 
-    for year in tqdm(years, desc="Backfilling"):
+    for year in tqdm(years, desc="Barra Exposures"):
         master_file = f"data/exposures/exposures_{year}.parquet"
 
         # Load raw df

@@ -82,7 +82,7 @@ def barra_risk_history_flow(start_date: date, end_date: date) -> None:
     # Get years
     years = list(range(start_date.year, end_date.year + 1))
 
-    for year in tqdm(years, desc="Backfilling"):
+    for year in tqdm(years, desc="Barra Risk"):
         master_file = f"data/assets/assets_{year}.parquet"
 
         # Load raw df

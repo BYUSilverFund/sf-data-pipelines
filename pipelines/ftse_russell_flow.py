@@ -3,7 +3,7 @@ from pipelines.utils import merge_into_master, russell_schema, russell_columns
 import polars as pl
 import wrds
 import os
-
+from tqdm import tqdm
 
 def load_ftse_russell_df(start_date: date, end_date: date) -> None:
     wrds_db = wrds.Connection(wrds_username="amh1124")
@@ -46,7 +46,7 @@ def ftse_russell_backfill_flow(start_date: date, end_date: date) -> None:
 
     years = list(range(start_date.year, end_date.year + 1))
 
-    for year in years:
+    for year in tqdm(years, desc="FTSE Russell"):
         raw_df = load_ftse_russell_df(
             start_date=date(year, 1, 1), end_date=date(year, 12, 31)
         )
