@@ -2,7 +2,7 @@ from datetime import date
 import polars as pl
 import os
 from tqdm import tqdm
-from utils.tables import in_universe_assets
+from pipelines.utils.views import in_universe_assets
 from system.signals import momentum, beta, reversal
 from utils import get_last_market_date, merge_into_master
 

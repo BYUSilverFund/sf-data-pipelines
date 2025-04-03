@@ -1,11 +1,10 @@
-from dataclasses import dataclass
 from dotenv import load_dotenv
 from datetime import date
 import os
 from pathlib import Path
 
 class BarraDataset:
-    def __init__(self, history_folder: str, daily_folder: str, zip_folder_name: str, file_name: str) -> None:
+    def __init__(self, history_folder: str, daily_folder: str, history_zip_file: str, daily_zip_file: str, file_name: str) -> None:
         load_dotenv(override=True)
 
         home, user = os.getenv("ROOT").split("/")[1:3]
@@ -13,11 +12,12 @@ class BarraDataset:
 
         self._history_folder = history_folder
         self._daily_folder = daily_folder
-        self._zip_folder_name = zip_folder_name
+        self._history_zip_file = history_zip_file
+        self._daily_zip_file = daily_zip_file
         self._file_name = file_name
 
     def history_zip_folder_path(self, year: int) -> Path:
-        return self._base_path / self._history_folder / f"{self._zip_folder_name}_{year}.zip"
+        return self._base_path / self._history_folder / f"{self._history_zip_file}_{year}.zip"
     
     def file_name(self, date_: date | None = None) -> str:
         if date_:
@@ -26,27 +26,14 @@ class BarraDataset:
             return self._file_name
     
     def daily_zip_folder_path(self, date_: date) -> Path:
-        return self._base_path / self._daily_folder / f"{self._zip_folder_name}_{date_.strftime('%y%m%d')}.zip"
+        return self._base_path / self._daily_folder / f"{self._daily_zip_file}_{date_.strftime('%y%m%d')}.zip"
     
 
 barra_returns = BarraDataset(
     history_folder='history/usslow/sm/daily',
+    history_zip_file = "SMD_USSLOW_100_D",
     daily_folder='us/usslow',
-    zip_folder_name='SMD_USSLOWL_100_D',
+    daily_zip_file='SMD_USSLOWL_100',
     file_name='USSLOW_Daily_Asset_Price',
 )    
-
-# if __name__ == '__main__':
-
-#     date_ = date.today()
-
-#     print()
-#     print(barra_returns.history_zip_folder_path(2025))
-#     print()
-#     print(barra_returns.file_name())
-#     print()
-#     print(barra_returns.daily_zip_folder_path(date_))
-#     print()
-#     print(barra_returns.file_name(date_))
-#     print()
     

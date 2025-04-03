@@ -1,5 +1,5 @@
 import polars as pl
-from pipelines.utils.tables import in_universe_assets, benchmark_weights
+from pipelines.utils.views import in_universe_assets, benchmark_weights
 from pipelines.system.portfolios import mean_variance_efficient
 from pipelines.system.records import Alpha
 from pipelines.system.constraints import full_investment, no_buying_on_margin, long_only, unit_beta

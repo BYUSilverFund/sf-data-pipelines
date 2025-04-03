@@ -3,7 +3,7 @@ import polars as pl
 import numpy as np
 from pipelines.utils.factors import factors
 import polars as pl
-from pipelines.utils.tables import in_universe_assets
+from pipelines.utils.views import in_universe_assets
 
 def get_barrids_by_date(date_: date) -> list[str]:
 
