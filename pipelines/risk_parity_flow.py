@@ -2,12 +2,12 @@ from datetime import date
 import polars as pl
 import os
 from tqdm import tqdm
-from utils.tables import signals_clean, assets_clean
+from utils.tables import signals_clean, in_universe_assets
 from utils import  merge_into_master
 
 def compute_composite_alphas(start_date: date, end_date: date) -> pl.DataFrame:
     assets = (
-        assets_clean
+        in_universe_assets
         # In date range
         .filter(pl.col('date').is_between(start_date, end_date))
         .select(

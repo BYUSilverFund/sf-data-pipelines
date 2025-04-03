@@ -6,8 +6,6 @@ from barra_returns_flow import barra_returns_daily_flow, barra_returns_history_f
 from barra_risk_flow import barra_risk_daily_flow, barra_risk_history_flow
 from ftse_russell_flow import ftse_russell_backfill_flow
 from datetime import date
-import polars as pl
-from pipelines.utils import get_last_market_date
 
 def daily_flow() -> None:
     # Assets table
@@ -38,9 +36,12 @@ def wrds_history_flow(start_date: date, end_date: date) -> None:
     )
 
 if __name__ == '__main__':
-    history_flow(
-        start_date=date(1995, 6, 1),
-        end_date=date.today()
-    )
+    start_date = date(2024, 1, 1)
+    end_date = date.today()
 
-    daily_flow()
+    # history_flow(start_date, end_date)
+
+    # daily_flow()
+
+    wrds_history_flow(start_date, end_date)
+

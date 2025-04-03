@@ -2,7 +2,7 @@ from datetime import date
 import polars as pl
 import os
 from tqdm import tqdm
-from utils.tables import assets_clean
+from utils.tables import in_universe_assets
 from system.signals import momentum, beta, reversal
 from utils import get_last_market_date, merge_into_master
 
@@ -10,7 +10,7 @@ def compute_signals(start_date: date, end_date: date) -> pl.DataFrame:
     data_start_date = min(get_last_market_date(start_date, 252)) or date(1995, 6, 1) # momentum signal lookback
 
     signals = (
-        assets_clean
+        in_universe_assets
         .filter(
             pl.col('date').is_between(data_start_date, end_date)
         )
@@ -61,7 +61,7 @@ def compute_signals(start_date: date, end_date: date) -> pl.DataFrame:
     # ----- Compute Alphas -----
 
     specific_risk = (
-        assets_clean
+        in_universe_assets
         # Get specific risk data
         .filter(pl.col('date').is_between(start_date, end_date))
         .select('date', 'barrid', 'specific_risk')

@@ -130,7 +130,7 @@ def barra_returns_daily_flow() -> None:
     )
 
     # Update master files by year
-    for year in tqdm(years, desc="Loading into parquet files"):
+    for year in tqdm(years, desc="Daily Barra Returns"):
         # Subset df to year
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 

@@ -1,5 +1,5 @@
 import polars as pl
-from pipelines.utils.tables import assets_clean, benchmark_weights
+from pipelines.utils.tables import in_universe_assets, benchmark_weights
 from pipelines.system.portfolios import mean_variance_efficient
 from pipelines.system.records import Alpha
 from pipelines.system.constraints import full_investment, no_buying_on_margin, long_only, unit_beta
@@ -39,7 +39,7 @@ constraints = [
 weights = mean_variance_efficient(date_, barrids, Alpha(composite_alphas), constraints, gamma=.09)  # 0.0006
 
 portfolio = (
-    assets_clean
+    in_universe_assets
     .filter(pl.col('date').eq(date_))
     .select('date', 'barrid', 'ticker')
     .collect()

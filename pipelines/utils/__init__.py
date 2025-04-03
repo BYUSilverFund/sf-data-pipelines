@@ -65,9 +65,6 @@ barra_schema = {
 russell_columns = {
     "russell2000": "russell_2000",
     "russell1000": "russell_1000",
-    "r3000_wt": "russell_3000_weight",
-    "r2000_wt": "russell_2000_weight",
-    "r1000_wt": "russell_1000_weight",
 }
 
 russell_schema = {
@@ -76,9 +73,6 @@ russell_schema = {
     "cusip": pl.String,
     "russell2000": pl.String,
     "russell1000": pl.String,
-    "r3000_wt": pl.Float64,
-    "r2000_wt": pl.Float64,
-    "r1000_wt": pl.Float64,
 }
 
 

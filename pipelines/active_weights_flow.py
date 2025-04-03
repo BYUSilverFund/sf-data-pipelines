@@ -2,11 +2,9 @@ from datetime import date
 import polars as pl
 import os
 from tqdm import tqdm
-from utils.tables import assets_clean
 from system.signals import momentum, beta, reversal
-from utils import get_last_market_date, merge_into_master
+from utils import merge_into_master
 from system.records import Alpha
-from functools import partial
 from system.portfolios import mean_variance_efficient
 from system.constraints import zero_beta
 
