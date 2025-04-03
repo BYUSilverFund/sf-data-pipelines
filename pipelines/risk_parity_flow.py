@@ -119,11 +119,3 @@ def risk_parity_history_flow(start_date: date, end_date: date) -> None:
         else:
             year_df.write_parquet(master_file)
 
-
-
-if __name__ == "__main__":
-    # ----- History Flow -----
-    risk_parity_history_flow(start_date=date(2025, 2, 1), end_date=date.today())
-
-    # ----- Print -----
-    print(pl.read_parquet("data/composite_alphas/composite_alphas_*.parquet"))

@@ -5,6 +5,9 @@ from barra_ids_flow import barra_ids_daily_flow
 from barra_returns_flow import barra_returns_daily_flow, barra_returns_history_flow
 from barra_risk_flow import barra_risk_daily_flow, barra_risk_history_flow
 from ftse_russell_flow import ftse_russell_backfill_flow
+from signals_flow import signals_history_flow
+from active_weights_flow import active_weights_history_flow
+from risk_parity_flow import risk_parity_history_flow
 from datetime import date
 
 def daily_flow() -> None:
@@ -35,6 +38,11 @@ def wrds_history_flow(start_date: date, end_date: date) -> None:
         end_date=end_date,
     )
 
+def strategy_backfill_flow(start_date: date, end_date: date) -> None:
+    signals_history_flow(start_date, end_date)
+    active_weights_history_flow(start_date, end_date)
+    risk_parity_history_flow(start_date, end_date)
+    
 if __name__ == '__main__':
     start_date = date(2024, 1, 1)
     end_date = date.today()
@@ -43,5 +51,7 @@ if __name__ == '__main__':
 
     # daily_flow()
 
-    wrds_history_flow(start_date, end_date)
+    # wrds_history_flow(start_date, end_date)
+
+    strategy_backfill_flow(start_date, end_date)
 

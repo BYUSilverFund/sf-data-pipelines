@@ -132,19 +132,3 @@ def barra_risk_daily_flow() -> None:
         else:
             year_df.write_parquet(master_file)
 
-
-if __name__ == "__main__":
-    os.makedirs("data/assets", exist_ok=True)
-
-    print(pl.read_parquet("data/assets/assets_*.parquet"))
-
-    # ----- History Flow -----
-    barra_risk_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
-
-    print(pl.read_parquet("data/assets/assets_*.parquet"))
-
-    # ----- Current Flow -----
-    barra_risk_daily_flow()
-
-    # ----- Print -----
-    print(pl.read_parquet("data/assets/assets_*.parquet"))

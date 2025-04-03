@@ -105,11 +105,3 @@ def signals_history_flow(start_date: date, end_date: date) -> None:
         else:
             year_df.write_parquet(master_file)
 
-
-if __name__ == "__main__":
-    # ----- History Flow -----
-    signals_history_flow(start_date=date(1995, 6, 1), end_date=date.today())
-
-    # ----- Print -----
-    # print(assets_clean.sort(['date', 'barrid']).select('date', 'barrid', 'ticker', 'price').collect())
-    # print(pl.read_parquet("data/signals/signals_*.parquet").sort(['date', 'barrid']))

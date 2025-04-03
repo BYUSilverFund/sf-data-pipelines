@@ -135,19 +135,3 @@ def barra_exposures_daily_flow() -> None:
         else:
             year_df.write_parquet(master_file)
 
-
-if __name__ == "__main__":
-    os.makedirs("data/exposures", exist_ok=True)
-
-    print(pl.read_parquet("data/exposures/exposures_*.parquet"))
-
-    # ----- History Flow -----
-    barra_exposures_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
-
-    print(pl.read_parquet("data/exposures/exposures_*.parquet"))
-
-    # # ----- Current Flow -----
-    barra_exposures_daily_flow()
-
-    # ----- Print -----
-    print(pl.read_parquet("data/exposures/exposures_*.parquet"))

@@ -144,14 +144,4 @@ def barra_returns_daily_flow() -> None:
         # or Create
         else:
             year_df.write_parquet(master_file)
-
-
-if __name__ == "__main__":
-    # ----- History Flow -----
-    barra_returns_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
-
-    # ----- Current Flow -----
-    barra_returns_daily_flow()
-
-    # ----- Print -----
-    print(pl.read_parquet("data/assets/assets_*.parquet"))
+            

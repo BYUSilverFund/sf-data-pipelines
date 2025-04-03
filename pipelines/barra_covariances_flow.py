@@ -134,20 +134,3 @@ def barra_covariances_daily_flow() -> None:
         # or Create
         else:
             year_df.write_parquet(master_file)
-
-
-if __name__ == "__main__":
-    os.makedirs("data/covariances", exist_ok=True)
-
-    print(pl.read_parquet("data/covariances/covariances_*.parquet"))
-
-    # ----- History Flow -----
-    barra_covariances_history_flow(start_date=date(2024, 1, 1), end_date=date.today())
-
-    print(pl.read_parquet("data/covariances/covariances_*.parquet"))
-
-    # ----- Current Flow -----
-    barra_covariances_daily_flow()
-
-    # ----- Print -----
-    print(pl.read_parquet("data/covariances/covariances_*.parquet"))

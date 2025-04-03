@@ -59,7 +59,6 @@ def active_weights_history_flow(start_date: date, end_date: date) -> None:
                 )
                 .select('date', 'barrid', 'signal', 'weight')
             )
-            print(period_portfolio)
 
             master_file = f"data/active_weights/active_weights_{period.year}.parquet"
 
@@ -71,11 +70,3 @@ def active_weights_history_flow(start_date: date, end_date: date) -> None:
             else:
                 period_portfolio.write_parquet(master_file)
     
-
-
-if __name__ == "__main__":
-    # ----- History Flow -----
-    active_weights_history_flow(start_date=date(2025, 2, 1), end_date=date.today())
-
-    # ----- Print -----
-    print(pl.read_parquet("data/active_weights/active_weights_*.parquet"))

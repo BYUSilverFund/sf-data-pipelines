@@ -56,9 +56,3 @@ market_calendar = (
     .unique()
     .sort('date')
 )
-
-if __name__ == '__main__':
-    print(
-        in_universe_assets
-        .collect()
-    )

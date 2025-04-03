@@ -125,15 +125,3 @@ def barra_ids_daily_flow() -> None:
 
             # Merge
             merge_into_master(master_file, year_df)
-
-
-if __name__ == "__main__":
-    os.makedirs("data", exist_ok=True)
-
-    print(pl.read_parquet("data/assets/assets_*.parquet"))
-
-    # ----- Current Flow -----
-    barra_ids_daily_flow()
-
-    # ----- Print -----
-    print(pl.read_parquet("data/assets/assets_*.parquet"))

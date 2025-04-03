@@ -136,7 +136,3 @@ def merge_into_master(
         # Write
         .write_parquet(master_file)
     )
-
-
-if __name__ == '__main__':
-    print(get_last_market_date(n_days=5))

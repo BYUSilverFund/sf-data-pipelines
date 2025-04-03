@@ -147,13 +147,3 @@ def construct_specific_risk_matrix(barrids: list[str], date_: date) -> pl.DataFr
 
     return specific_risk_matrix
     
-
-if __name__ == '__main__':
-    date_ = date(2025, 3, 25)
-    barrids = get_barrids_by_date(date_)
-
-    cov_mat = construct_covariance_matrix(date_, barrids)
-
-    print(cov_mat)
-
-    
