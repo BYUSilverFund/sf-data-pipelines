@@ -58,5 +58,13 @@ barra_assets = BarraDataset(
     daily_folder='bime',
     daily_zip_file='SMD_USSLOW_XSEDOL_ID',
     file_name='USA_Asset_Identity',
-)  
+)
+
+barra_ids = BarraDataset(
+    history_folder=None,
+    history_zip_file =None,
+    daily_folder='bime',
+    daily_zip_file='SMD_USSLOW_XSEDOL_ID',
+    file_name='USA_XSEDOL_Asset_ID',
+)
     
