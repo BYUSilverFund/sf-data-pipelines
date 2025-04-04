@@ -4,6 +4,7 @@ import polars as pl
 import wrds
 import os
 from tqdm import tqdm
+from pipelines.utils.tables import assets_table
 
 def load_ftse_russell_df(start_date: date, end_date: date) -> None:
     wrds_db = wrds.Connection(wrds_username="amh1124")
@@ -30,9 +31,7 @@ def load_ftse_russell_df(start_date: date, end_date: date) -> None:
 def clean(df: pl.DataFrame) -> pl.DataFrame:
     return (
         df
-        # Rename columns
         .rename(russell_columns, strict=False)
-        # Cast to bool
         .with_columns(
             pl.col("russell_2000", "russell_1000").eq("Y")
         )
@@ -52,9 +51,5 @@ def ftse_russell_backfill_flow(start_date: date, end_date: date) -> None:
 
         clean_df = clean(raw_df)
 
-        # Merge into master
-        master_file = f"data/assets/assets_{year}.parquet"
-
-        # Merge
-        if os.path.exists(master_file):
-            merge_into_master(master_file, clean_df, on=["cusip", "date"], how="left")
+        if assets_table.exists(year):
+            assets_table.update(year, clean_df)

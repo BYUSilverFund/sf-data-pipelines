@@ -1,10 +1,10 @@
 from datetime import date
 import polars as pl
-import os
 from tqdm import tqdm
 from pipelines.utils.views import in_universe_assets
 from system.signals import momentum, beta, reversal
 from utils import get_last_market_date, merge_into_master
+from pipelines.utils.tables import signals_table
 
 def compute_signals(start_date: date, end_date: date) -> pl.DataFrame:
     data_start_date = min(get_last_market_date(start_date, 252)) or date(1995, 6, 1) # momentum signal lookback
@@ -33,15 +33,11 @@ def compute_signals(start_date: date, end_date: date) -> pl.DataFrame:
 
     signals = (
         signals
-        # Select columns
         .select(
             ["date", "barrid"] + signal_names
         )
-        # Filter to start_date, end_Date
         .filter(pl.col('date').is_between(start_date, end_date))
-        # Put in signals long format
         .unpivot(index=['date', 'barrid'], on=signal_names, variable_name='name', value_name='signal')
-        # Sort
         .sort(['barrid', 'date', 'name'])
     )
 
@@ -59,10 +55,8 @@ def compute_signals(start_date: date, end_date: date) -> pl.DataFrame:
     )
 
     # ----- Compute Alphas -----
-
     specific_risk = (
         in_universe_assets
-        # Get specific risk data
         .filter(pl.col('date').is_between(start_date, end_date))
         .select('date', 'barrid', 'specific_risk')
         .sort(['barrid', 'date'])
@@ -86,22 +80,14 @@ def compute_signals(start_date: date, end_date: date) -> pl.DataFrame:
 
 
 def signals_history_flow(start_date: date, end_date: date) -> None:
-    os.makedirs("data/signals", exist_ok=True)
     signals = compute_signals(start_date, end_date)
 
-    # Get years
     years = list(range(start_date.year, end_date.year + 1))
 
-    for year in tqdm(years, desc="Backfilling"):
-        master_file = f"data/signals/signals_{year}.parquet"
+    for year in tqdm(years, desc="Signals"):
 
         year_df = signals.filter(pl.col("date").dt.year().eq(year))
 
-        # Merge
-        if os.path.exists(master_file):
-            merge_into_master(master_file, year_df,  on=['date', 'barrid', 'name'], how='full')
-
-        # or Create
-        else:
-            year_df.write_parquet(master_file)
+        signals_table.create_if_not_exists(year)
+        signals_table.upsert(year, year_df)
 

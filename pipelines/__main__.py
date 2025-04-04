@@ -7,7 +7,7 @@ from barra_risk_flow import barra_risk_daily_flow, barra_risk_history_flow
 from ftse_russell_flow import ftse_russell_backfill_flow
 from signals_flow import signals_history_flow
 from active_weights_flow import active_weights_history_flow
-from risk_parity_flow import risk_parity_history_flow
+from pipelines.composite_alphas import risk_parity_history_flow
 from datetime import date
 
 def daily_flow() -> None:

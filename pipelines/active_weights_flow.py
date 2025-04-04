@@ -1,16 +1,16 @@
 from datetime import date
 import polars as pl
-import os
 from tqdm import tqdm
 from system.signals import momentum, beta, reversal
-from utils import merge_into_master
 from system.records import Alpha
 from system.portfolios import mean_variance_efficient
 from system.constraints import zero_beta
+from pipelines.utils.tables import active_weights_table
+from pipelines.utils.views import signals
 
 def get_alphas(signal: str, start_date: date, end_date: date) -> pl.DataFrame:
     return (
-        pl.scan_parquet("data/signals/signals_*.parquet")
+        signals
         .filter(pl.col('date').is_between(start_date, end_date))
         .filter(pl.col('name').eq(signal))
         .with_columns(
@@ -23,8 +23,6 @@ def get_alphas(signal: str, start_date: date, end_date: date) -> pl.DataFrame:
 
 
 def active_weights_history_flow(start_date: date, end_date: date) -> None:
-    os.makedirs("data/active_weights", exist_ok=True)
-
     signal_fns = [momentum, beta, reversal]
     signal_names = sorted([fn.__name__ for fn in signal_fns])
 
@@ -37,7 +35,6 @@ def active_weights_history_flow(start_date: date, end_date: date) -> None:
 
             period_alphas = (
                 alphas
-                # Filter to period
                 .filter(pl.col('date').eq(period))
                 .sort('barrid')
             )
@@ -60,13 +57,6 @@ def active_weights_history_flow(start_date: date, end_date: date) -> None:
                 .select('date', 'barrid', 'signal', 'weight')
             )
 
-            master_file = f"data/active_weights/active_weights_{period.year}.parquet"
-
-            # Merge
-            if os.path.exists(master_file):
-                merge_into_master(master_file, period_portfolio, on=['date', 'barrid', 'signal'], how='full')
-
-            # or Create
-            else:
-                period_portfolio.write_parquet(master_file)
+            active_weights_table.create_if_not_exists(period.year)
+            active_weights_table.upsert(period.year, period_portfolio)
     

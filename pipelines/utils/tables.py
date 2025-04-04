@@ -26,7 +26,6 @@ class Table:
         
     def exists(self, year: int) -> bool:
         return os.path.exists(self._file_path(year))
-
     
     def create_if_not_exists(self, year: int) -> None:
         if not os.path.exists(self._file_path(year)):
@@ -39,15 +38,12 @@ class Table:
             return pl.scan_parquet(self._file_path(year))
     
     def upsert(self, year: int, rows: pl.DataFrame) -> None:
-        if os.path.exists(self._file_path(year)):
-            (
-                pl.scan_parquet(self._file_path(year))
-                .update(rows.lazy(), on=self._ids, how='full')
-                .collect()
-                .write_parquet(self._file_path(year))
-            )
-        else:
-            rows.write_parquet(self._file_path(year))
+        (
+            pl.scan_parquet(self._file_path(year))
+            .update(rows.lazy(), on=self._ids, how='full')
+            .collect()
+            .write_parquet(self._file_path(year))
+        )
 
     def update(self, year: int, rows: pl.DataFrame) -> None:
         (
@@ -105,6 +101,41 @@ exposures_table = Table(
         "barrid": pl.String,
         **{factor: pl.Float64 for factor in factors}
         
+    },
+    ids=['date', 'barrid']
+)
+
+signals_table = Table(
+    name='signals',
+    schema={
+        'date': pl.Date,
+        'barrid': pl.String,
+        'name': pl.String,
+        'signal': pl.Float64,
+        'score': pl.Float64,
+        'alpha': pl.Float64
+    },
+    ids=['date', 'barrid']
+)
+
+active_weights_table = Table(
+    name='active_weights',
+    schema={
+        'date': pl.Date,
+        'barrid': pl.String,
+        'signal': pl.String,
+        'weight': pl.Float64,
+    },
+    ids=['date', 'barrid']
+)
+
+composite_alphas_table = Table(
+    name='composite_alphas',
+    schema={
+        'date': pl.Date,
+        'barrid': pl.String,
+        'name': pl.String,
+        'alpha': pl.Float64
     },
     ids=['date', 'barrid']
 )
