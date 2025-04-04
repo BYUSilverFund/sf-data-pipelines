@@ -1,6 +1,7 @@
 import polars as pl
 import os
 from dotenv import load_dotenv
+from pipelines.utils.factors import factors
 
 
 class Table:
@@ -40,7 +41,7 @@ class Table:
     def upsert(self, year: int, rows: pl.DataFrame) -> None:
         if os.path.exists(self._file_path(year)):
             (
-                pl.scan_parquet()
+                pl.scan_parquet(self._file_path(year))
                 .update(rows.lazy(), on=self._ids, how='full')
                 .collect()
                 .write_parquet(self._file_path(year))
@@ -86,5 +87,13 @@ assets_table = Table(
     ids=['date', 'barrid']
 )
 
-if __name__ == '__main__':
-    print(len(assets_table.read().collect()))
+covariances_table = Table(
+    name='covariances',
+    schema={
+        "date": pl.Date,
+        "factor_1": pl.String,
+        **{factor: pl.Float64 for factor in factors}
+        
+    },
+    ids=['date', 'factor_1']
+)

@@ -67,4 +67,11 @@ barra_ids = BarraDataset(
     daily_zip_file='SMD_USSLOW_XSEDOL_ID',
     file_name='USA_XSEDOL_Asset_ID',
 )
-    
+
+barra_covariances = BarraDataset(
+    history_folder='history/usslow/sm/daily',
+    history_zip_file = "SMD_USSLOWL_100_D",
+    daily_folder='us/usslow',
+    daily_zip_file='SMD_USSLOWL_100',
+    file_name='USSLOWL_100_Covariance',
+) 
