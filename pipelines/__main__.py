@@ -24,12 +24,12 @@ def daily_flow() -> None:
 def history_flow(start_date: date, end_date: date) -> None:
     # Assets table
     # barra_returns_history_flow(start_date, end_date)
-    barra_ids_daily_flow()
+    # barra_ids_daily_flow()
     # barra_assets_daily_flow()
     # barra_risk_history_flow(start_date, end_date)
 
     # Covariance Matrix Components
-    # barra_exposures_history_flow(start_date, end_date)
+    barra_exposures_history_flow(start_date, end_date)
     # barra_covariances_history_flow(start_date, end_date)
 
 def wrds_history_flow(start_date: date, end_date: date) -> None:

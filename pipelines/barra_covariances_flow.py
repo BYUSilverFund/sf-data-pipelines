@@ -2,7 +2,7 @@ from datetime import date
 import zipfile
 import polars as pl
 from io import BytesIO
-from pipelines.utils import barra_schema, barra_columns, merge_into_master, get_last_market_date
+from pipelines.utils import barra_schema, barra_columns, get_last_market_date
 import os
 from tqdm import tqdm
 from pipelines.utils.barra_datasets import barra_covariances
@@ -10,14 +10,10 @@ from pipelines.utils.tables import covariances_table
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
-    # zip_folder_path = f"/home/amh1124/groups/grp_msci_barra/nobackup/archive/history/usslow/sm/daily/SMD_USSLOWL_100_D_{year}.zip"
-
     zip_folder_path = barra_covariances.history_zip_folder_path(year)
     file_name = barra_covariances.file_name()
 
-    # Open zip folder
     with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
-        # Read each file
         dfs = [
             pl.read_csv(
                 BytesIO(zip_folder.read(file)),
@@ -30,32 +26,22 @@ def load_barra_history_files(year: int) -> pl.DataFrame:
             if file.startswith(file_name)
         ]
 
-    # Concate
     return pl.concat(dfs, how="vertical") if dfs else pl.DataFrame()
 
 
 def load_current_barra_files() -> pl.DataFrame:
-    # usslow_dir = "/home/amh1124/groups/grp_msci_barra/nobackup/archive/us/usslow/"
-
     dfs = []
 
     dates = get_last_market_date(n_days=20)
 
     for date_ in tqdm(dates, desc="Searching Files"):
-        # date_long = date_.strftime("%Y%m%d")
-        # date_short = date_.strftime("%y%m%d")
-        # zip_path = f"SMD_USSLOWL_100_{date_short}.zip"
-        # file_path = f"USSLOWL_100_Covariance.{date_long}"
     
         zip_folder_path = barra_covariances.daily_zip_folder_path(date_)
         file_name = barra_covariances.file_name(date_)
 
-        # Check zip folder exists
         if os.path.exists(zip_folder_path):
-            # Open zip folder
             with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
                 dfs.append(
-                    # Read each file
                     pl.read_csv(
                         BytesIO(zip_folder.read(file_name)),
                         skip_rows=2,

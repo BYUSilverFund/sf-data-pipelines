@@ -75,3 +75,11 @@ barra_covariances = BarraDataset(
     daily_zip_file='SMD_USSLOWL_100',
     file_name='USSLOWL_100_Covariance',
 ) 
+
+barra_exposures = BarraDataset(
+    history_folder='history/usslow/sm/daily',
+    history_zip_file = "SMD_USSLOWL_100_D",
+    daily_folder='us/usslow',
+    daily_zip_file='SMD_USSLOWL_100',
+    file_name='USSLOWL_100_Asset_Exposure',
+) 

@@ -97,3 +97,14 @@ covariances_table = Table(
     },
     ids=['date', 'factor_1']
 )
+
+exposures_table = Table(
+    name='covariances',
+    schema={
+        "date": pl.Date,
+        "barrid": pl.String,
+        **{factor: pl.Float64 for factor in factors}
+        
+    },
+    ids=['date', 'barrid']
+)
