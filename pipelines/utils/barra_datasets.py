@@ -4,7 +4,14 @@ import os
 from pathlib import Path
 
 class BarraDataset:
-    def __init__(self, history_folder: str, daily_folder: str, history_zip_file: str, daily_zip_file: str, file_name: str) -> None:
+    def __init__(
+            self, 
+            history_folder: str | None, 
+            daily_folder: str, 
+            history_zip_file: str | None,
+            daily_zip_file: str, 
+            file_name: str
+        ) -> None:
         load_dotenv(override=True)
 
         home, user = os.getenv("ROOT").split("/")[1:3]
@@ -43,5 +50,13 @@ barra_risk = BarraDataset(
     daily_folder='us/usslow',
     daily_zip_file='SMD_USSLOWL_100',
     file_name='USSLOWL_100_Asset_Data',
+)
+
+barra_assets = BarraDataset(
+    history_folder=None,
+    history_zip_file =None,
+    daily_folder='bime',
+    daily_zip_file='SMD_USSLOW_XSEDOL_ID',
+    file_name='USA_Asset_Identity',
 )  
     

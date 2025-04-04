@@ -23,14 +23,14 @@ def daily_flow() -> None:
 
 def history_flow(start_date: date, end_date: date) -> None:
     # Assets table
-    barra_returns_history_flow(start_date, end_date)
-    barra_ids_daily_flow()
+    # barra_returns_history_flow(start_date, end_date)
+    # barra_ids_daily_flow()
     barra_assets_daily_flow()
-    barra_risk_history_flow(start_date, end_date)
+    # barra_risk_history_flow(start_date, end_date)
 
     # Covariance Matrix Components
-    barra_exposures_history_flow(start_date, end_date)
-    barra_covariances_history_flow(start_date, end_date)
+    # barra_exposures_history_flow(start_date, end_date)
+    # barra_covariances_history_flow(start_date, end_date)
 
 def wrds_history_flow(start_date: date, end_date: date) -> None:
     ftse_russell_backfill_flow(
@@ -47,11 +47,11 @@ if __name__ == '__main__':
     start_date = date(2025, 2, 1)
     end_date = date.today()
 
-    # history_flow(start_date, end_date)
+    history_flow(start_date, end_date)
 
     # daily_flow()
 
     # wrds_history_flow(start_date, end_date)
 
-    strategy_backfill_flow(start_date, end_date)
+    # strategy_backfill_flow(start_date, end_date)
 

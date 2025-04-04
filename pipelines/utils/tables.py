@@ -17,28 +17,41 @@ class Table:
 
         os.makedirs(f"data/{self._name}", exist_ok=True)
 
-    def _file_path(self, year: int) -> str:
-        return f"{self._base_path}/{self._name}/{self._name}_{year}.parquet"
+    def _file_path(self, year: int | None = None) -> str:
+        if year is not None:
+            return f"{self._base_path}/{self._name}/{self._name}_{year}.parquet"
+        else:
+            return f"{self._base_path}/{self._name}/{self._name}_*.parquet"
+        
+    def exists(self, year: int) -> bool:
+        return os.path.exists(self._file_path(year))
+
     
     def create_if_not_exists(self, year: int) -> None:
         if not os.path.exists(self._file_path(year)):
             pl.DataFrame(schema=self._schema).write_parquet(self._file_path(year))
     
-    def read(self) -> pl.LazyFrame:
-        return pl.scan_parquet(f"{self._base_path}/{self._name}/{self._name}_*.parquet")
+    def read(self, year: int | None = None) -> pl.LazyFrame:
+        if year is None:
+            return pl.scan_parquet(self._file_path())
+        else:
+            return pl.scan_parquet(self._file_path(year))
     
     def upsert(self, year: int, rows: pl.DataFrame) -> None:
-        (
-            pl.scan_parquet(self._file_path(year))
-            .update(rows.lazy(), on=self._ids, how='full')
-            .collect()
-            .write_parquet(self._file_path(year))
-        )
+        if os.path.exists(self._file_path(year)):
+            (
+                pl.scan_parquet()
+                .update(rows.lazy(), on=self._ids, how='full')
+                .collect()
+                .write_parquet(self._file_path(year))
+            )
+        else:
+            rows.write_parquet(self._file_path(year))
 
     def update(self, year: int, rows: pl.DataFrame) -> None:
         (
             pl.scan_parquet(self._file_path(year))
-            .update(rows.lazy(), on=self._ids, how='Left')
+            .update(rows.lazy(), on=self._ids, how='left')
             .collect()
             .write_parquet(self._file_path(year))
         )
