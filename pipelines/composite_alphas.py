@@ -88,7 +88,7 @@ def risk_parity_history_flow(start_date: date, end_date: date) -> None:
 
     years = list(range(start_date.year, end_date.year + 1))
 
-    for year in tqdm(years, desc="Backfilling"):
+    for year in tqdm(years, desc="Composite Alphas"):
         year_df = composite_alphas.filter(pl.col("date").dt.year().eq(year))
 
         composite_alphas_table.create_if_not_exists(year)

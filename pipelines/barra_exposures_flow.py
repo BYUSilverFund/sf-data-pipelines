@@ -75,8 +75,6 @@ def barra_exposures_history_flow(start_date: date, end_date: date) -> None:
         raw_df = load_barra_history_files(year)
         clean_df = clean_barra_df(raw_df)
 
-        print(clean_df)
-
         exposures_table.create_if_not_exists(year)
         exposures_table.upsert(year, clean_df)
 
@@ -95,6 +93,3 @@ def barra_exposures_daily_flow() -> None:
 
         exposures_table.create_if_not_exists(year)
         exposures_table.upsert(year, year_df)
-
-        
-

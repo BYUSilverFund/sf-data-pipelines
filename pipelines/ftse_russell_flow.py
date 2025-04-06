@@ -52,4 +52,4 @@ def ftse_russell_backfill_flow(start_date: date, end_date: date) -> None:
         clean_df = clean(raw_df)
 
         if assets_table.exists(year):
-            assets_table.update(year, clean_df)
+            assets_table.update(year, clean_df, on=['date', 'cusip'])

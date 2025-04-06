@@ -42,6 +42,8 @@ in_universe_assets = (
     )
     # Russell constituency filter
     .filter(pl.col('russell_1000') | pl.col('russell_2000'))
+    # Drop russell_rebalance column
+    .drop("russell_rebalance")
     # Sort
     .sort(['barrid', 'date'])
 )

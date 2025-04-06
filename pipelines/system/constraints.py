@@ -3,6 +3,8 @@ from typing import Protocol
 
 import cvxpy as cp
 import polars as pl
+from pipelines.utils.views import benchmark_weights
+from pipelines.system.covariance_matrix import construct_covariance_matrix
 
 
 class ConstraintConstructor(Protocol):
