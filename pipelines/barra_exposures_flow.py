@@ -35,7 +35,6 @@ def load_current_barra_files() -> pl.DataFrame:
     dates = get_last_market_date(n_days=20)
 
     for date_ in tqdm(dates, desc="Searching Files"):
-
         zip_folder_path = barra_exposures.daily_zip_folder_path(date_)
         file_name = barra_exposures.file_name(date_)
 
@@ -58,13 +57,12 @@ def load_current_barra_files() -> pl.DataFrame:
 
 def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     return (
-        df
-        .rename(barra_columns, strict=False)
+        df.rename(barra_columns, strict=False)
         .with_columns(pl.col("date").str.strptime(pl.Date, "%Y%m%d"))
         .filter(pl.col("barrid").ne("[End of File]"))
-        .sort('factor')
-        .pivot(index=['date', 'barrid'], on='factor', values='exposures')
-        .sort(['barrid', 'date'])
+        .sort("factor")
+        .pivot(index=["date", "barrid"], on="factor", values="exposures")
+        .sort(["barrid", "date"])
     )
 
 
@@ -83,10 +81,9 @@ def barra_exposures_daily_flow() -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
-    years = (
-        clean_df
-        .select(pl.col("date").dt.year().unique().sort().alias("year"))["year"]
-    )
+    years = clean_df.select(pl.col("date").dt.year().unique().sort().alias("year"))[
+        "year"
+    ]
 
     for year in tqdm(years, desc="Daily Barra Exposures"):
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))

@@ -35,7 +35,6 @@ def load_current_barra_files() -> pl.DataFrame:
     dates = get_last_market_date(n_days=20)
 
     for date_ in tqdm(dates, desc="Searching Files"):
-    
         zip_folder_path = barra_covariances.daily_zip_folder_path(date_)
         file_name = barra_covariances.file_name(date_)
 
@@ -58,13 +57,12 @@ def load_current_barra_files() -> pl.DataFrame:
 
 def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     return (
-        df
-        .rename(barra_columns, strict=False)
+        df.rename(barra_columns, strict=False)
         .with_columns(pl.col("date").str.strptime(pl.Date, "%Y%m%d"))
         .filter(pl.col("factor_1").ne("[End of File]"))
-        .sort(['factor_1', 'factor_2'])
-        .pivot(index=['date', 'factor_1'], on='factor_2', values='covariance')
-        .sort(['factor_1', 'date'])
+        .sort(["factor_1", "factor_2"])
+        .pivot(index=["date", "factor_1"], on="factor_2", values="covariance")
+        .sort(["factor_1", "date"])
     )
 
 
@@ -72,7 +70,6 @@ def barra_covariances_history_flow(start_date: date, end_date: date) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="Barra Covariances"):
-
         raw_df = load_barra_history_files(year)
         clean_df = clean_barra_df(raw_df)
 
@@ -84,10 +81,9 @@ def barra_covariances_daily_flow() -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
-    years = (
-        clean_df
-        .select(pl.col("date").dt.year().unique().sort().alias("year"))["year"]
-    )
+    years = clean_df.select(pl.col("date").dt.year().unique().sort().alias("year"))[
+        "year"
+    ]
 
     for year in tqdm(years, desc="Daily Barra Covariances"):
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))

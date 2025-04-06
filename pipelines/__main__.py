@@ -44,12 +44,12 @@ def strategy_backfill_flow(start_date: date, end_date: date) -> None:
     risk_parity_history_flow(start_date, end_date)
     
 if __name__ == '__main__':
-    start_date = date(2024, 1, 1)
+    start_date = date(2025, 1, 1)
     end_date = date.today()
 
-    history_flow(start_date, end_date)
-    daily_flow()
-    id_mappings_flow()
-    wrds_history_flow(start_date, end_date)
+    # history_flow(start_date, end_date)
+    # daily_flow()
+    # id_mappings_flow()
+    # wrds_history_flow(start_date, end_date)
     strategy_backfill_flow(start_date, end_date)
 

@@ -39,7 +39,6 @@ def load_current_barra_files() -> pl.DataFrame:
         file_name = barra_risk.file_name(date_)
 
         if os.path.exists(zip_folder_path):
-
             with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
                 dfs.append(
                     pl.read_csv(
@@ -58,8 +57,7 @@ def load_current_barra_files() -> pl.DataFrame:
 
 def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     return (
-        df
-        .rename(barra_columns, strict=False)
+        df.rename(barra_columns, strict=False)
         .with_columns(pl.col("date").str.strptime(pl.Date, "%Y%m%d"))
         .filter(pl.col("barrid").ne("[End of File]"))
         .sort(["barrid", "date"])
@@ -70,7 +68,6 @@ def barra_risk_history_flow(start_date: date, end_date: date) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="Barra Risk"):
-
         raw_df = load_barra_history_files(year)
         clean_df = clean_barra_df(raw_df)
 
@@ -82,14 +79,12 @@ def barra_risk_daily_flow() -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
-    years = (
-        clean_df
-        .select(pl.col("date").dt.year().unique().sort().alias("year"))["year"]
-    )
+    years = clean_df.select(pl.col("date").dt.year().unique().sort().alias("year"))[
+        "year"
+    ]
 
     for year in tqdm(years, desc="Daily Barra Risk"):
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
         assets_table.create_if_not_exists(year)
         assets_table.upsert(year, year_df)
-

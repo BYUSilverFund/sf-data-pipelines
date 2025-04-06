@@ -11,11 +11,9 @@ from pipelines.utils.tables import assets_table
 
 
 def load_current_barra_files() -> pl.DataFrame:
-
     dates = get_last_market_date(n_days=40)
 
     for date_ in reversed(dates):
-
         zip_folder_path = barra_ids.daily_zip_folder_path(date_)
         file_path = barra_ids.file_name(date_)
 
@@ -34,8 +32,7 @@ def load_current_barra_files() -> pl.DataFrame:
 
 def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     df = (
-        df
-        .rename(barra_columns, strict=False)
+        df.rename(barra_columns, strict=False)
         .with_columns(pl.col("start_date", "end_date").str.strptime(pl.Date, "%Y%m%d"))
         .filter(pl.col("barrid").ne("[End of File]"))
         .filter(pl.col("asset_id_type").eq("CUSIP"))
@@ -55,21 +52,16 @@ def barra_ids_daily_flow() -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
-    years = (
-        clean_df
-        .select(pl.col("date").dt.year().unique().sort().alias("year"))["year"]
-    )
+    years = clean_df.select(pl.col("date").dt.year().unique().sort().alias("year"))[
+        "year"
+    ]
 
     for year in tqdm(years, desc="Barra IDs"):
         if assets_table.exists(year):
             year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
             dates = (
-                assets_table.read(year)
-                .select("date")
-                .unique()
-                .sort("date")
-                .collect()
+                assets_table.read(year).select("date").unique().sort("date").collect()
             )
             year_df = year_df.filter(pl.col("date").is_in(dates))
 

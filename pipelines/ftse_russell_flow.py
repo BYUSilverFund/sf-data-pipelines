@@ -1,10 +1,11 @@
 from datetime import date
-from pipelines.utils import merge_into_master, russell_schema, russell_columns
+from pipelines.utils import russell_schema, russell_columns
 import polars as pl
 import wrds
 import os
 from tqdm import tqdm
 from pipelines.utils.tables import assets_table
+
 
 def load_ftse_russell_df(start_date: date, end_date: date) -> None:
     wrds_db = wrds.Connection(wrds_username="amh1124")
@@ -29,12 +30,8 @@ def load_ftse_russell_df(start_date: date, end_date: date) -> None:
 
 
 def clean(df: pl.DataFrame) -> pl.DataFrame:
-    return (
-        df
-        .rename(russell_columns, strict=False)
-        .with_columns(
-            pl.col("russell_2000", "russell_1000").eq("Y")
-        )
+    return df.rename(russell_columns, strict=False).with_columns(
+        pl.col("russell_2000", "russell_1000").eq("Y")
     )
 
 
@@ -52,4 +49,4 @@ def ftse_russell_backfill_flow(start_date: date, end_date: date) -> None:
         clean_df = clean(raw_df)
 
         if assets_table.exists(year):
-            assets_table.update(year, clean_df, on=['date', 'cusip'])
+            assets_table.update(year, clean_df, on=["date", "cusip"])
