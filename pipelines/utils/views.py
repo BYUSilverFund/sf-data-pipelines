@@ -1,13 +1,8 @@
 import polars as pl
-
-assets = pl.scan_parquet("data/assets/assets_*.parquet")
-signals = pl.scan_parquet("data/signals/signals_*.parquet")
-active_weights = pl.scan_parquet("data/active_weights/active_weights_*.parquet")
-covariances = pl.scan_parquet("data/covariances/covariances_weight_*.parquet")
-exposures = pl.scan_parquet("data/exposures/exposures_*.parquet")
+from pipelines.utils.tables import assets_table, signals_table
 
 russell_rebalance_dates = (
-    assets
+    assets_table.read()
     # Standard filters
     .filter(pl.col('barrid').eq(pl.col('rootid')))
     .filter(pl.col('iso_country_code').eq("USA"))
@@ -19,7 +14,7 @@ russell_rebalance_dates = (
 )
 
 in_universe_assets = (
-    assets
+    assets_table.read()
     # Standard filters
     .filter(pl.col('barrid').eq(pl.col('rootid')))
     .filter(pl.col('iso_country_code').eq("USA"))
@@ -55,7 +50,7 @@ universe = (
 
 in_universe_signals = (
     universe.join(
-        signals,
+        signals_table.read(),
         on=['date', 'barrid'],
         how='left'
     )
@@ -74,7 +69,7 @@ benchmark_weights = (
 )
 
 market_calendar = (
-    assets
+    assets_table.read()
     .select('date')
     .unique()
     .sort('date')

@@ -1,8 +1,8 @@
 from datetime import date
 import polars as pl
 from tqdm import tqdm
-from pipelines.utils.views import in_universe_assets, in_universe_signals, active_weights
-from pipelines.utils.tables import composite_alphas_table
+from pipelines.utils.views import in_universe_assets, in_universe_signals
+from pipelines.utils.tables import composite_alphas_table, active_weights_table
 
 def compute_composite_alphas(start_date: date, end_date: date) -> pl.DataFrame:
     assets = (
@@ -22,7 +22,7 @@ def compute_composite_alphas(start_date: date, end_date: date) -> pl.DataFrame:
     )
 
     weights = (
-        active_weights
+        active_weights_table.read()
         .filter(pl.col('date').is_between(start_date, end_date))
     )
 

@@ -18,7 +18,7 @@ class Table:
         self._schema = schema
         self._ids = ids
 
-        os.makedirs(f"data/{self._name}", exist_ok=True)
+        os.makedirs(f"{self._base_path}/{self._name}", exist_ok=True)
 
     def _file_path(self, year: int | None = None) -> str:
         if year is not None:
@@ -47,7 +47,7 @@ class Table:
             .write_parquet(self._file_path(year))
         )
 
-    def update(self, year: int, rows: pl.DataFrame, on: Optional[list[str]]) -> None:
+    def update(self, year: int, rows: pl.DataFrame, on: Optional[list[str]] = None) -> None:
         on = on or self._ids
         (
             pl.scan_parquet(self._file_path(year))

@@ -1,16 +1,16 @@
 from datetime import date
 import polars as pl
 from tqdm import tqdm
-from system.signals import momentum, beta, reversal
-from system.records import Alpha
-from system.portfolios import mean_variance_efficient
-from system.constraints import zero_beta
+from pipelines.system.signals import momentum, beta, reversal
+from pipelines.system.records import Alpha
+from pipelines.system.portfolios import mean_variance_efficient
+from pipelines.system.constraints import zero_beta
 from pipelines.utils.tables import active_weights_table
-from pipelines.utils.views import signals
+from pipelines.utils.views import in_universe_signals
 
 def get_alphas(signal: str, start_date: date, end_date: date) -> pl.DataFrame:
     return (
-        signals
+        in_universe_signals
         .filter(pl.col('date').is_between(start_date, end_date))
         .filter(pl.col('name').eq(signal))
         .with_columns(
