@@ -116,7 +116,7 @@ signals_table = Table(
         "score": pl.Float64,
         "alpha": pl.Float64,
     },
-    ids=["date", "barrid"],
+    ids=["date", "barrid", "name"],
 )
 
 active_weights_table = Table(
@@ -127,7 +127,7 @@ active_weights_table = Table(
         "signal": pl.String,
         "weight": pl.Float64,
     },
-    ids=["date", "barrid"],
+    ids=["date", "barrid", "signal"],
 )
 
 composite_alphas_table = Table(
@@ -138,5 +138,5 @@ composite_alphas_table = Table(
         "name": pl.String,
         "alpha": pl.Float64,
     },
-    ids=["date", "barrid"],
+    ids=["date", "barrid", "name"],
 )

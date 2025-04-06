@@ -3,9 +3,7 @@ from typing import Protocol
 
 import cvxpy as cp
 import polars as pl
-from pipelines.utils.views import benchmark_weights
-from pipelines.system.covariance_matrix import construct_covariance_matrix
-
+from pipelines.utils.tables import assets_table
 
 class ConstraintConstructor(Protocol):
     """
@@ -70,7 +68,7 @@ def zero_beta(
     weights: cp.Variable, date_: date, barrids: list[str]
 ) -> cp.Constraint:
     betas = (
-        pl.scan_parquet(f"data/assets/assets_{date_.year}.parquet")
+        assets_table.read(date_.year)
         .filter(pl.col('date').eq(date_))
         .filter(pl.col('barrid').is_in(barrids))
         .select('barrid', 'predicted_beta')
@@ -87,7 +85,7 @@ def unit_beta(
     weights: cp.Variable, date_: date, barrids: list[str]
 ) -> cp.Constraint:
     betas = (
-        pl.scan_parquet(f"data/assets/assets_{date_.year}.parquet")
+        assets_table.read(date_.year)
         .filter(pl.col('date').eq(date_))
         .filter(pl.col('barrid').is_in(barrids))
         .select('barrid', 'predicted_beta')

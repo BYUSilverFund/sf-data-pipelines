@@ -4,6 +4,7 @@ import numpy as np
 from pipelines.utils.factors import factors
 import polars as pl
 from pipelines.utils.views import in_universe_assets
+from pipelines.utils.tables import exposures_table, covariances_table, assets_table
 
 def get_barrids_by_date(date_: date) -> list[str]:
 
@@ -64,7 +65,7 @@ def construct_exposure_matrix(barrids: list[str], date_: date) -> pl.DataFrame:
         pl.DataFrame: The factor exposure matrix.
     """
     df = (
-        pl.scan_parquet("data/exposures/exposures_*.parquet")
+        exposures_table.read()
         .filter(pl.col('date').eq(date_))
         .filter(pl.col('barrid').is_in(barrids))
         .select(['barrid', *factors])
@@ -87,7 +88,7 @@ def construct_factor_covariance_matrix(date_: date) -> pl.DataFrame:
     """
 
     df = (
-        pl.scan_parquet("data/covariances/covariances_*.parquet")
+        covariances_table.read()
         .filter(pl.col('date').eq(date_))
         .filter(pl.col('factor_1').is_in(factors))
         .select(['factor_1', *factors])
@@ -125,7 +126,7 @@ def construct_specific_risk_matrix(barrids: list[str], date_: date) -> pl.DataFr
     """
 
     df = (
-        pl.scan_parquet("data/assets/assets_*.parquet")
+        assets_table.read()
         .filter(pl.col('date').eq(date_))
         .filter(pl.col('barrid').is_in(barrids))
         .select('barrid', 'specific_risk')

@@ -33,7 +33,6 @@ def active_weights_history_flow(start_date: date, end_date: date) -> None:
 
         for period in tqdm(periods, desc=f"{signal_name.replace('_', ' ').title()}"):
             period_alphas = alphas.filter(pl.col("date").eq(period)).sort("barrid")
-
             period_barrids = period_alphas["barrid"].unique().sort().to_list()
 
             period_portfolio = mean_variance_efficient(
