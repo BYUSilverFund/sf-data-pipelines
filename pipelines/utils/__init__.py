@@ -29,7 +29,15 @@ barra_columns = {
     "Exposure": "exposures",
     "!Factor1": "factor_1",
     "Factor2": "factor_2",
-    'VarCovar': 'covariance',
+    "VarCovar": "covariance",
+    "BidAskSpread": 'bid_ask_spread',
+    "DailyVolume": 'daily_volume',
+    "ADBAS_30": "average_daily_bid_ask_spread_30",
+    "ADBAS_60": "average_daily_bid_ask_spread_60",
+    "ADBAS_90": "average_daily_bid_ask_spread_90",
+    "ADTV_30": "average_daily_volume_30",
+    "ADTV_60": "average_daily_volume_60",
+    "ADTV_90": "average_daily_volume_90",
 }
 
 barra_schema = {
@@ -59,7 +67,22 @@ barra_schema = {
     "Exposures": pl.Float64,
     "!Factor1": pl.String,
     "Factor2": pl.String,
-    'VarCovar': pl.Float64
+    "VarCovar": pl.Float64,
+    "BidAskSpread": pl.Float64,
+    "DailyVolume": pl.Float64,
+    "ADBAS_30": pl.Float64,
+    "ADBAS_60": pl.Float64,
+    "ADBAS_90": pl.Float64,
+    "ADTV_30": pl.Float64,
+    "ADTV_60": pl.Float64,
+    "ADTV_90": pl.Float64,
+    "ADPS": pl.Float64,
+    "CompositeVolume": pl.Float64,
+    "ADTCV_30": pl.Float64,
+    "ADTCV_60": pl.Float64,
+    "ADTCV_90": pl.Float64,
+    "ADTCA_30": pl.Float64,
+    "IssuerMarketCap": pl.Float64
 }
 
 russell_columns = {
@@ -76,7 +99,9 @@ russell_schema = {
 }
 
 
-def get_last_market_date(current_date: date | None = None, n_days: int = 1) -> list[date]:
+def get_last_market_date(
+    current_date: date | None = None, n_days: int = 1
+) -> list[date]:
     current_date = current_date or date.today()
 
     df = (
@@ -85,11 +110,10 @@ def get_last_market_date(current_date: date | None = None, n_days: int = 1) -> l
         .with_columns(pl.col("close").cast(pl.Date).alias("date"))
         # Get previous date
         .with_columns(pl.col("date").shift(1).alias("previous_date"))
-    
     )
 
     market_dates = df["date"].to_list()
-    
+
     # If today is not a market date, use the next closest.
     if current_date not in market_dates:
         current_date = next(d for d in market_dates if d > current_date)
@@ -99,8 +123,7 @@ def get_last_market_date(current_date: date | None = None, n_days: int = 1) -> l
         # Filter
         .filter(pl.col("date").le(current_date))
         # Sort
-        .sort("date")
-        ["previous_date"]
+        .sort("date")["previous_date"]
         # Get last previous date
         .tail(n_days)
         .to_list()

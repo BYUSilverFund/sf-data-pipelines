@@ -52,6 +52,14 @@ barra_risk = BarraDataset(
     file_name='USSLOWL_100_Asset_Data',
 )
 
+barra_volume = BarraDataset(
+    history_folder='history/usslow/sm/daily',
+    history_zip_file = "SMD_USSLOW_100_D",
+    daily_folder='bime',
+    daily_zip_file='SMD_USSLOW_Market_Data',
+    file_name='USSLOW_Market_Data',
+)
+
 barra_assets = BarraDataset(
     history_folder=None,
     history_zip_file =None,
