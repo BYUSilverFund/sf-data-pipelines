@@ -13,6 +13,7 @@ from barra_volume_flow import barra_volume_history_flow, barra_volume_daily_flow
 from crsp_daily_flow import crsp_daily_backfill_flow
 from crsp_monthly_flow import crsp_monthly_backfill_flow
 from crsp_events_flow import crsp_events_backfill_flow
+from barra_factors_flow import barra_factors_daily_flow
 from datetime import date, timedelta
 
 def daily_flow() -> None:
@@ -25,6 +26,9 @@ def daily_flow() -> None:
     # Covariance Matrix Components
     barra_exposures_daily_flow()
     barra_covariances_daily_flow()
+
+    # Factors
+    barra_factors_daily_flow()
 
 def history_flow(start_date: date, end_date: date) -> None:
     # Assets table
