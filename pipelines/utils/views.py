@@ -1,5 +1,5 @@
 import polars as pl
-from pipelines.utils.tables import assets_table, signals_table
+from pipelines.utils.tables import assets_table, signals_table, crsp_daily_table, crsp_events_table, crsp_monthly_table
 
 russell_rebalance_dates = (
     assets_table.read()
@@ -74,3 +74,73 @@ market_calendar = (
     .unique()
     .sort('date')
 )
+
+crsp_events_monthly = (
+    crsp_events_table.read()
+    .select(
+        pl.col('date').dt.strftime("%Y-%m").alias("month_date"),
+        'permno',
+        'ticker',
+        'shrcd',
+        'exchcd'
+    )
+    .group_by(['month_date', 'permno'])
+    .agg(
+        pl.col('ticker').last(),
+        pl.col('shrcd').last(),
+        pl.col('exchcd').last()
+    )
+)
+
+crsp_monthly_clean = (
+    crsp_monthly_table.read()
+    .with_columns(
+        pl.col('date').dt.strftime("%Y-%m").alias("month_date")
+    )
+    .join(
+        crsp_events_monthly,
+        on=['month_date', 'permno'],
+        how='left'
+    )
+    .sort(['permno', 'date'])
+    .with_columns(
+        pl.col('ticker').fill_null(strategy='forward').over('permno'),
+        pl.col('shrcd').fill_null(strategy='forward').over('permno'),
+        pl.col('exchcd').fill_null(strategy='forward').over('permno'),
+    )
+    .filter(
+        pl.col('shrcd').is_in([10, 11]),
+        pl.col('exchcd').is_in([1, 2, 3])
+    )
+    .sort(['permno', 'date'])
+)
+
+crsp_daily_clean = (
+    crsp_daily_table.read()
+    .join(
+        crsp_events_table.read(),
+        on=['date', 'permno'],
+        how='left'
+    )
+    .sort(['permno', 'date'])
+    .with_columns(
+        pl.col('ticker').fill_null(strategy='forward').over('permno'),
+        pl.col('shrcd').fill_null(strategy='forward').over('permno'),
+        pl.col('exchcd').fill_null(strategy='forward').over('permno'),
+    )
+    .filter(
+        pl.col('shrcd').is_in([10, 11]),
+        pl.col('exchcd').is_in([1, 2, 3])
+    )
+    .sort(['permno', 'date'])
+)
+
+if __name__ == '__main__':
+    # print(
+    #     crsp_events_monthly.collect()
+    # )
+
+    # print(
+    #     crsp_events_monthly.group_by(['month_date', 'permno']).agg(pl.len()).filter(pl.col('len').gt(1)).collect()
+    # )
+    print(crsp_daily_clean.collect())
