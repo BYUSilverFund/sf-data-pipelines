@@ -1,91 +1,50 @@
 from datetime import date
-from prefect import task, flow
-from pipelines.utils.database import Database
-from utils import render_sql_file, get_last_market_date
+from pipelines.utils import russell_schema, russell_columns
 import polars as pl
 import wrds
+import os
+from tqdm import tqdm
+from pipelines.utils.tables import assets_table
 
 
 def load_ftse_russell_df(start_date: date, end_date: date) -> None:
-    """Task for loading a dataframe of FTSE Russell data into duckdb."""
-    print(f"Loading ftse file")
-    date_string = end_date.strftime("%Y%m%d")
-    stage_table = f"ftse_russell_{date_string}_stage"
+    wrds_db = wrds.Connection(wrds_username="amh1124")
 
-    with Database() as db:
-        wrds_db = wrds.Connection(wrds_username="amh1124")
+    df = wrds_db.raw_sql(
+        f"""
+            SELECT 
+                date, 
+                cusip, 
+                ticker, 
+                russell2000,
+                russell1000
+            FROM ftse_russell_us.idx_holdings_us
+            WHERE date BETWEEN '{start_date}' AND '{end_date}'
+            ORDER BY cusip, date
+            ;
+            """
+    )
+    df = pl.from_pandas(df, schema_overrides=russell_schema)
 
-        schema = {
-            "date": pl.String,
-            "cusip": pl.String,
-            "ticker": pl.String,
-            "russell_2000": pl.Boolean,
-            "russell_1000": pl.Boolean,
-            "russell_3000_weight": pl.Float64,
-            "russell_2000_weight": pl.Float64,
-            "russell_1000_weight": pl.Float64,
-        }
-        df = wrds_db.raw_sql(
-            f"""
-                SELECT 
-                    date, 
-                    cusip, 
-                    ticker, 
-                    CASE WHEN russell2000 = 'Y' THEN true ELSE false END AS russell_2000,
-                    CASE WHEN russell1000 = 'Y' THEN true ELSE false END AS russell_1000,
-                    r3000_wt AS russell_3000_weight,
-                    r2000_wt AS russell_2000_weight,
-                    r1000_wt AS russell_1000_weight
-                FROM ftse_russell_us.idx_holdings_us
-                WHERE date BETWEEN '{start_date}' AND '{end_date}'
-                ORDER BY cusip, date
-                ;
-                """
-        )
-        df = pl.from_pandas(df, schema_overrides=schema)
+    return df
 
-        stage_query = (
-            f"CREATE OR REPLACE TEMPORARY TABLE {stage_table} AS SELECT * FROM df;"
-        )
-        db.execute(stage_query)
 
-        merge_query = render_sql_file(
-            "sql/ftse_russell_merge.sql",
-            source_table=stage_table,
-        )
-        db.execute(merge_query)
+def clean(df: pl.DataFrame) -> pl.DataFrame:
+    return df.rename(russell_columns, strict=False).with_columns(
+        pl.col("russell_2000", "russell_1000").eq("Y")
+    )
 
 
 def ftse_russell_backfill_flow(start_date: date, end_date: date) -> None:
     """Flow for orchestrating barra ids backfill."""
-
-    with Database() as db:
-        create_query = render_sql_file("sql/assets_create.sql")
-        db.execute(create_query)
-
-    if start_date.year == end_date.year:
-        end_date = date(start_date.year + 1, 1, 1)
-
     years = list(range(start_date.year, end_date.year + 1))
 
-    for i in range(0, len(years) - 1):
-        start_year = years[i]
-        end_year = years[i + 1]
-
-        load_ftse_russell_df(
-            start_date=date(start_year, 1, 1), end_date=date(end_year, 12, 31)
+    for year in tqdm(years, desc="FTSE Russell"):
+        raw_df = load_ftse_russell_df(
+            start_date=date(year, 1, 1), end_date=date(year, 12, 31)
         )
 
+        clean_df = clean(raw_df)
 
-def ftse_russell_daily_flow() -> None:
-    """Flow for orchestrating Russell constituents each day."""
-
-    with Database() as db:
-        create_query = render_sql_file("sql/assets_create.sql")
-        db.execute(create_query)
-
-    current_year = date.today().year
-
-    load_ftse_russell_df(
-        start_date=date(current_year, 1, 1), end_date=date(current_year, 12, 31)
-    )
+        if assets_table.exists(year):
+            assets_table.update(year, clean_df, on=["date", "cusip"])

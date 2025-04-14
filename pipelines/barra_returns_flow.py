@@ -1,90 +1,91 @@
-from datetime import date, timedelta
-from pipelines.utils.database import Database
-from pipelines.utils.barra_file import (
-    BarraFile,
-    Folder,
-    Model,
-    ModelFolder,
-    Frequency,
-    ZipFolder,
-    File,
-)
-from utils import render_sql_file
+from datetime import date
+import zipfile
+import polars as pl
+from io import BytesIO
+from pipelines.utils import barra_schema, barra_columns
+from utils.barra_datasets import barra_returns
+import os
+from tqdm import tqdm
+from utils import get_last_market_date
+from utils.tables import assets_table
 
 
-def load_barra_file(barra_file: BarraFile) -> None:
-    """Task for loading a BarraFile into duckdb."""
-    print(f"Loading barra file: {barra_file.file_name}")
+def load_barra_history_files(year: int) -> pl.DataFrame:
+    zip_folder_path = barra_returns.history_zip_folder_path(year)
+    file_name = barra_returns.file_name()
 
-    date_string = barra_file.date_.strftime("%Y%m%d")
-    stage_table = f"pricing_{date_string}_stage"
-    transform_table = f"pricing_{date_string}_transform"
+    with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
+        dfs = [
+            pl.read_csv(
+                BytesIO(zip_folder.read(file)),
+                skip_rows=1,
+                separator="|",
+                schema_overrides=barra_schema,
+                try_parse_dates=True,
+            )
+            for file in zip_folder.namelist()
+            if file.startswith(file_name)
+        ]
 
-    with Database() as db:
-        _ = barra_file.df
-        stage_query = (
-            f"CREATE OR REPLACE TEMPORARY TABLE {stage_table} AS SELECT * FROM _;"
-        )
-        db.execute(stage_query)
-
-        transform_query = render_sql_file(
-            "sql/pricing_transform.sql",
-            stage_table=stage_table,
-            transform_table=transform_table,
-        )
-        db.execute(transform_query)
-
-        merge_query = render_sql_file(
-            "sql/pricing_merge.sql",
-            source_table=transform_table,
-        )
-        db.execute(merge_query)
+    return pl.concat(dfs, how="vertical") if dfs else pl.DataFrame()
 
 
-def barra_returns_backfill_flow(start_date: date, end_date: date) -> None:
-    """Flow for orchestrating barra reutrns backfill."""
+def load_current_barra_files() -> pl.DataFrame:
+    dfs = []
 
-    with Database() as db:
-        create_query = render_sql_file("sql/assets_create.sql")
-        db.execute(create_query)
+    dates = get_last_market_date(n_days=20)
 
-    current_date = start_date
-    while current_date <= end_date:
-        barra_file = BarraFile(
-            folder=Folder.HISTORY,
-            model=Model.USSLOW,
-            model_folder=ModelFolder.SM,
-            frequency=Frequency.DAILY,
-            zip_folder=ZipFolder.SMD_USSLOW_100_D,
-            file=File.USSLOW_Daily_Asset_Price,
-            date_=current_date,
-        )
+    for date_ in tqdm(dates, desc="Searching Files"):
+        zip_folder_path = barra_returns.daily_zip_folder_path(date_)
+        file_name = barra_returns.file_name(date_)
 
-        if barra_file.exists:
-            load_barra_file(barra_file=barra_file)
+        if os.path.exists(zip_folder_path):
+            with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
+                dfs.append(
+                    pl.read_csv(
+                        BytesIO(zip_folder.read(file_name)),
+                        skip_rows=1,
+                        separator="|",
+                        schema_overrides=barra_schema,
+                        try_parse_dates=True,
+                    )
+                )
 
-        current_date += timedelta(days=1)
+    df = pl.concat(dfs)
+
+    return df
+
+
+def clean_barra_returns(df: pl.DataFrame) -> pl.DataFrame:
+    return (
+        df.rename(barra_columns, strict=False)
+        .with_columns(pl.col("date").str.strptime(pl.Date, "%Y%m%d"))
+        .filter(pl.col("barrid").ne("[End of File]"))
+        .sort(["barrid", "date"])
+    )
+
+
+def barra_returns_history_flow(start_date: date, end_date: date) -> None:
+    years = list(range(start_date.year, end_date.year + 1))
+
+    for year in tqdm(years, desc="Barra Returns"):
+        raw_df = load_barra_history_files(year)
+        clean_df = clean_barra_returns(raw_df)
+
+        assets_table.create_if_not_exists(year)
+        assets_table.upsert(year, clean_df)
 
 
 def barra_returns_daily_flow() -> None:
-    """Flow for orchestrating barra reutrns each day."""
+    raw_df = load_current_barra_files()
+    clean_df = clean_barra_returns(raw_df)
 
-    with Database() as db:
-        create_query = render_sql_file("sql/assets_create.sql")
-        db.execute(create_query)
+    years = clean_df.select(pl.col("date").dt.year().unique().sort().alias("year"))[
+        "year"
+    ]
 
-    barra_file = BarraFile(
-        folder=Folder.HISTORY,
-        model=Model.USSLOW,
-        model_folder=ModelFolder.SM,
-        frequency=Frequency.DAILY,
-        zip_folder=ZipFolder.SMD_USSLOW_100_D,
-        file=File.USSLOW_Daily_Asset_Price,
-        date_=date.today(),
-    )
+    for year in tqdm(years, desc="Daily Barra Returns"):
+        year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
-    if barra_file.exists:
-        load_barra_file(barra_file=barra_file)
-    else:
-        msg = f"BarraFile '{barra_file.file_name}' does not exist!"
-        raise RuntimeError(msg)
+        assets_table.create_if_not_exists(year)
+        assets_table.upsert(year, year_df)

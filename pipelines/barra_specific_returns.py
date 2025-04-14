@@ -3,15 +3,15 @@ import zipfile
 import polars as pl
 from io import BytesIO
 from pipelines.utils import barra_schema, barra_columns, get_last_market_date
+from pipelines.utils.barra_datasets import barra_specific_returns
+from pipelines.utils.tables import assets_table
 import os
 from tqdm import tqdm
-from pipelines.utils.barra_datasets import barra_covariances
-from pipelines.utils.tables import covariances_table
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
-    zip_folder_path = barra_covariances.history_zip_folder_path(year)
-    file_name = barra_covariances.file_name()
+    zip_folder_path = barra_specific_returns.history_zip_folder_path(year)
+    file_name = barra_specific_returns.file_name()
 
     with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
         dfs = [
@@ -35,8 +35,8 @@ def load_current_barra_files() -> pl.DataFrame:
     dates = get_last_market_date(n_days=20)
 
     for date_ in tqdm(dates, desc="Searching Files"):
-        zip_folder_path = barra_covariances.daily_zip_folder_path(date_)
-        file_name = barra_covariances.file_name(date_)
+        zip_folder_path = barra_specific_returns.daily_zip_folder_path(date_)
+        file_name = barra_specific_returns.file_name(date_)
 
         if os.path.exists(zip_folder_path):
             with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
@@ -59,25 +59,23 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     return (
         df.rename(barra_columns, strict=False)
         .with_columns(pl.col("date").str.strptime(pl.Date, "%Y%m%d"))
-        .filter(pl.col("factor_1").ne("[End of File]"))
-        .sort(["factor_1", "factor_2"])
-        .pivot(index=["date", "factor_1"], on="factor_2", values="covariance")
-        .sort(["factor_1", "date"])
+        .filter(pl.col("barrid").ne("[End of File]"))
+        .sort(["barrid", "date"])
     )
 
 
-def barra_covariances_history_flow(start_date: date, end_date: date) -> None:
+def barra_specific_returns_history_flow(start_date: date, end_date: date) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
-    for year in tqdm(years, desc="Barra Covariances"):
+    for year in tqdm(years, desc="Barra Specific Returns"):
         raw_df = load_barra_history_files(year)
         clean_df = clean_barra_df(raw_df)
 
-        covariances_table.create_if_not_exists(year)
-        covariances_table.upsert(year, clean_df)
+        assets_table.create_if_not_exists(year)
+        assets_table.update(year, clean_df)
 
 
-def barra_covariances_daily_flow() -> None:
+def barra_specific_returns_daily_flow() -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
@@ -85,8 +83,8 @@ def barra_covariances_daily_flow() -> None:
         "year"
     ]
 
-    for year in tqdm(years, desc="Daily Barra Covariances"):
+    for year in tqdm(years, desc="Daily Barra Specific Returns"):
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
-        covariances_table.create_if_not_exists(year)
-        covariances_table.upsert(year, year_df)
+        assets_table.create_if_not_exists(year)
+        assets_table.update(year, year_df)
