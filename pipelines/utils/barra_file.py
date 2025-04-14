@@ -139,15 +139,15 @@ class BarraFile:
             
 
 if __name__ == '__main__':
-    file = BarraFile(
+    barra_file = BarraFile(
         folder=Folder.HISTORY,
-        file=File.USSLOWL_100_Asset_Data,
-        date_=date(2025, 3, 7),
         model=Model.USSLOW,
         model_folder=ModelFolder.SM,
         frequency=Frequency.DAILY,
-        zip_folder=ZipFolder.SMD_USSLOWL_100_D,
+        zip_folder=ZipFolder.SMD_USSLOW_100_D,
+        file=File.USSLOW_100_Asset_DlySpecRet,
+        date_=date.today(),
     )
 
-    print(file.zip_folder_path)
-    print(file.df)
+    print(barra_file.zip_folder_path)
+    print(barra_file.file_path)

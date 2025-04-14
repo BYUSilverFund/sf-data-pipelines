@@ -44,6 +44,14 @@ barra_returns = BarraDataset(
     file_name='USSLOW_Daily_Asset_Price',
 )  
 
+barra_specific_returns = BarraDataset(
+    history_folder='history/usslow/sm/daily',
+    history_zip_file = "SMD_USSLOW_100_D",
+    daily_folder='us/usslow',
+    daily_zip_file='SMD_USSLOWL_100',
+    file_name='USSLOW_100_Asset_DlySpecRet',
+)  
+
 barra_risk = BarraDataset(
     history_folder='history/usslow/sm/daily',
     history_zip_file = "SMD_USSLOWL_100_D",

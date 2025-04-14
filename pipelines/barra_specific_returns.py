@@ -3,15 +3,15 @@ import zipfile
 import polars as pl
 from io import BytesIO
 from pipelines.utils import barra_schema, barra_columns, get_last_market_date
-from pipelines.utils.barra_datasets import barra_risk
+from pipelines.utils.barra_datasets import barra_specific_returns
 from pipelines.utils.tables import assets_table
 import os
 from tqdm import tqdm
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
-    zip_folder_path = barra_risk.history_zip_folder_path(year)
-    file_name = barra_risk.file_name()
+    zip_folder_path = barra_specific_returns.history_zip_folder_path(year)
+    file_name = barra_specific_returns.file_name()
 
     with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
         dfs = [
@@ -35,8 +35,8 @@ def load_current_barra_files() -> pl.DataFrame:
     dates = get_last_market_date(n_days=20)
 
     for date_ in tqdm(dates, desc="Searching Files"):
-        zip_folder_path = barra_risk.daily_zip_folder_path(date_)
-        file_name = barra_risk.file_name(date_)
+        zip_folder_path = barra_specific_returns.daily_zip_folder_path(date_)
+        file_name = barra_specific_returns.file_name(date_)
 
         if os.path.exists(zip_folder_path):
             with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
@@ -64,10 +64,10 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def barra_risk_history_flow(start_date: date, end_date: date) -> None:
+def barra_specific_returns_history_flow(start_date: date, end_date: date) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
-    for year in tqdm(years, desc="Barra Risk"):
+    for year in tqdm(years, desc="Barra Specific Returns"):
         raw_df = load_barra_history_files(year)
         clean_df = clean_barra_df(raw_df)
 
@@ -75,7 +75,7 @@ def barra_risk_history_flow(start_date: date, end_date: date) -> None:
         assets_table.update(year, clean_df)
 
 
-def barra_risk_daily_flow() -> None:
+def barra_specific_returns_daily_flow() -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
@@ -83,7 +83,7 @@ def barra_risk_daily_flow() -> None:
         "year"
     ]
 
-    for year in tqdm(years, desc="Daily Barra Risk"):
+    for year in tqdm(years, desc="Daily Barra Specific Returns"):
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
         assets_table.create_if_not_exists(year)

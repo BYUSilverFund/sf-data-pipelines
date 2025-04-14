@@ -85,7 +85,7 @@ def barra_volume_history_flow(start_date: date, end_date: date) -> None:
         clean_df = clean_barra_df(raw_df)
 
         assets_table.create_if_not_exists(year)
-        assets_table.upsert(year, clean_df)
+        assets_table.update(year, clean_df)
 
 
 def barra_volume_daily_flow() -> None:
@@ -100,4 +100,4 @@ def barra_volume_daily_flow() -> None:
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
         assets_table.create_if_not_exists(year)
-        assets_table.upsert(year, year_df)
+        assets_table.update(year, year_df)

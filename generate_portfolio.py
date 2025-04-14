@@ -10,6 +10,7 @@ from pipelines.system.constraints import (
 )
 from pipelines.utils import get_last_market_date
 from pipelines.system.covariance_matrix import construct_covariance_matrix
+from pipelines.utils.tables import composite_alphas_table
 import numpy as np
 
 
@@ -24,146 +25,108 @@ constraints = [
     long_only,
 ]
 
+print(date_)
+
 
 # ----- Get Composite Alphas -----
 composite_alphas = (
-    pl.scan_parquet("data/composite_alphas/composite_alphas_*.parquet")
-    .filter(pl.col("date").eq(date_))
+    composite_alphas_table.read()
+    # .filter(pl.col("date").eq(date_))
     .filter(pl.col("name").eq("risk_parity"))
     .select(["date", "barrid", "alpha"])
     .sort("barrid")
     .collect()
 )
+print(composite_alphas)
 
-# ----- Get Barrids -----
-if barrids_file is None:
-    barrids = composite_alphas["barrid"].unique().sort().to_list()
-else:
-    barrids = pl.read_csv(barrids_file)["barrid"].unique().sort().to_list()
-
-
-def generate_portfolio(gamma: float) -> pl.DataFrame:
-    """Function for generating a portfolio given a value of gamma."""
-    # Get mean variance optimal weights
-    weights = mean_variance_efficient(
-        date_, barrids, Alpha(composite_alphas), constraints, gamma=gamma
-    )
-
-    # Join ticker column
-    portfolio = (
-        in_universe_assets.filter(pl.col("date").eq(date_))
-        .select("date", "barrid", "ticker")
-        .join(weights.lazy(), on=["date", "barrid"], how="left")
-        .filter(pl.col("weight").gt(0))  # Only keep positive weights
-        .select("barrid", "ticker", "weight")
-    )
-
-    # Join benchmark weights
-    benchmark = benchmark_weights.filter(pl.col("date").eq(date_)).select(
-        "barrid", pl.col("weight").alias("benchmark_weight")
-    )
-
-    # Compute active weights
-    active_portfolio = (
-        portfolio.join(benchmark, on=["barrid"], how="left")
-        .with_columns(
-            pl.col("weight").sub(pl.col("benchmark_weight")).alias("active_weight")
-        )
-        .sort("barrid")
-        .collect()
-    )
-
-    return active_portfolio
+# # ----- Get Barrids -----
+# if barrids_file is None:
+#     barrids = composite_alphas["barrid"].unique().sort().to_list()
+# else:
+#     barrids = pl.read_csv(barrids_file)["barrid"].unique().sort().to_list()
 
 
-def compute_active_risk(active_portfolio: pl.DataFrame) -> float:
-    """Function for computing active risk given an active portfolio."""
-    barrids = active_portfolio["barrid"].unique().sort().to_list()
+# def generate_portfolio(gamma: float) -> pl.DataFrame:
+#     """Function for generating a portfolio given a value of gamma."""
+#     # Get mean variance optimal weights
+#     weights = mean_variance_efficient(
+#         date_, barrids, Alpha(composite_alphas), constraints, gamma=gamma
+#     )
 
-    covariance_matrix = (
-        construct_covariance_matrix(date_, barrids).drop("barrid").to_numpy()
-    )
+#     # Join ticker column
+#     portfolio = (
+#         in_universe_assets.filter(pl.col("date").eq(date_))
+#         .select("date", "barrid", "ticker")
+#         .join(weights.lazy(), on=["date", "barrid"], how="left")
+#         .filter(pl.col("weight").gt(0))  # Only keep positive weights
+#         .select("barrid", "ticker", "weight")
+#     )
 
-    active_weights = active_portfolio["active_weight"].to_numpy()
-    active_risk = np.sqrt(active_weights.T @ covariance_matrix @ active_weights)
+#     # Join benchmark weights
+#     benchmark = benchmark_weights.filter(pl.col("date").eq(date_)).select(
+#         "barrid", pl.col("weight").alias("benchmark_weight")
+#     )
 
-    return active_risk
+#     # Compute active weights
+#     active_portfolio = (
+#         portfolio.join(benchmark, on=["barrid"], how="left")
+#         .with_columns(
+#             pl.col("weight").sub(pl.col("benchmark_weight")).alias("active_weight")
+#         )
+#         .sort("barrid")
+#         .collect()
+#     )
+
+#     return active_portfolio
 
 
-def get_target_active_risk_portfolio(
-    target_active_risk: float = 5.0, tolerance: float = 1e-2, max_iter: int = 20
-):
-    # Parameters
-    left_gamma = .2
-    right_gamma = 2
+# def compute_active_risk(active_portfolio: pl.DataFrame) -> float:
+#     """Function for computing active risk given an active portfolio."""
+#     barrids = active_portfolio["barrid"].unique().sort().to_list()
 
-    # Results
-    best_gamma = (left_gamma + right_gamma) / 2
-    best_active_risk = float("inf")
-    best_active_portfolio = None
+#     covariance_matrix = (
+#         construct_covariance_matrix(date_, barrids).drop("barrid").to_numpy()
+#     )
 
-    for i in range(max_iter):
-        mid_gamma = (left_gamma + right_gamma) / 2
+#     active_weights = active_portfolio["active_weight"].to_numpy()
+#     active_risk = np.sqrt(active_weights.T @ covariance_matrix @ active_weights)
 
-        active_portfolio = generate_portfolio(mid_gamma)
-        active_risk = compute_active_risk(active_portfolio)
+#     return active_risk
 
-        if best_active_portfolio is None:
-            best_active_portfolio = active_portfolio
 
-        print(
-            f"Iteration {i + 1}: Gamma = {mid_gamma:.6f}, Active Risk = {active_risk:.2f}%"
-        )
+# def get_target_active_risk_portfolio(
+#     target_active_risk: float = 5.0
+# ):
+#     # Parameters
+#     gammas = [.1 * i for i in range(1, 21)]
 
-        # Keep track of best gamma
-        if abs(active_risk - target_active_risk) < abs(best_active_risk - target_active_risk):
-            best_gamma = mid_gamma
-            best_active_risk = active_risk
-            best_active_portfolio = active_portfolio
+#     # Results
+#     best_gamma = gammas[0]
+#     best_active_risk = float("inf")
+#     best_active_portfolio = None
 
-        # Exit if active risk meets tollerance
-        if abs(active_risk - target_active_risk) <= tolerance:
-            best_gamma = mid_gamma
-            best_active_risk = active_risk
-            best_active_portfolio = active_portfolio
-            break
-        
-        # Itterate
-        if active_risk > target_active_risk:
-            left_gamma = mid_gamma
-        else:
-            right_gamma = mid_gamma
+#     for i, gamma in enumerate(gammas):
+#         active_portfolio = generate_portfolio(gamma)
+#         active_risk = compute_active_risk(active_portfolio)
 
-    print(f"Best Gamma: {best_gamma:.6f}, Active Risk = {best_active_risk:.2f}%")
+#         if best_active_portfolio is None:
+#             best_active_portfolio = active_portfolio
 
-    return best_active_portfolio, best_gamma, best_active_risk
+#         print(
+#             f"Iteration {i + 1}: Gamma = {gamma:.6f}, Active Risk = {active_risk:.2f}%"
+#         )
 
-def experiment():
-    gammas = np.linspace(.2, .5, 20)
-    print(gammas)
-    results = []
-    for gamma in gammas:
-        active_portfolio = generate_portfolio(gamma)
-        active_risk = compute_active_risk(active_portfolio)
-        print(f"Gamma: {gamma}, Active Risk: {active_risk:.2f}%")
-        results.append({
-            'gamma': gamma,
-            'active_risk': active_risk
-        })
+#         # Keep track of best gamma
+#         if abs(active_risk - target_active_risk) < abs(best_active_risk - target_active_risk):
+#             best_active_risk = active_risk
+#             best_gamma = gamma
+#             best_active_portfolio = active_portfolio
 
-    results_df = pl.from_dicts(results)
-    results_df.write_csv("results_2.csv")
-    print(results_df)
+#     print(f"Best Gamma: {best_gamma:.6f}, Active Risk = {best_active_risk:.2f}%")
 
-if __name__ == "__main__":
-    # active_portfolio, _, _ = get_target_active_risk_portfolio()
-    # print("Active Portfolio", active_portfolio.sort('active_weight', descending=True))
-    # active_portfolio.write_csv('filtered_portfolio.csv')
-    experiment()
-    df = pl.read_csv('results_2.csv')
-    print(df)
+#     return best_active_portfolio, best_gamma, best_active_risk
 
-    import seaborn as sns
-    import matplotlib.pyplot as plt
-    sns.lineplot(df, x='gamma', y='active_risk')
-    plt.savefig("results_2.png", dpi=300)
+# if __name__ == "__main__":
+#     active_portfolio, _, _ = get_target_active_risk_portfolio()
+#     print("Active Portfolio", active_portfolio.sort('active_weight', descending=True))
+#     active_portfolio.write_csv('portfolio.csv')

@@ -71,6 +71,7 @@ assets_table = Table(
         "ticker": pl.String,
         "price": pl.Float64,
         "return": pl.Float64,
+        "specific_return": pl.Float64,
         "market_cap": pl.Float64,
         "price_source": pl.String,
         "currency": pl.String,

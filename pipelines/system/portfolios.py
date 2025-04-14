@@ -40,7 +40,10 @@ def mean_variance_efficient(
     """
 
     # Get covariance matrix
-    cov_mat = CovarianceMatrix(construct_covariance_matrix(period, barrids), barrids)
+    # cov_mat = CovarianceMatrix(construct_covariance_matrix(period, barrids), barrids)
+    cov_mat = construct_covariance_matrix(period, barrids)
+    print(cov_mat)
+    cov_mat = CovarianceMatrix(cov_mat, barrids)
 
     # Cast to numpy arrays
     alphas = alphas.to_vector()
