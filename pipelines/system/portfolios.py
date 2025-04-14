@@ -6,7 +6,7 @@ from typing import Protocol
 import polars as pl
 from tqdm import tqdm
 
-from pipelines.system.alphas import Alpha
+from pipelines.system.records import Alpha
 from pipelines.system.constraints import ConstraintConstructor
 from pipelines.system.covariance_matrix import construct_covariance_matrix
 from pipelines.system.optimizers import quadratic_program

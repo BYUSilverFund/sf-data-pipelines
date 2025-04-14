@@ -12,7 +12,6 @@ class Table:
         load_dotenv(override=True)
         home, user = os.getenv("ROOT").split("/")[1:3]
         self._base_path = f"/{home}/{user}/groups/grp_quant/database"
-        # self._base_path = "data"
 
         self._name = name
         self._schema = schema
@@ -47,7 +46,9 @@ class Table:
             .write_parquet(self._file_path(year))
         )
 
-    def update(self, year: int, rows: pl.DataFrame, on: Optional[list[str]] = None) -> None:
+    def update(
+        self, year: int, rows: pl.DataFrame, on: Optional[list[str]] = None
+    ) -> None:
         on = on or self._ids
         (
             pl.scan_parquet(self._file_path(year))
@@ -147,4 +148,49 @@ composite_alphas_table = Table(
         "alpha": pl.Float64,
     },
     ids=["date", "barrid", "name"],
+)
+
+crsp_daily_table = Table(
+    name="crsp_daily",
+    schema={
+        "date": pl.Date,
+        "permno": pl.Int64,
+        "cusip": pl.String,
+        "ret": pl.Float64,
+        "retx": pl.Float64,
+        "prc": pl.Float64,
+        "vol": pl.Int64,
+        "openprc": pl.Float64,
+        "askhi": pl.Float64,
+        "bidlo": pl.Float64,
+        "shrout": pl.Int64,
+    },
+    ids=["date", "permno"],
+)
+
+crsp_monthly_table = Table(
+    name="crsp_monthly",
+    schema={
+        "date": pl.Date,
+        "permno": pl.Int64,
+        "cusip": pl.String,
+        "ret": pl.Float64,
+        "retx": pl.Float64,
+        "prc": pl.Float64,
+        "vol": pl.Int64,
+        "shrout": pl.Int64,
+    },
+    ids=["date", "permno"],
+)
+
+crsp_events_table = Table(
+    name="crsp_events",
+    schema={
+        "date": pl.Date,
+        "permno": pl.Int64,
+        "ticker": pl.String,
+        "shrcd": pl.Int64,
+        "exchcd": pl.Int64,
+    },
+    ids=["date", "permno"],
 )

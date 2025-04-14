@@ -9,6 +9,9 @@ from signals_flow import signals_history_flow
 from active_weights_flow import active_weights_history_flow
 from pipelines.composite_alphas import risk_parity_history_flow
 from barra_volume_flow import barra_volume_history_flow, barra_volume_daily_flow
+from crsp_daily_flow import crsp_daily_backfill_flow
+from crsp_monthly_flow import crsp_monthly_backfill_flow
+from crsp_events_flow import crsp_events_backfill_flow
 from datetime import date
 
 def daily_flow() -> None:
@@ -35,11 +38,16 @@ def id_mappings_flow() -> None:
     barra_ids_daily_flow()
     barra_assets_daily_flow()
 
-def wrds_history_flow(start_date: date, end_date: date) -> None:
+def ftse_history_flow(start_date: date, end_date: date) -> None:
     ftse_russell_backfill_flow(
         start_date=start_date,
         end_date=end_date,
     )
+
+def crsp_history_flow(start_date: date, end_date: date) -> None:
+    crsp_events_backfill_flow(start_date, end_date)
+    crsp_monthly_backfill_flow(start_date, end_date)
+    # crsp_daily_backfill_flow(start_date, end_date)
 
 def strategy_backfill_flow(start_date: date, end_date: date) -> None:
     signals_history_flow(start_date, end_date)
@@ -54,5 +62,6 @@ if __name__ == '__main__':
     # daily_flow()
     # id_mappings_flow()
     # wrds_history_flow(start_date, end_date)
-    strategy_backfill_flow(start_date, end_date)
+    # strategy_backfill_flow(start_date, end_date)
+    crsp_history_flow(start_date, end_date)
 

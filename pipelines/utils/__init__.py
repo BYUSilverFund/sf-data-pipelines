@@ -30,8 +30,8 @@ barra_columns = {
     "!Factor1": "factor_1",
     "Factor2": "factor_2",
     "VarCovar": "covariance",
-    "BidAskSpread": 'bid_ask_spread',
-    "DailyVolume": 'daily_volume',
+    "BidAskSpread": "bid_ask_spread",
+    "DailyVolume": "daily_volume",
     "ADBAS_30": "average_daily_bid_ask_spread_30",
     "ADBAS_60": "average_daily_bid_ask_spread_60",
     "ADBAS_90": "average_daily_bid_ask_spread_90",
@@ -82,7 +82,7 @@ barra_schema = {
     "ADTCV_60": pl.Float64,
     "ADTCV_90": pl.Float64,
     "ADTCA_30": pl.Float64,
-    "IssuerMarketCap": pl.Float64
+    "IssuerMarketCap": pl.Float64,
 }
 
 russell_columns = {
@@ -96,6 +96,23 @@ russell_schema = {
     "cusip": pl.String,
     "russell2000": pl.String,
     "russell1000": pl.String,
+}
+
+crsp_schema = {
+    "date": pl.Date,
+    "permno": pl.Int64,
+    "cusip": pl.String,
+    "ret": pl.Float64,
+    "retx": pl.Float64,
+    "prc": pl.Float64,
+    "vol": pl.Int64,
+    "openprc": pl.Float64,
+    "askhi": pl.Float64,
+    "bidlo": pl.Float64,
+    "shrout": pl.Int64,
+    "ticker": pl.String,
+    "shrcd": pl.Int64,
+    "exchcd": pl.Int64,
 }
 
 
