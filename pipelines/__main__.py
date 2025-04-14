@@ -23,8 +23,8 @@ def daily_flow() -> None:
     barra_volume_daily_flow()
 
     # Covariance Matrix Components
-    # barra_exposures_daily_flow()
-    # barra_covariances_daily_flow()
+    barra_exposures_daily_flow()
+    barra_covariances_daily_flow()
 
 def history_flow(start_date: date, end_date: date) -> None:
     # Assets table
@@ -34,8 +34,8 @@ def history_flow(start_date: date, end_date: date) -> None:
     barra_volume_history_flow(start_date, end_date)
 
     # Covariance Matrix Components
-    # barra_exposures_history_flow(start_date, end_date)
-    # barra_covariances_history_flow(start_date, end_date)
+    barra_exposures_history_flow(start_date, end_date)
+    barra_covariances_history_flow(start_date, end_date)
 
 def id_mappings_flow() -> None:
     barra_ids_daily_flow()
@@ -48,8 +48,8 @@ def ftse_history_flow(start_date: date, end_date: date) -> None:
     )
 
 def crsp_history_flow(start_date: date, end_date: date) -> None:
-    # crsp_events_backfill_flow(start_date, end_date)
-    # crsp_monthly_backfill_flow(start_date, end_date)
+    crsp_events_backfill_flow(start_date, end_date)
+    crsp_monthly_backfill_flow(start_date, end_date)
     crsp_daily_backfill_flow(start_date, end_date)
 
 def strategy_backfill_flow(start_date: date, end_date: date) -> None:
@@ -67,10 +67,5 @@ if __name__ == '__main__':
     start_date = date(1920, 1, 1)
     end_date = date.today()
 
-    history_flow(start_date, end_date)
-    daily_flow()
-    id_mappings_flow()
-    # wrds_history_flow(start_date, end_date)
-    # strategy_backfill_flow(start_date, end_date)
     crsp_history_flow(start_date, end_date)
 

@@ -116,6 +116,15 @@ exposures_table = Table(
     ids=["date", "barrid"],
 )
 
+factors_table = Table(
+    name='factors',
+    schema={
+        "date": pl.Date,
+        **{factor: pl.Float64 for factor in factors},
+    },
+    ids=['date']
+)
+
 signals_table = Table(
     name="signals",
     schema={

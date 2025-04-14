@@ -99,3 +99,12 @@ barra_exposures = BarraDataset(
     daily_zip_file='SMD_USSLOWL_100',
     file_name='USSLOWL_100_Asset_Exposure',
 ) 
+
+
+barra_factors = BarraDataset(
+    history_folder=None,
+    history_zip_file =None,
+    daily_folder='bime',
+    daily_zip_file='SMD_USSLOWL_100',
+    file_name='USSLOWL_100_DlyFacRet',
+)

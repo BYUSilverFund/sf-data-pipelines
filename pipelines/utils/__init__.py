@@ -39,6 +39,8 @@ barra_columns = {
     "ADTV_30": "average_daily_volume_30",
     "ADTV_60": "average_daily_volume_60",
     "ADTV_90": "average_daily_volume_90",
+    "!Factor": "factor",
+    "DlyReturn": "return",
 }
 
 barra_schema = {
@@ -85,6 +87,8 @@ barra_schema = {
     "ADTCV_90": pl.Float64,
     "ADTCA_30": pl.Float64,
     "IssuerMarketCap": pl.Float64,
+    "!Factor": pl.String,
+    "DlyReturn": pl.Float64,
 }
 
 russell_columns = {
