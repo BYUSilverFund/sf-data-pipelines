@@ -2,7 +2,6 @@ from datetime import date
 from pipelines.utils import russell_schema, russell_columns
 import polars as pl
 import wrds
-import os
 from tqdm import tqdm
 from pipelines.utils.tables import assets_table
 

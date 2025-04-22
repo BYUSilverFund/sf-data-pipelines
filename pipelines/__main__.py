@@ -14,9 +14,10 @@ from crsp_daily_flow import crsp_daily_backfill_flow
 from crsp_monthly_flow import crsp_monthly_backfill_flow
 from crsp_events_flow import crsp_events_backfill_flow
 from barra_factors_flow import barra_factors_daily_flow
+from covariance_matrix_flow import covariance_daily_flow
 from datetime import date, timedelta
 
-def daily_flow() -> None:
+def barra_daily_flow() -> None:
     # Assets table
     barra_returns_daily_flow()
     barra_specific_returns_daily_flow()
@@ -30,7 +31,7 @@ def daily_flow() -> None:
     # Factors
     barra_factors_daily_flow()
 
-def history_flow(start_date: date, end_date: date) -> None:
+def barra_history_flow(start_date: date, end_date: date) -> None:
     # Assets table
     barra_returns_history_flow(start_date, end_date)
     barra_specific_returns_history_flow(start_date, end_date)
@@ -62,14 +63,17 @@ def strategy_backfill_flow(start_date: date, end_date: date) -> None:
     risk_parity_history_flow(start_date, end_date)
 
 def daily_etl_pipeline() -> None:
-    date_ = date.today() - timedelta(days=1)
-    daily_flow()
+    # date_ = date.today() - timedelta(days=1)
+    barra_daily_flow()
     id_mappings_flow()
-    strategy_backfill_flow(date_, date_)
+    covariance_daily_flow()
+    # strategy_backfill_flow(date_, date_)
     
 if __name__ == '__main__':
-    start_date = date(1920, 1, 1)
-    end_date = date.today()
+    # start_date = date(1995, 1, 1)
+    # end_date = date.today()
 
-    crsp_history_flow(start_date, end_date)
+    # barra_history_flow(start_date, end_date)
+    daily_etl_pipeline()
+    # ftse_history_flow(start_date, end_date)
 
