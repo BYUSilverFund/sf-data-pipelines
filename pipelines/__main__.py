@@ -15,7 +15,7 @@ from crsp_monthly_flow import crsp_monthly_backfill_flow
 from crsp_events_flow import crsp_events_backfill_flow
 from barra_factors_flow import barra_factors_daily_flow
 from covariance_matrix_flow import covariance_daily_flow
-from datetime import date, timedelta
+from datetime import date
 
 def barra_daily_flow() -> None:
     # Assets table
