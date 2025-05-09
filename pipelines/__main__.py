@@ -63,17 +63,14 @@ def strategy_backfill_flow(start_date: date, end_date: date) -> None:
     risk_parity_history_flow(start_date, end_date)
 
 def daily_etl_pipeline() -> None:
-    # date_ = date.today() - timedelta(days=1)
     barra_daily_flow()
     id_mappings_flow()
     covariance_daily_flow()
+
+    # TODO: Work in progress for strategy data
+    # date_ = date.today() - timedelta(days=1)
     # strategy_backfill_flow(date_, date_)
     
 if __name__ == '__main__':
-    # start_date = date(1995, 1, 1)
-    # end_date = date.today()
-
-    # barra_history_flow(start_date, end_date)
     daily_etl_pipeline()
-    # ftse_history_flow(start_date, end_date)
 
