@@ -1,75 +1,50 @@
-from barra_assets_flow import barra_assets_daily_flow
-from barra_covariances_flow import barra_covariances_daily_flow, barra_covariances_history_flow
-from barra_exposures_flow import barra_exposures_daily_flow, barra_exposures_history_flow
-from barra_ids_flow import barra_ids_daily_flow
-from barra_returns_flow import barra_returns_daily_flow, barra_returns_history_flow
-from barra_risk_flow import barra_risk_daily_flow, barra_risk_history_flow
-from ftse_russell_flow import ftse_russell_backfill_flow
-from signals_flow import signals_history_flow
-from active_weights_flow import active_weights_history_flow
-from barra_specific_returns import barra_specific_returns_daily_flow, barra_specific_returns_history_flow
-from pipelines.composite_alphas import risk_parity_history_flow
-from barra_volume_flow import barra_volume_history_flow, barra_volume_daily_flow
-from crsp_daily_flow import crsp_daily_backfill_flow
-from crsp_monthly_flow import crsp_monthly_backfill_flow
-from crsp_events_flow import crsp_events_backfill_flow
-from barra_factors_flow import barra_factors_daily_flow
-from covariance_matrix_flow import covariance_daily_flow
+import click
 import datetime as dt
 
-# def barra_daily_flow() -> None:
-#     # Assets table
-#     barra_returns_daily_flow()
-#     barra_specific_returns_daily_flow()
-#     barra_risk_daily_flow()
-#     barra_volume_daily_flow()
-
-#     # Covariance Matrix Components
-#     barra_exposures_daily_flow()
-#     barra_covariances_daily_flow()
-
-#     # Factors
-#     barra_factors_daily_flow()
-
-def barra_history_flow(start_date: dt.date, end_date: dt.date) -> None:
-    # Assets table
-    barra_returns_history_flow(start_date, end_date)
-    # barra_specific_returns_history_flow(start_date, end_date)
-    # barra_risk_history_flow(start_date, end_date)
-    # barra_volume_history_flow(start_date, end_date)
-
-    # # Covariance Matrix Components
-    # barra_exposures_history_flow(start_date, end_date)
-    # barra_covariances_history_flow(start_date, end_date)
-
-# def id_mappings_flow() -> None:
-#     barra_ids_daily_flow()
-#     barra_assets_daily_flow()
-
-# def ftse_history_flow(start_date: dt.date, end_date: dt.date) -> None:
-#     """Requires log in."""
-#     ftse_russell_backfill_flow(
-#         start_date=start_date,
-#         end_date=end_date,
-#     )
-
-# def crsp_history_flow(start_date: dt.date, end_date: dt.date) -> None:
-#     crsp_events_backfill_flow(start_date, end_date)
-#     crsp_monthly_backfill_flow(start_date, end_date)
-#     crsp_daily_backfill_flow(start_date, end_date)
-
-# def strategy_backfill_flow(start_date: dt.date, end_date: dt.date) -> None:
-#     signals_history_flow(start_date, end_date)
-#     active_weights_history_flow(start_date, end_date)
-#     risk_parity_history_flow(start_date, end_date)
-
-# def daily_pipeline() -> None:
-#     barra_daily_flow()
-#     id_mappings_flow()
-#     covariance_daily_flow()
+VALID_DATABASES = ["research", "database"]
 
 
-def history_etl_pipeline(start_date: dt.date, end_date: dt.date, database: str) -> None:
-    barra_returns_history_flow(start_date, end_date, database)
+@click.group()
+def cli():
+    """Main CLI group"""
     pass
 
+
+VALID_DATABASES = ["research", "database"]
+
+
+@cli.command()
+@click.argument("database", type=click.Choice(VALID_DATABASES, case_sensitive=False))
+@click.option(
+    "--start-date",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    default=str(dt.date(1995, 7, 31)),
+    show_default=True,
+    help="Start date (YYYY-MM-DD)",
+)
+@click.option(
+    "--end-date",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    default=str(dt.date.today()),
+    show_default=True,
+    help="End date (YYYY-MM-DD)",
+)
+def backfill(database, start_date, end_date):
+    """Run the backfill pipeline for the given database."""
+    start_date = start_date.date() if hasattr(start_date, "date") else start_date
+    end_date = end_date.date() if hasattr(end_date, "date") else end_date
+
+    click.echo(f"Running backfill for {database} database")
+    click.echo(f"Start date: {start_date}")
+    click.echo(f"End date: {end_date}")
+
+
+@cli.command()
+@click.argument("database", type=click.Choice(VALID_DATABASES, case_sensitive=False))
+def update(database):
+    """Run the daily update pipeline for the given database."""
+    click.echo(f"Running update for {database} database")
+
+
+if __name__ == "__main__":
+    cli()
