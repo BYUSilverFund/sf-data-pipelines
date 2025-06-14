@@ -16,6 +16,7 @@ from crsp_events_flow import crsp_events_backfill_flow
 from barra_factors_flow import barra_factors_daily_flow
 from covariance_matrix_flow import covariance_daily_flow
 import datetime as dt
+from utils.tables import Database
 
 # def barra_daily_flow() -> None:
 #     # Assets table
@@ -31,9 +32,9 @@ import datetime as dt
 #     # Factors
 #     barra_factors_daily_flow()
 
-def barra_history_flow(start_date: dt.date, end_date: dt.date) -> None:
+def barra_history_flow(start_date: dt.date, end_date: dt.date, database: Database) -> None:
     # Assets table
-    barra_returns_history_flow(start_date, end_date)
+    barra_returns_history_flow(start_date, end_date, database)
     # barra_specific_returns_history_flow(start_date, end_date)
     # barra_risk_history_flow(start_date, end_date)
     # barra_volume_history_flow(start_date, end_date)
@@ -69,7 +70,6 @@ def barra_history_flow(start_date: dt.date, end_date: dt.date) -> None:
 #     covariance_daily_flow()
 
 
-def history_etl_pipeline(start_date: dt.date, end_date: dt.date, database: str) -> None:
-    barra_returns_history_flow(start_date, end_date, database)
-    pass
+def backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Database) -> None:
+    barra_history_flow(start_date, end_date, database)
 

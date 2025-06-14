@@ -7,7 +7,7 @@ from utils.barra_datasets import barra_returns
 import os
 from tqdm import tqdm
 from utils import get_last_market_date
-from utils.tables import assets_table
+from utils.tables import Database
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
@@ -65,27 +65,27 @@ def clean_barra_returns(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def barra_returns_history_flow(start_date: date, end_date: date) -> None:
+def barra_returns_history_flow(start_date: date, end_date: date, database: Database) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="Barra Returns"):
         raw_df = load_barra_history_files(year)
         clean_df = clean_barra_returns(raw_df)
 
-        assets_table.create_if_not_exists(year)
-        assets_table.upsert(year, clean_df)
+        database.assets_table.create_if_not_exists(year)
+        database.assets_table.upsert(year, clean_df)
 
 
-def barra_returns_daily_flow() -> None:
-    raw_df = load_current_barra_files()
-    clean_df = clean_barra_returns(raw_df)
+# def barra_returns_daily_flow() -> None:
+#     raw_df = load_current_barra_files()
+#     clean_df = clean_barra_returns(raw_df)
 
-    years = clean_df.select(pl.col("date").dt.year().unique().sort().alias("year"))[
-        "year"
-    ]
+#     years = clean_df.select(pl.col("date").dt.year().unique().sort().alias("year"))[
+#         "year"
+#     ]
 
-    for year in tqdm(years, desc="Daily Barra Returns"):
-        year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
+#     for year in tqdm(years, desc="Daily Barra Returns"):
+#         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
-        assets_table.create_if_not_exists(year)
-        assets_table.upsert(year, year_df)
+#         assets_table.create_if_not_exists(year)
+#         assets_table.upsert(year, year_df)
