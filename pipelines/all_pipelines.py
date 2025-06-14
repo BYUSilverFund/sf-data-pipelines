@@ -18,19 +18,19 @@ from covariance_matrix_flow import covariance_daily_flow
 import datetime as dt
 from utils.tables import Database
 
-# def barra_daily_flow() -> None:
-#     # Assets table
-#     barra_returns_daily_flow()
-#     barra_specific_returns_daily_flow()
-#     barra_risk_daily_flow()
-#     barra_volume_daily_flow()
+def barra_daily_flow(database: Database) -> None:
+    # Assets table
+    barra_returns_daily_flow(database)
+    barra_specific_returns_daily_flow(database)
+    barra_risk_daily_flow(database)
+    barra_volume_daily_flow(database)
 
-#     # Covariance Matrix Components
-#     barra_exposures_daily_flow()
-#     barra_covariances_daily_flow()
+    # Covariance Matrix Components
+    barra_exposures_daily_flow(database)
+    barra_covariances_daily_flow(database)
 
-#     # Factors
-#     barra_factors_daily_flow()
+    # Factors
+    barra_factors_daily_flow(database)
 
 def barra_history_flow(start_date: dt.date, end_date: dt.date, database: Database) -> None:
     # Assets table
@@ -39,7 +39,7 @@ def barra_history_flow(start_date: dt.date, end_date: dt.date, database: Databas
     barra_risk_history_flow(start_date, end_date, database)
     barra_volume_history_flow(start_date, end_date, database)
 
-    # # Covariance Matrix Components
+    # Covariance Matrix Components
     barra_exposures_history_flow(start_date, end_date, database)
     barra_covariances_history_flow(start_date, end_date, database)
 
@@ -52,6 +52,7 @@ def ftse_history_flow(start_date: dt.date, end_date: dt.date, database: Database
     ftse_russell_backfill_flow(start_date, end_date, database)
 
 def crsp_history_flow(start_date: dt.date, end_date: dt.date, database: Database) -> None:
+    """Note: requires logging in to WRDS when running."""
     crsp_events_backfill_flow(start_date, end_date, database)
     crsp_monthly_backfill_flow(start_date, end_date, database)
     crsp_daily_backfill_flow(start_date, end_date, database)
@@ -61,11 +62,9 @@ def crsp_history_flow(start_date: dt.date, end_date: dt.date, database: Database
 #     active_weights_history_flow(start_date, end_date)
 #     risk_parity_history_flow(start_date, end_date)
 
-# def daily_pipeline() -> None:
-#     barra_daily_flow()
-#     id_mappings_flow()
-#     covariance_daily_flow()
-
+def barra_daily_pipeline(database: Database) -> None:
+    barra_daily_flow(database)
+    id_mappings_flow(database)
 
 def barra_backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Database) -> None:
     barra_history_flow(start_date, end_date, database)
@@ -76,3 +75,6 @@ def ftse_backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Dat
 
 def crsp_backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Database) -> None:
     crsp_history_flow(start_date, end_date, database)
+
+def covariance_matrix_pipeline() -> None:
+    covariance_daily_flow()

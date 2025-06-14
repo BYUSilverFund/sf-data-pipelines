@@ -58,15 +58,6 @@ class Table:
             .write_parquet(self._file_path(year))
         )
 
-# factors_table = Table(
-#     name='factors',
-#     schema={
-#         "date": pl.Date,
-#         **{factor: pl.Float64 for factor in factors},
-#     },
-#     ids=['date']
-# )
-
 # signals_table = Table(
 #     name="signals",
 #     schema={
@@ -226,4 +217,16 @@ class Database:
                 "shrout": pl.Int64,
             },
             ids=["date", "permno"],
+        )
+
+    @property
+    def factors_table(self) -> Table:
+        return Table(
+            database=self._database_name,
+            name='factors',
+            schema={
+                "date": pl.Date,
+                **{factor: pl.Float64 for factor in factors},
+            },
+            ids=['date']
         )

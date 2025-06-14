@@ -6,7 +6,7 @@ import os
 from tqdm import tqdm
 from pipelines.utils import get_last_market_date
 from pipelines.utils.barra_datasets import barra_factors
-from pipelines.utils.tables import factors_table
+from utils.tables import Database
 
 
 def load_current_barra_files() -> pl.DataFrame:
@@ -42,7 +42,7 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     return df
 
 
-def barra_factors_daily_flow() -> None:
+def barra_factors_daily_flow(database: Database) -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
@@ -50,8 +50,8 @@ def barra_factors_daily_flow() -> None:
         "year"
     ]
 
-    for year in tqdm(years, desc="Barra IDs"):
+    for year in tqdm(years, desc="Daily Barra Factors"):
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
-        factors_table.create_if_not_exists(year)
-        factors_table.upsert(year, year_df)
+        database.factors_table.create_if_not_exists(year)
+        database.factors_table.upsert(year, year_df)

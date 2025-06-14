@@ -34,7 +34,7 @@ def load_current_barra_files() -> pl.DataFrame:
 
     dates = get_last_market_date(n_days=20)
 
-    for date_ in tqdm(dates, desc="Searching Files"):
+    for date_ in dates:
         zip_folder_path = barra_exposures.daily_zip_folder_path(date_)
         file_name = barra_exposures.file_name(date_)
 
@@ -77,7 +77,7 @@ def barra_exposures_history_flow(start_date: date, end_date: date, database: Dat
         database.exposures_table.upsert(year, clean_df)
 
 
-def barra_exposures_daily_flow() -> None:
+def barra_exposures_daily_flow(database: Database) -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
@@ -88,5 +88,5 @@ def barra_exposures_daily_flow() -> None:
     for year in tqdm(years, desc="Daily Barra Exposures"):
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
-        # exposures_table.create_if_not_exists(year)
-        # exposures_table.upsert(year, year_df)
+        database.exposures_table.create_if_not_exists(year)
+        database.exposures_table.upsert(year, year_df)

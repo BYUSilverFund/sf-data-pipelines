@@ -1,6 +1,12 @@
 import click
 import datetime as dt
-from all_pipelines import barra_backfill_pipeline, ftse_backfill_pipeline, crsp_backfill_pipeline
+from all_pipelines import (
+    barra_backfill_pipeline,
+    ftse_backfill_pipeline,
+    crsp_backfill_pipeline,
+    covariance_matrix_pipeline,
+    barra_daily_pipeline,
+)
 from enums import DatabaseName
 from utils.tables import Database
 
@@ -16,7 +22,9 @@ def cli():
 
 
 @cli.command()
-@click.argument("backfill_group", type=click.Choice(VALID_BACKFILL_GROUPS, case_sensitive=False))
+@click.argument(
+    "backfill_group", type=click.Choice(VALID_BACKFILL_GROUPS, case_sensitive=False)
+)
 @click.option(
     "--database",
     type=click.Choice(VALID_DATABASES, case_sensitive=False),
@@ -42,19 +50,21 @@ def backfill(backfill_group, database, start_date, end_date):
     start_date = start_date.date() if hasattr(start_date, "date") else start_date
     end_date = end_date.date() if hasattr(end_date, "date") else end_date
 
-    click.echo(f"Running backfill for group '{backfill_group}' on '{database}' from {start_date} to {end_date}.")
+    click.echo(
+        f"Running backfill for group '{backfill_group}' on '{database}' from {start_date} to {end_date}."
+    )
 
     database_name = DatabaseName(database)
     database_instance = Database(database_name)
 
     match backfill_group:
-        case 'barra':
+        case "barra":
             barra_backfill_pipeline(start_date, end_date, database_instance)
-        
-        case 'ftse':
+
+        case "ftse":
             ftse_backfill_pipeline(start_date, end_date, database_instance)
 
-        case 'crsp':
+        case "crsp":
             crsp_backfill_pipeline(start_date, end_date, database_instance)
 
         case _:
@@ -62,10 +72,26 @@ def backfill(backfill_group, database, start_date, end_date):
 
 
 @cli.command()
-@click.argument("database", type=click.Choice(VALID_DATABASES, case_sensitive=False))
+@click.option(
+    "--database",
+    type=click.Choice(VALID_DATABASES, case_sensitive=False),
+    required=True,
+    help="Target database (research or database)."
+)
 def update(database):
     """Run the daily update pipeline for the given database."""
     click.echo(f"Running update for {database} database.")
+
+    database_name = DatabaseName(database)
+    database_instance = Database(database_name)
+
+    barra_daily_pipeline(database_instance)
+
+@cli.command()
+def covariance_matrix():
+    """Create and load today's covariance matrix into S3."""
+    click.echo("Running covariance matrix pipeline.")
+    covariance_matrix_pipeline()
 
 
 if __name__ == "__main__":

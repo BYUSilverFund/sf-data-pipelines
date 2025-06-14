@@ -34,7 +34,7 @@ def load_current_barra_files() -> pl.DataFrame:
 
     dates = get_last_market_date(n_days=20)
 
-    for date_ in tqdm(dates, desc="Searching Files"):
+    for date_ in dates:
         zip_folder_path = barra_covariances.daily_zip_folder_path(date_)
         file_name = barra_covariances.file_name(date_)
 
@@ -77,7 +77,7 @@ def barra_covariances_history_flow(start_date: date, end_date: date, database: D
         database.covariances_table.upsert(year, clean_df)
 
 
-def barra_covariances_daily_flow() -> None:
+def barra_covariances_daily_flow(database: Database) -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
@@ -88,5 +88,5 @@ def barra_covariances_daily_flow() -> None:
     for year in tqdm(years, desc="Daily Barra Covariances"):
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
-        # covariances_table.create_if_not_exists(year)
-        # covariances_table.upsert(year, year_df)
+        database.covariances_table.create_if_not_exists(year)
+        database.covariances_table.upsert(year, year_df)

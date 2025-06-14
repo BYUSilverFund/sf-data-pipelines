@@ -35,7 +35,7 @@ def load_current_barra_files() -> pl.DataFrame:
 
     dates = get_last_market_date(n_days=20)
 
-    for date_ in tqdm(dates, desc="Searching Files"):
+    for date_ in dates:
         zip_folder_path = barra_volume.daily_zip_folder_path(date_)
         file_name = barra_volume.file_name(date_)
 
@@ -88,7 +88,7 @@ def barra_volume_history_flow(start_date: date, end_date: date, database: Databa
         database.assets_table.update(year, clean_df)
 
 
-def barra_volume_daily_flow() -> None:
+def barra_volume_daily_flow(database: Database) -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
@@ -99,5 +99,5 @@ def barra_volume_daily_flow() -> None:
     for year in tqdm(years, desc="Daily Barra Volume"):
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
-        # assets_table.create_if_not_exists(year)
-        # assets_table.update(year, year_df)
+        database.assets_table.create_if_not_exists(year)
+        database.assets_table.update(year, year_df)
