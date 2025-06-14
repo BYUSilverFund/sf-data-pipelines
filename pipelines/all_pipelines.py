@@ -35,7 +35,7 @@ from utils.tables import Database
 def barra_history_flow(start_date: dt.date, end_date: dt.date, database: Database) -> None:
     # Assets table
     barra_returns_history_flow(start_date, end_date, database)
-    # barra_specific_returns_history_flow(start_date, end_date)
+    barra_specific_returns_history_flow(start_date, end_date, database)
     # barra_risk_history_flow(start_date, end_date)
     # barra_volume_history_flow(start_date, end_date)
 
