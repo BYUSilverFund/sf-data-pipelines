@@ -6,7 +6,7 @@ from pipelines.utils import barra_schema, barra_columns, get_last_market_date
 import os
 from tqdm import tqdm
 from pipelines.utils.barra_datasets import barra_exposures
-from pipelines.utils.tables import exposures_table
+from utils.tables import Database
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
@@ -66,15 +66,15 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def barra_exposures_history_flow(start_date: date, end_date: date) -> None:
+def barra_exposures_history_flow(start_date: date, end_date: date, database: Database) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="Barra Exposures"):
         raw_df = load_barra_history_files(year)
         clean_df = clean_barra_df(raw_df)
 
-        exposures_table.create_if_not_exists(year)
-        exposures_table.upsert(year, clean_df)
+        database.exposures_table.create_if_not_exists(year)
+        database.exposures_table.upsert(year, clean_df)
 
 
 def barra_exposures_daily_flow() -> None:
@@ -88,5 +88,5 @@ def barra_exposures_daily_flow() -> None:
     for year in tqdm(years, desc="Daily Barra Exposures"):
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
-        exposures_table.create_if_not_exists(year)
-        exposures_table.upsert(year, year_df)
+        # exposures_table.create_if_not_exists(year)
+        # exposures_table.upsert(year, year_df)

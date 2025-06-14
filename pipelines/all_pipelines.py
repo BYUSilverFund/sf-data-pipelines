@@ -36,16 +36,16 @@ def barra_history_flow(start_date: dt.date, end_date: dt.date, database: Databas
     # Assets table
     barra_returns_history_flow(start_date, end_date, database)
     barra_specific_returns_history_flow(start_date, end_date, database)
-    # barra_risk_history_flow(start_date, end_date)
-    # barra_volume_history_flow(start_date, end_date)
+    barra_risk_history_flow(start_date, end_date, database)
+    barra_volume_history_flow(start_date, end_date, database)
 
     # # Covariance Matrix Components
-    # barra_exposures_history_flow(start_date, end_date)
-    # barra_covariances_history_flow(start_date, end_date)
+    barra_exposures_history_flow(start_date, end_date, database)
+    barra_covariances_history_flow(start_date, end_date, database)
 
-# def id_mappings_flow() -> None:
-#     barra_ids_daily_flow()
-#     barra_assets_daily_flow()
+def id_mappings_flow(database: Database) -> None:
+    barra_ids_daily_flow(database)
+    barra_assets_daily_flow(database)
 
 # def ftse_history_flow(start_date: dt.date, end_date: dt.date) -> None:
 #     """Requires log in."""
@@ -54,10 +54,10 @@ def barra_history_flow(start_date: dt.date, end_date: dt.date, database: Databas
 #         end_date=end_date,
 #     )
 
-# def crsp_history_flow(start_date: dt.date, end_date: dt.date) -> None:
-#     crsp_events_backfill_flow(start_date, end_date)
-#     crsp_monthly_backfill_flow(start_date, end_date)
-#     crsp_daily_backfill_flow(start_date, end_date)
+# def crsp_history_flow(start_date: dt.date, end_date: dt.date, database: Database) -> None:
+    # crsp_events_backfill_flow(start_date, end_date, database)
+    # crsp_monthly_backfill_flow(start_date, end_date, database)
+    # crsp_daily_backfill_flow(start_date, end_date, database)
 
 # def strategy_backfill_flow(start_date: dt.date, end_date: dt.date) -> None:
 #     signals_history_flow(start_date, end_date)
@@ -72,4 +72,5 @@ def barra_history_flow(start_date: dt.date, end_date: dt.date, database: Databas
 
 def backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Database) -> None:
     barra_history_flow(start_date, end_date, database)
+    id_mappings_flow(database)
 

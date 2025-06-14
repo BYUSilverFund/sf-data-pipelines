@@ -58,29 +58,6 @@ class Table:
             .write_parquet(self._file_path(year))
         )
 
-
-
-
-# covariances_table = Table(
-#     name="covariances",
-#     schema={
-#         "date": pl.Date,
-#         "factor_1": pl.String,
-#         **{factor: pl.Float64 for factor in factors},
-#     },
-#     ids=["date", "factor_1"],
-# )
-
-# exposures_table = Table(
-#     name="exposures",
-#     schema={
-#         "date": pl.Date,
-#         "barrid": pl.String,
-#         **{factor: pl.Float64 for factor in factors},
-#     },
-#     ids=["date", "barrid"],
-# )
-
 # factors_table = Table(
 #     name='factors',
 #     schema={
@@ -214,4 +191,30 @@ class Database:
                 "average_daily_bid_ask_spread_90": pl.Float64,
             },
             ids=["date", "barrid"],
+        )
+
+    @property
+    def exposures_table(self):
+        return Table(
+            database=self._database_name,
+            name="exposures",
+            schema={
+                "date": pl.Date,
+                "barrid": pl.String,
+                **{factor: pl.Float64 for factor in factors},
+            },
+            ids=["date", "barrid"],
+        )
+
+    @property
+    def covariances_table(self):
+        return Table(
+            database=self._database_name,
+            name="covariances",
+            schema={
+                "date": pl.Date,
+                "factor_1": pl.String,
+                **{factor: pl.Float64 for factor in factors},
+            },
+            ids=["date", "factor_1"],
         )

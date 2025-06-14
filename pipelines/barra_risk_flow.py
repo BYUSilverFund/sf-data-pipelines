@@ -4,7 +4,7 @@ import polars as pl
 from io import BytesIO
 from pipelines.utils import barra_schema, barra_columns, get_last_market_date
 from pipelines.utils.barra_datasets import barra_risk
-from pipelines.utils.tables import assets_table
+from utils.tables import Database
 import os
 from tqdm import tqdm
 
@@ -64,15 +64,15 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def barra_risk_history_flow(start_date: date, end_date: date) -> None:
+def barra_risk_history_flow(start_date: date, end_date: date, database: Database) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="Barra Risk"):
         raw_df = load_barra_history_files(year)
         clean_df = clean_barra_df(raw_df)
 
-        assets_table.create_if_not_exists(year)
-        assets_table.update(year, clean_df)
+        database.assets_table.create_if_not_exists(year)
+        database.assets_table.update(year, clean_df)
 
 
 def barra_risk_daily_flow() -> None:
@@ -86,5 +86,5 @@ def barra_risk_daily_flow() -> None:
     for year in tqdm(years, desc="Daily Barra Risk"):
         year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
-        assets_table.create_if_not_exists(year)
-        assets_table.update(year, year_df)
+        # assets_table.create_if_not_exists(year)
+        # assets_table.update(year, year_df)

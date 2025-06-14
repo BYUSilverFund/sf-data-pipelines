@@ -6,7 +6,7 @@ from pipelines.utils import barra_schema, barra_columns
 import os
 from tqdm import tqdm
 from pipelines.utils import get_last_market_date
-from pipelines.utils.tables import assets_table
+from utils.tables import Database
 from pipelines.utils.barra_datasets import barra_assets
 
 
@@ -46,7 +46,7 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def barra_assets_daily_flow() -> None:
+def barra_assets_daily_flow(database: Database) -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
@@ -55,12 +55,12 @@ def barra_assets_daily_flow() -> None:
     ]
 
     for year in tqdm(years, desc="Barra Assets"):
-        if assets_table.exists(year):
+        if database.assets_table.exists(year):
             year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
             dates = (
-                assets_table.read(year).select("date").unique().sort("date").collect()
+                database.assets_table.read(year).select("date").unique().sort("date").collect()
             )
             year_df = year_df.filter(pl.col("date").is_in(dates))
 
-            assets_table.update(year, year_df)
+            database.assets_table.update(year, year_df)
