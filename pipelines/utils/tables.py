@@ -102,58 +102,13 @@ class Table:
 #     ids=["date", "barrid", "name"],
 # )
 
-# crsp_daily_table = Table(
-#     name="crsp_daily",
-#     schema={
-#         "date": pl.Date,
-#         "permno": pl.Int64,
-#         "cusip": pl.String,
-#         "ret": pl.Float64,
-#         "retx": pl.Float64,
-#         "prc": pl.Float64,
-#         "vol": pl.Int64,
-#         "openprc": pl.Float64,
-#         "askhi": pl.Float64,
-#         "bidlo": pl.Float64,
-#         "shrout": pl.Int64,
-#     },
-#     ids=["date", "permno"],
-# )
-
-# crsp_monthly_table = Table(
-#     name="crsp_monthly",
-#     schema={
-#         "date": pl.Date,
-#         "permno": pl.Int64,
-#         "cusip": pl.String,
-#         "ret": pl.Float64,
-#         "retx": pl.Float64,
-#         "prc": pl.Float64,
-#         "vol": pl.Int64,
-#         "shrout": pl.Int64,
-#     },
-#     ids=["date", "permno"],
-# )
-
-# crsp_events_table = Table(
-#     name="crsp_events",
-#     schema={
-#         "date": pl.Date,
-#         "permno": pl.Int64,
-#         "ticker": pl.String,
-#         "shrcd": pl.Int64,
-#         "exchcd": pl.Int64,
-#     },
-#     ids=["date", "permno"],
-# )
-
 class Database:
 
     def __init__(self, database_name: DatabaseName):
         self._database_name = database_name
 
     @property
-    def assets_table(self):
+    def assets_table(self) -> Table:
         return Table(
             database=self._database_name,
             name="assets",
@@ -194,7 +149,7 @@ class Database:
         )
 
     @property
-    def exposures_table(self):
+    def exposures_table(self) -> Table:
         return Table(
             database=self._database_name,
             name="exposures",
@@ -207,7 +162,7 @@ class Database:
         )
 
     @property
-    def covariances_table(self):
+    def covariances_table(self) -> Table:
         return Table(
             database=self._database_name,
             name="covariances",
@@ -217,4 +172,58 @@ class Database:
                 **{factor: pl.Float64 for factor in factors},
             },
             ids=["date", "factor_1"],
+        )
+
+    @property
+    def crsp_events_table(self) -> Table:
+        return  Table(
+            database=self._database_name,
+            name="crsp_events",
+            schema={
+                "date": pl.Date,
+                "permno": pl.Int64,
+                "ticker": pl.String,
+                "shrcd": pl.Int64,
+                "exchcd": pl.Int64,
+            },
+            ids=["date", "permno"],
+        )
+
+    @property
+    def crsp_monthly_table(self) -> Table:
+        return Table(
+            database=self._database_name,
+            name="crsp_monthly",
+            schema={
+                "date": pl.Date,
+                "permno": pl.Int64,
+                "cusip": pl.String,
+                "ret": pl.Float64,
+                "retx": pl.Float64,
+                "prc": pl.Float64,
+                "vol": pl.Int64,
+                "shrout": pl.Int64,
+            },
+            ids=["date", "permno"],
+        )
+
+    @property
+    def crsp_daily_table(self) -> Table:
+        return  Table(
+            database=self._database_name,
+            name="crsp_daily",
+            schema={
+                "date": pl.Date,
+                "permno": pl.Int64,
+                "cusip": pl.String,
+                "ret": pl.Float64,
+                "retx": pl.Float64,
+                "prc": pl.Float64,
+                "vol": pl.Int64,
+                "openprc": pl.Float64,
+                "askhi": pl.Float64,
+                "bidlo": pl.Float64,
+                "shrout": pl.Int64,
+            },
+            ids=["date", "permno"],
         )

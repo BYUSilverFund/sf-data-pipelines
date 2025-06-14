@@ -3,7 +3,7 @@ from pipelines.utils import crsp_schema
 import polars as pl
 import wrds
 from tqdm import tqdm
-from pipelines.utils.tables import crsp_events_table
+from utils.tables import Database
 
 
 def load_crsp_events_df(start_date: date, end_date: date) -> pl.DataFrame:
@@ -28,7 +28,7 @@ def load_crsp_events_df(start_date: date, end_date: date) -> pl.DataFrame:
     return df
 
 
-def crsp_events_backfill_flow(start_date: date, end_date: date) -> None:
+def crsp_events_backfill_flow(start_date: date, end_date: date, database: Database) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     df = load_crsp_events_df(start_date, end_date)
@@ -36,5 +36,5 @@ def crsp_events_backfill_flow(start_date: date, end_date: date) -> None:
     for year in tqdm(years, desc="CRSP Events"):
         year_df = df.filter(pl.col('date').dt.year().eq(year))
 
-        crsp_events_table.create_if_not_exists(year)
-        crsp_events_table.upsert(year, year_df)
+        database.crsp_events_table.create_if_not_exists(year)
+        database.crsp_events_table.upsert(year, year_df)

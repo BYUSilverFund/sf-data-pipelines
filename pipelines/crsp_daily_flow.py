@@ -3,7 +3,7 @@ from pipelines.utils import crsp_schema
 import polars as pl
 import wrds
 from tqdm import tqdm
-from pipelines.utils.tables import crsp_daily_table
+from utils.tables import Database
 
 
 def load_crsp_daily_df(start_date: date, end_date: date) -> pl.DataFrame:
@@ -33,7 +33,7 @@ def load_crsp_daily_df(start_date: date, end_date: date) -> pl.DataFrame:
     return df
 
 
-def crsp_daily_backfill_flow(start_date: date, end_date: date) -> None:
+def crsp_daily_backfill_flow(start_date: date, end_date: date, database: Database) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="CRSP Daily"):
@@ -41,5 +41,5 @@ def crsp_daily_backfill_flow(start_date: date, end_date: date) -> None:
             start_date=date(year, 1, 1), end_date=date(year, 12, 31)
         )
 
-        crsp_daily_table.create_if_not_exists(year)
-        crsp_daily_table.upsert(year, df)
+        database.crsp_daily_table.create_if_not_exists(year)
+        database.crsp_daily_table.upsert(year, df)

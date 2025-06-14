@@ -47,17 +47,14 @@ def id_mappings_flow(database: Database) -> None:
     barra_ids_daily_flow(database)
     barra_assets_daily_flow(database)
 
-# def ftse_history_flow(start_date: dt.date, end_date: dt.date) -> None:
-#     """Requires log in."""
-#     ftse_russell_backfill_flow(
-#         start_date=start_date,
-#         end_date=end_date,
-#     )
+def ftse_history_flow(start_date: dt.date, end_date: dt.date, database: Database) -> None:
+    """Note: requires logging in to WRDS when running."""
+    ftse_russell_backfill_flow(start_date, end_date, database)
 
-# def crsp_history_flow(start_date: dt.date, end_date: dt.date, database: Database) -> None:
-    # crsp_events_backfill_flow(start_date, end_date, database)
-    # crsp_monthly_backfill_flow(start_date, end_date, database)
-    # crsp_daily_backfill_flow(start_date, end_date, database)
+def crsp_history_flow(start_date: dt.date, end_date: dt.date, database: Database) -> None:
+    crsp_events_backfill_flow(start_date, end_date, database)
+    crsp_monthly_backfill_flow(start_date, end_date, database)
+    crsp_daily_backfill_flow(start_date, end_date, database)
 
 # def strategy_backfill_flow(start_date: dt.date, end_date: dt.date) -> None:
 #     signals_history_flow(start_date, end_date)
@@ -70,7 +67,12 @@ def id_mappings_flow(database: Database) -> None:
 #     covariance_daily_flow()
 
 
-def backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Database) -> None:
+def barra_backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Database) -> None:
     barra_history_flow(start_date, end_date, database)
     id_mappings_flow(database)
 
+def ftse_backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Database) -> None:
+    ftse_history_flow(start_date, end_date, database)
+
+def crsp_backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Database) -> None:
+    crsp_history_flow(start_date, end_date, database)

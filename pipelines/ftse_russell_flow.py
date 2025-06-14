@@ -3,7 +3,7 @@ from pipelines.utils import russell_schema, russell_columns
 import polars as pl
 import wrds
 from tqdm import tqdm
-from pipelines.utils.tables import assets_table
+from utils.tables import Database
 
 
 def load_ftse_russell_df(start_date: date, end_date: date) -> None:
@@ -34,7 +34,7 @@ def clean(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def ftse_russell_backfill_flow(start_date: date, end_date: date) -> None:
+def ftse_russell_backfill_flow(start_date: date, end_date: date, database: Database) -> None:
     """Flow for orchestrating barra ids backfill."""
     years = list(range(start_date.year, end_date.year + 1))
 
@@ -45,5 +45,5 @@ def ftse_russell_backfill_flow(start_date: date, end_date: date) -> None:
 
         clean_df = clean(raw_df)
 
-        if assets_table.exists(year):
-            assets_table.update(year, clean_df, on=["date", "cusip"])
+        if database.assets_table.exists(year):
+            database.assets_table.update(year, clean_df, on=["date", "cusip"])
