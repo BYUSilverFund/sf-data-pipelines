@@ -2,14 +2,13 @@ from datetime import date
 import polars as pl
 import numpy as np
 from pipelines.utils.factors import factors
-import polars as pl
 from pipelines.utils.views import in_universe_assets
-from pipelines.utils.tables import exposures_table, covariances_table, assets_table
+from pipelines.utils.tables import Database
 
-def get_barrids_by_date(date_: date) -> list[str]:
+def get_barrids_by_date(date_: date, database: Database) -> list[str]:
 
     barrids = (
-        in_universe_assets
+        in_universe_assets(database)
         .filter(pl.col('date').eq(date_))
         .select('barrid')
         .unique()
@@ -21,7 +20,7 @@ def get_barrids_by_date(date_: date) -> list[str]:
 
     return barrids
     
-def construct_covariance_matrix(date_: date, barrids: list[str] | None = None) -> pl.DataFrame:
+def construct_covariance_matrix(database: Database, date_: date, barrids: list[str] | None = None, ) -> pl.DataFrame:
     """
     Constructs the covariance matrix based on exposures, factor covariances, and specific risks.
 
@@ -32,12 +31,12 @@ def construct_covariance_matrix(date_: date, barrids: list[str] | None = None) -
     Returns:
         CovarianceMatrix: The computed covariance matrix wrapped in a CovarianceMatrix object.
     """
-    barrids = barrids or get_barrids_by_date(date_)
+    barrids = barrids or get_barrids_by_date(date_, database)
 
     # Construct covariance matrix components
-    exposures_matrix = construct_exposure_matrix(barrids, date_).drop('barrid').to_numpy()
-    factor_covariance_matrix = construct_factor_covariance_matrix(date_).drop('factor_1').to_numpy()
-    specific_risk_matrix = construct_specific_risk_matrix(barrids, date_).drop('barrid').to_numpy()
+    exposures_matrix = construct_exposure_matrix(barrids, date_, database).drop('barrid').to_numpy()
+    factor_covariance_matrix = construct_factor_covariance_matrix(date_, database).drop('factor_1').to_numpy()
+    specific_risk_matrix = construct_specific_risk_matrix(barrids, date_, database).drop('barrid').to_numpy()
 
     # Construct asset covariance matrix
     covariance_matrix = exposures_matrix @ factor_covariance_matrix @ exposures_matrix.T + specific_risk_matrix
@@ -53,7 +52,7 @@ def construct_covariance_matrix(date_: date, barrids: list[str] | None = None) -
     return covariance_matrix
 
 
-def construct_exposure_matrix(barrids: list[str], date_: date) -> pl.DataFrame:
+def construct_exposure_matrix(barrids: list[str], date_: date, database: Database) -> pl.DataFrame:
     """
     Constructs the factor exposure matrix for the given date and Barrids.
 
@@ -65,7 +64,7 @@ def construct_exposure_matrix(barrids: list[str], date_: date) -> pl.DataFrame:
         pl.DataFrame: The factor exposure matrix.
     """
     df = (
-        exposures_table.read()
+        database.exposures_table.read()
         .filter(pl.col('date').eq(date_))
         .filter(pl.col('barrid').is_in(barrids))
         .select(['barrid', *factors])
@@ -76,7 +75,7 @@ def construct_exposure_matrix(barrids: list[str], date_: date) -> pl.DataFrame:
 
     return df
     
-def construct_factor_covariance_matrix(date_: date) -> pl.DataFrame:
+def construct_factor_covariance_matrix(date_: date, database: Database) -> pl.DataFrame:
     """
     Constructs the factor covariance matrix for the given date.
 
@@ -88,7 +87,7 @@ def construct_factor_covariance_matrix(date_: date) -> pl.DataFrame:
     """
 
     df = (
-        covariances_table.read()
+        database.covariances_table.read()
         .filter(pl.col('date').eq(date_))
         .filter(pl.col('factor_1').is_in(factors))
         .select(['factor_1', *factors])
@@ -113,7 +112,7 @@ def construct_factor_covariance_matrix(date_: date) -> pl.DataFrame:
 
     return covariance_matrix
     
-def construct_specific_risk_matrix(barrids: list[str], date_: date) -> pl.DataFrame:
+def construct_specific_risk_matrix(barrids: list[str], date_: date, database: Database) -> pl.DataFrame:
     """
     Constructs the specific risk matrix for the given date and Barrids.
 
@@ -126,7 +125,7 @@ def construct_specific_risk_matrix(barrids: list[str], date_: date) -> pl.DataFr
     """
 
     df = (
-        assets_table.read()
+        database.assets_table.read()
         .filter(pl.col('date').eq(date_))
         .filter(pl.col('barrid').is_in(barrids))
         .select('barrid', 'specific_risk')

@@ -4,11 +4,12 @@ from pipelines.system.covariance_matrix import construct_covariance_matrix
 from pipelines.utils.views import in_universe_assets
 import pipelines.utils.s3 as s3
 from pipelines.utils import get_last_market_date
+from pipelines.utils.tables import Database
 
-def get_covariance_matrix(date_: date) -> pl.DataFrame:
+def get_covariance_matrix(date_: date, database: Database) -> pl.DataFrame:
     # Assets lazyframe
     assets = (
-        in_universe_assets
+        in_universe_assets(database)
         # Filter by date
         .filter(pl.col("date").eq(date_)).select("date", "barrid", "ticker")
     )
@@ -22,7 +23,7 @@ def get_covariance_matrix(date_: date) -> pl.DataFrame:
     tickers = sorted(mapping.values())
 
     # Barrid covariance matrix
-    cov_mat = construct_covariance_matrix(date_, barrids)
+    cov_mat = construct_covariance_matrix(database, date_, barrids)
 
     # Ticker covariance matrix
     cov_mat_rekeyed = (
@@ -51,11 +52,9 @@ def upload_to_s3(df: pl.DataFrame, date_: date) -> None:
     )
 
 
-def covariance_daily_flow() -> None:
+def covariance_daily_flow(database: Database) -> None:
     date_ = get_last_market_date()[0]
     print(date_)
-    df = get_covariance_matrix(date_)
+    df = get_covariance_matrix(date_, database)
+    print(df)
     upload_to_s3(df, date_)
-
-if __name__ == "__main__":
-    covariance_daily_flow()

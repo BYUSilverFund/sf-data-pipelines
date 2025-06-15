@@ -11,8 +11,8 @@ from enums import DatabaseName
 from utils.tables import Database
 
 # Valid options
-VALID_DATABASES = ["research", "database"]
-VALID_BACKFILL_GROUPS = ["barra", "ftse", "crsp"]
+VALID_DATABASES = ["research", "production"]
+PIPELINE_TYPES = ["backfill", "update"]
 
 
 @click.group()
@@ -23,7 +23,7 @@ def cli():
 
 @cli.command()
 @click.argument(
-    "backfill_group", type=click.Choice(VALID_BACKFILL_GROUPS, case_sensitive=False)
+    "pipeline_type", type=click.Choice(PIPELINE_TYPES, case_sensitive=False)
 )
 @click.option(
     "--database",
@@ -32,67 +32,137 @@ def cli():
     help="Target database (research or database).",
 )
 @click.option(
-    "--start-date",
+    "--start",
     type=click.DateTime(formats=["%Y-%m-%d"]),
     default=str(dt.date(1995, 7, 31)),
     show_default=True,
     help="Start date (YYYY-MM-DD).",
 )
 @click.option(
-    "--end-date",
+    "--end",
     type=click.DateTime(formats=["%Y-%m-%d"]),
     default=str(dt.date.today()),
     show_default=True,
     help="End date (YYYY-MM-DD).",
 )
-def backfill(backfill_group, database, start_date, end_date):
-    """Run the backfill pipeline for the given database and group."""
-    start_date = start_date.date() if hasattr(start_date, "date") else start_date
-    end_date = end_date.date() if hasattr(end_date, "date") else end_date
+def barra(pipeline_type, database, start, end):
+    match pipeline_type:
+        case "backfill":
+            start = start.date() if hasattr(start, "date") else start
+            end = end.date() if hasattr(end, "date") else end
 
-    click.echo(
-        f"Running backfill for group '{backfill_group}' on '{database}' from {start_date} to {end_date}."
-    )
+            click.echo(f"Running barra backfill on '{database}' from {start} to {end}.")
 
-    database_name = DatabaseName(database)
-    database_instance = Database(database_name)
+            database_name = DatabaseName(database)
+            database_instance = Database(database_name)
 
-    match backfill_group:
-        case "barra":
-            barra_backfill_pipeline(start_date, end_date, database_instance)
+            barra_backfill_pipeline(start, end, database_instance)
 
-        case "ftse":
-            ftse_backfill_pipeline(start_date, end_date, database_instance)
+        case "update":
+            click.echo(f"Running update for {database} database.")
 
-        case "crsp":
-            crsp_backfill_pipeline(start_date, end_date, database_instance)
+            database_name = DatabaseName(database)
+            database_instance = Database(database_name)
 
-        case _:
-            raise ValueError(f"Inavlid backfill_group: {backfill_group}")
+            barra_daily_pipeline(database_instance)
+
+
+@cli.command()
+@click.argument(
+    "pipeline_type",
+    type=click.Choice(
+        ["backfill"], case_sensitive=False
+    ),  # Update is currently not supported
+)
+@click.option(
+    "--database",
+    type=click.Choice(VALID_DATABASES, case_sensitive=False),
+    required=True,
+    help="Target database (research or database).",
+)
+@click.option(
+    "--start",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    default=str(dt.date(1925, 1, 1)),
+    show_default=True,
+    help="Start date (YYYY-MM-DD).",
+)
+@click.option(
+    "--end",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    default=str(dt.date.today()),
+    show_default=True,
+    help="End date (YYYY-MM-DD).",
+)
+def crsp(pipeline_type, database, start, end):
+    match pipeline_type:
+        case "backfill":
+            start = start.date() if hasattr(start, "date") else start
+            end = end.date() if hasattr(end, "date") else end
+
+            click.echo(f"Running crsp backfill on '{database}' from {start} to {end}.")
+
+            database_name = DatabaseName(database)
+            database_instance = Database(database_name)
+
+            crsp_backfill_pipeline(start, end, database_instance)
+
+
+@cli.command()
+@click.argument(
+    "pipeline_type",
+    type=click.Choice(
+        ["backfill"], case_sensitive=False
+    ),  # Update is currently not supported
+)
+@click.option(
+    "--database",
+    type=click.Choice(VALID_DATABASES, case_sensitive=False),
+    required=True,
+    help="Target database (research or database).",
+)
+@click.option(
+    "--start",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    default=str(dt.date(1925, 1, 1)),
+    show_default=True,
+    help="Start date (YYYY-MM-DD).",
+)
+@click.option(
+    "--end",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    default=str(dt.date.today()),
+    show_default=True,
+    help="End date (YYYY-MM-DD).",
+)
+def ftse(pipeline_type, database, start, end):
+    match pipeline_type:
+        case "backfill":
+            start = start.date() if hasattr(start, "date") else start
+            end = end.date() if hasattr(end, "date") else end
+
+            click.echo(f"Running ftse backfill on '{database}' from {start} to {end}.")
+
+            database_name = DatabaseName(database)
+            database_instance = Database(database_name)
+
+            ftse_backfill_pipeline(start, end, database_instance)
 
 
 @cli.command()
 @click.option(
     "--database",
     type=click.Choice(VALID_DATABASES, case_sensitive=False),
-    required=True,
-    help="Target database (research or database)."
+    required=False,
+    default="production",
+    help="Target database (research or database).",
 )
-def update(database):
-    """Run the daily update pipeline for the given database."""
-    click.echo(f"Running update for {database} database.")
-
-    database_name = DatabaseName(database)
-    database_instance = Database(database_name)
-
-    barra_daily_pipeline(database_instance)
-
-@cli.command()
-def covariance_matrix():
+def covariance(database: Database):
     """Create and load today's covariance matrix into S3."""
     click.echo("Running covariance matrix pipeline.")
-    covariance_matrix_pipeline()
-
+    database_name = DatabaseName(database)
+    database_instance = Database(database_name)
+    covariance_matrix_pipeline(database_instance)
 
 if __name__ == "__main__":
     cli()
