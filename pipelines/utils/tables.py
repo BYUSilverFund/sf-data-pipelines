@@ -58,41 +58,6 @@ class Table:
             .write_parquet(self._file_path(year))
         )
 
-# signals_table = Table(
-#     name="signals",
-#     schema={
-#         "date": pl.Date,
-#         "barrid": pl.String,
-#         "name": pl.String,
-#         "signal": pl.Float64,
-#         "score": pl.Float64,
-#         "alpha": pl.Float64,
-#     },
-#     ids=["date", "barrid", "name"],
-# )
-
-# active_weights_table = Table(
-#     name="active_weights",
-#     schema={
-#         "date": pl.Date,
-#         "barrid": pl.String,
-#         "signal": pl.String,
-#         "weight": pl.Float64,
-#     },
-#     ids=["date", "barrid", "signal"],
-# )
-
-# composite_alphas_table = Table(
-#     name="composite_alphas",
-#     schema={
-#         "date": pl.Date,
-#         "barrid": pl.String,
-#         "name": pl.String,
-#         "alpha": pl.Float64,
-#     },
-#     ids=["date", "barrid", "name"],
-# )
-
 class Database:
 
     def __init__(self, database_name: DatabaseName):
@@ -229,4 +194,48 @@ class Database:
                 **{factor: pl.Float64 for factor in factors},
             },
             ids=['date']
+        )
+    
+    @property
+    def signals_table(self) -> Table:
+        return Table(
+            database=self._database_name,
+            name="signals",
+            schema={
+                "date": pl.Date,
+                "barrid": pl.String,
+                "name": pl.String,
+                "signal": pl.Float64,
+                "score": pl.Float64,
+                "alpha": pl.Float64,
+            },
+            ids=["date", "barrid", "name"],
+        )
+    
+    @property
+    def active_weights_table(self) -> Table:
+        return Table(
+            database=self._database_name,
+            name="active_weights",
+            schema={
+                "date": pl.Date,
+                "barrid": pl.String,
+                "signal": pl.String,
+                "weight": pl.Float64,
+            },
+            ids=["date", "barrid", "signal"],
+        )
+    
+    @property
+    def composite_alphas_table(self) -> Table:
+        return Table(
+            database=self._database_name,
+            name="composite_alphas",
+            schema={
+                "date": pl.Date,
+                "barrid": pl.String,
+                "name": pl.String,
+                "alpha": pl.Float64,
+            },
+            ids=["date", "barrid", "name"],
         )

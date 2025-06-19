@@ -150,7 +150,7 @@ if __name__ == '__main__':
     database_name = DatabaseName.RESEARCH
     database = Database(database_name)
     print(
-        in_universe_assets(database)
+        in_universe_signals(database)
         .sort(['date', 'barrid'])
         .collect()
-    )
+    ) # shape: (66_433_575, 6)

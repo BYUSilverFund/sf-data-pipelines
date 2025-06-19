@@ -5,13 +5,14 @@ from pipelines.system.signals import momentum, beta, reversal
 from pipelines.system.records import Alpha
 from pipelines.system.portfolios import mean_variance_efficient
 from pipelines.system.constraints import zero_beta
-from pipelines.utils.tables import active_weights_table
+from pipelines.utils.tables import Database
 from pipelines.utils.views import in_universe_signals
+from functools import partial
 
 
-def get_alphas(signal: str, start_date: date, end_date: date) -> pl.DataFrame:
+def get_alphas(signal: str, start_date: date, end_date: date, database: Database) -> pl.DataFrame:
     return (
-        in_universe_signals.filter(pl.col("date").is_between(start_date, end_date))
+        in_universe_signals(database).filter(pl.col("date").is_between(start_date, end_date))
         .filter(pl.col("name").eq(signal))
         .with_columns(
             pl.col("alpha").fill_null(0)  # TODO: Check this...
@@ -22,12 +23,12 @@ def get_alphas(signal: str, start_date: date, end_date: date) -> pl.DataFrame:
     )
 
 
-def active_weights_history_flow(start_date: date, end_date: date) -> None:
+def active_weights_history_flow(start_date: date, end_date: date, database: Database) -> None:
     signal_fns = [momentum, beta, reversal]
     signal_names = sorted([fn.__name__ for fn in signal_fns])
 
     for signal_name in tqdm(signal_names, desc="Computing active weights"):
-        alphas = get_alphas(signal_name, start_date, end_date)
+        alphas = get_alphas(signal_name, start_date, end_date, database)
 
         periods = alphas["date"].unique().sort().to_list()
 
@@ -39,7 +40,8 @@ def active_weights_history_flow(start_date: date, end_date: date) -> None:
                 period=period,
                 barrids=period_barrids,
                 alphas=Alpha(period_alphas),
-                constraints=[zero_beta],
+                constraints=[partial(zero_beta, database=database)],
+                database=database,
                 gamma=2,
             )
 
@@ -47,5 +49,5 @@ def active_weights_history_flow(start_date: date, end_date: date) -> None:
                 pl.lit(signal_name).alias("signal")
             ).select("date", "barrid", "signal", "weight")
 
-            active_weights_table.create_if_not_exists(period.year)
-            active_weights_table.upsert(period.year, period_portfolio)
+            database.active_weights_table.create_if_not_exists(period.year)
+            database.active_weights_table.upsert(period.year, period_portfolio)

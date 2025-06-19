@@ -6,6 +6,7 @@ from all_pipelines import (
     crsp_backfill_pipeline,
     covariance_matrix_pipeline,
     barra_daily_pipeline,
+    strategy_backfill_pipeline
 )
 from enums import DatabaseName
 from utils.tables import Database
@@ -147,6 +148,44 @@ def ftse(pipeline_type, database, start, end):
             database_instance = Database(database_name)
 
             ftse_backfill_pipeline(start, end, database_instance)
+
+@cli.command()
+@click.argument(
+    "pipeline_type", type=click.Choice(PIPELINE_TYPES, case_sensitive=False)
+)
+@click.option(
+    "--database",
+    type=click.Choice(VALID_DATABASES, case_sensitive=False),
+    required=True,
+    help="Target database (research or database).",
+)
+@click.option(
+    "--start",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    default=str(dt.date(1995, 7, 31)),
+    show_default=True,
+    help="Start date (YYYY-MM-DD).",
+)
+@click.option(
+    "--end",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    default=str(dt.date.today()),
+    show_default=True,
+    help="End date (YYYY-MM-DD).",
+)
+def strategy(pipeline_type, database, start, end):
+    match pipeline_type:
+        case "backfill":
+            start = start.date() if hasattr(start, "date") else start
+            end = end.date() if hasattr(end, "date") else end
+
+            click.echo(f"Running strategy backfill on '{database}' from {start} to {end}.")
+
+            database_name = DatabaseName(database)
+            database_instance = Database(database_name)
+
+            strategy_backfill_pipeline(start, end, database_instance)
+
 
 
 @cli.command()

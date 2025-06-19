@@ -31,7 +31,7 @@ def construct_covariance_matrix(database: Database, date_: date, barrids: list[s
     Returns:
         CovarianceMatrix: The computed covariance matrix wrapped in a CovarianceMatrix object.
     """
-    barrids = barrids or get_barrids_by_date(date_, database)
+    barrids = barrids or get_barrids_by_date(date_=date_, database=database)
 
     # Construct covariance matrix components
     exposures_matrix = construct_exposure_matrix(barrids, date_, database).drop('barrid').to_numpy()

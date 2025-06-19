@@ -2,21 +2,20 @@ from datetime import date
 import polars as pl
 from tqdm import tqdm
 from pipelines.utils.views import in_universe_assets, in_universe_signals
-from pipelines.utils.tables import composite_alphas_table, active_weights_table
+from pipelines.utils.tables import Database
 
-
-def compute_composite_alphas(start_date: date, end_date: date) -> pl.DataFrame:
-    assets = in_universe_assets.filter(
+def compute_composite_alphas(start_date: date, end_date: date, database: Database) -> pl.DataFrame:
+    assets = in_universe_assets(database).filter(
         pl.col("date").is_between(start_date, end_date)
     ).select("date", "barrid", pl.col("return"))
     print(assets.collect())
 
-    signals = in_universe_signals.filter(
+    signals = in_universe_signals(database).filter(
         pl.col("date").is_between(start_date, end_date)
     ).select("date", "barrid", pl.col("name").alias("signal"), "alpha")
     print(signals.collect())
 
-    weights = active_weights_table.read().filter(
+    weights = database.active_weights_table.read().filter(
         pl.col("date").is_between(start_date, end_date)
     )
     print(weights.collect())
@@ -64,18 +63,13 @@ def compute_composite_alphas(start_date: date, end_date: date) -> pl.DataFrame:
     return composite_alphas
 
 
-def risk_parity_history_flow(start_date: date, end_date: date) -> None:
-    composite_alphas = compute_composite_alphas(start_date, end_date)
+def risk_parity_history_flow(start_date: date, end_date: date, database: Database) -> None:
+    composite_alphas = compute_composite_alphas(start_date, end_date, database)
 
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="Composite Alphas"):
         year_df = composite_alphas.filter(pl.col("date").dt.year().eq(year))
 
-        composite_alphas_table.create_if_not_exists(year)
-        composite_alphas_table.upsert(year, year_df)
-
-
-if __name__ == '__main__':
-    date_ = date(2025, 4, 8)
-    compute_composite_alphas(date_, date_)
+        database.composite_alphas_table.create_if_not_exists(year)
+        database.composite_alphas_table.upsert(year, year_df)

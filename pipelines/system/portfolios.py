@@ -11,6 +11,7 @@ from pipelines.system.constraints import ConstraintConstructor
 from pipelines.system.covariance_matrix import construct_covariance_matrix
 from pipelines.system.optimizers import quadratic_program
 from pipelines.system.records import Portfolio, CovarianceMatrix
+from pipelines.utils.tables import Database
 
 
 def mean_variance_efficient(
@@ -18,6 +19,7 @@ def mean_variance_efficient(
     barrids: list[str],
     alphas: Alpha,
     constraints: list[ConstraintConstructor],
+    database: Database,
     gamma: float = 2.0,
 ) -> Portfolio:
     """Constructs a mean-variance efficient portfolio using quadratic optimization.
@@ -41,8 +43,7 @@ def mean_variance_efficient(
 
     # Get covariance matrix
     # cov_mat = CovarianceMatrix(construct_covariance_matrix(period, barrids), barrids)
-    cov_mat = construct_covariance_matrix(period, barrids)
-    print(cov_mat)
+    cov_mat = construct_covariance_matrix(database=database, date_=period, barrids=barrids)
     cov_mat = CovarianceMatrix(cov_mat, barrids)
 
     # Cast to numpy arrays

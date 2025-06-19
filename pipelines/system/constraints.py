@@ -3,7 +3,7 @@ from typing import Protocol
 
 import cvxpy as cp
 import polars as pl
-from pipelines.utils.tables import assets_table
+from pipelines.utils.tables import Database
 
 class ConstraintConstructor(Protocol):
     """
@@ -65,10 +65,10 @@ def long_only(weights: cp.Variable, date_: date, barrids: list[str]) -> cp.Const
 
 
 def zero_beta(
-    weights: cp.Variable, date_: date, barrids: list[str]
+    weights: cp.Variable, date_: date, barrids: list[str], database: Database
 ) -> cp.Constraint:
     betas = (
-        assets_table.read(date_.year)
+        database.assets_table.read(date_.year)
         .filter(pl.col('date').eq(date_))
         .filter(pl.col('barrid').is_in(barrids))
         .select('barrid', 'predicted_beta')
@@ -82,10 +82,10 @@ def zero_beta(
 
 
 def unit_beta(
-    weights: cp.Variable, date_: date, barrids: list[str]
+    weights: cp.Variable, date_: date, barrids: list[str], database: Database
 ) -> cp.Constraint:
     betas = (
-        assets_table.read(date_.year)
+        database.assets_table.read(date_.year)
         .filter(pl.col('date').eq(date_))
         .filter(pl.col('barrid').is_in(barrids))
         .select('barrid', 'predicted_beta')
