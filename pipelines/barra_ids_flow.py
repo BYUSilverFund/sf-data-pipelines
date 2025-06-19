@@ -11,7 +11,7 @@ from utils.tables import Database
 
 
 def load_current_barra_files() -> pl.DataFrame:
-    dates = get_last_market_date(n_days=40)
+    dates = get_last_market_date(n_days=60)
 
     for date_ in reversed(dates):
         zip_folder_path = barra_ids.daily_zip_folder_path(date_)

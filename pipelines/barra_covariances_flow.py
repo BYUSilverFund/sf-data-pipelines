@@ -32,7 +32,7 @@ def load_barra_history_files(year: int) -> pl.DataFrame:
 def load_current_barra_files() -> pl.DataFrame:
     dfs = []
 
-    dates = get_last_market_date(n_days=20)
+    dates = get_last_market_date(n_days=60)
 
     for date_ in dates:
         zip_folder_path = barra_covariances.daily_zip_folder_path(date_)
