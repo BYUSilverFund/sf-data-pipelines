@@ -10,22 +10,27 @@ from tqdm import tqdm
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:
-    zip_folder_path = barra_risk.history_zip_folder_path(year)
     file_name = barra_risk.file_name()
 
-    with zipfile.ZipFile(zip_folder_path, "r") as zip_folder:
-        dfs = [
-            pl.read_csv(
-                BytesIO(zip_folder.read(file)),
-                skip_rows=2,
-                separator="|",
-                schema_overrides=barra_schema,
-                try_parse_dates=True,
-            )
-            for file in zip_folder.namelist()
-            if file.startswith(file_name)
-        ]
+    dfs = []
+    for zip_folder_name in sorted(os.listdir(barra_risk.history_zip_folder())):
+        if barra_risk.history_zip_file(year) in zip_folder_name:
+            with zipfile.ZipFile(f"{barra_risk.history_zip_folder()}/{zip_folder_name}", "r") as zip_folder:
+                folder_dfs = [
+                    pl.read_csv(
+                        BytesIO(zip_folder.read(file)),
+                        skip_rows=2,
+                        separator="|",
+                        schema_overrides=barra_schema,
+                        try_parse_dates=True,
+                    )
+                    for file in zip_folder.namelist()
+                    if file.startswith(file_name)
+                ]
 
+                folder_df = pl.concat(folder_dfs, how="vertical") if folder_dfs else pl.DataFrame()
+                dfs.append(folder_df)
+    
     return pl.concat(dfs, how="vertical") if dfs else pl.DataFrame()
 
 

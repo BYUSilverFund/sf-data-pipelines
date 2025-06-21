@@ -23,6 +23,12 @@ class BarraDataset:
         self._daily_zip_file = daily_zip_file
         self._file_name = file_name
 
+    def history_zip_folder(self) -> Path:
+        return self._base_path / self._history_folder
+    
+    def history_zip_file(self, year: int) -> str:
+        return f"{self._history_zip_file}_{year}"
+
     def history_zip_folder_path(self, year: int) -> Path:
         return self._base_path / self._history_folder / f"{self._history_zip_file}_{year}.zip"
     

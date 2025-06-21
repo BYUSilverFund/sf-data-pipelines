@@ -1,7 +1,7 @@
 import polars as pl
 from pipelines.utils.tables import Database
 
-def russell_rebalance_dates(database: Database) -> pl.DataFrame:
+def russell_rebalance_dates(database: Database) -> pl.LazyFrame:
     return (
         database.assets_table.read()
         # Standard filters
@@ -14,7 +14,7 @@ def russell_rebalance_dates(database: Database) -> pl.DataFrame:
         .unique()
     )
 
-def in_universe_assets(database: Database) -> pl.DataFrame:
+def in_universe_assets(database: Database) -> pl.LazyFrame:
     return (
         database.assets_table.read()
         # Standard filters
@@ -45,13 +45,13 @@ def in_universe_assets(database: Database) -> pl.DataFrame:
         .sort(['barrid', 'date'])
     )
 
-def universe(database: Database) -> pl.DataFrame:
+def universe(database: Database) -> pl.LazyFrame:
     return (
         in_universe_assets(database)
         .select('date', 'barrid')
     )
 
-def in_universe_signals(database: Database) -> pl.DataFrame:
+def in_universe_signals(database: Database) -> pl.LazyFrame:
     return (
         universe(database).join(
             database.signals_table.read(),
@@ -62,7 +62,7 @@ def in_universe_signals(database: Database) -> pl.DataFrame:
         .sort(['barrid', 'date'])
     )
 
-def benchmark_weights(database: Database) -> pl.DataFrame:
+def benchmark_weights(database: Database) -> pl.LazyFrame:
     return (
         in_universe_assets(database)
         .select(
@@ -73,7 +73,7 @@ def benchmark_weights(database: Database) -> pl.DataFrame:
         .sort(['barrid', 'date'])
     )
 
-def market_calendar(database: Database) -> pl.DataFrame:
+def market_calendar(database: Database) -> pl.LazyFrame:
     return (
         database.assets_table.read()
         .select('date')
@@ -81,7 +81,7 @@ def market_calendar(database: Database) -> pl.DataFrame:
         .sort('date')
     )
 
-def crsp_events_monthly(database: Database) -> pl.DataFrame:
+def crsp_events_monthly(database: Database) -> pl.LazyFrame:
     return (
         database.crsp_events_table.read()
         .select(
@@ -100,7 +100,7 @@ def crsp_events_monthly(database: Database) -> pl.DataFrame:
     )
 
 
-def crsp_monthly_clean(database: Database) -> pl.DataFrame:
+def crsp_monthly_clean(database: Database) -> pl.LazyFrame:
     return (
         database.crsp_monthly_table.read()
         .with_columns(
@@ -124,7 +124,7 @@ def crsp_monthly_clean(database: Database) -> pl.DataFrame:
         .sort(['permno', 'date'])
     )
 
-def crsp_daily_clean(database: Database) -> pl.DataFrame:
+def crsp_daily_clean(database: Database) -> pl.LazyFrame:
     return (
         database.crsp_daily_table.read()
         .join(
