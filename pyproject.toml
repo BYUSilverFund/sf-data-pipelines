@@ -10,10 +10,12 @@ dependencies = [
     "exchange-calendars>=4.9",
     "ipykernel>=6.29.5",
     "numpy>=2.2.3",
+    "pandas-market-calendars>=5.1.1",
     "polars>=1.24.0",
     "pyarrow>=19.0.1",
     "python-dotenv>=1.0.1",
     "ray>=2.44.1",
+    "rich>=14.1.0",
     "tqdm>=4.67.1",
     "wrds>=3.3.0",
 ]
