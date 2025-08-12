@@ -4,29 +4,24 @@ import dateutil.relativedelta as du
 import aws
 import os
 import dotenv
+import config
+import tqdm
 
 dotenv.load_dotenv(override=True)
 
-config = {
-    "fund": 'grad',
-    "token": 547414482431868624428004,
-    "nav": 993010,
-    "delta_nav": 993013,
-    "positions": 993015,
-    "dividends": 993011,
-    "trades": 993012,
-}
 
-
-def ibkr_daily_flow(config: dict):
+def execute_ibkr_to_s3_daily_flow(config: dict) -> None:
     yesterday = dt.date.today() - du.relativedelta(days=1)
     last_market_date = tools.get_last_market_date(reference_date=yesterday)
-
-    for query in ['delta_nav', 'dividends', 'nav', 'positions', 'trades']:
+    
+    for query in tqdm.tqdm(
+        iterable=['delta_nav', 'dividends', 'nav', 'positions', 'trades'],
+        desc=f"Processing {config['fund']}",
+    ):
         # 1. Pull data from IBKR
         df = tools.ibkr_query(
             token=config['token'],
-            query_id=config[query],
+            query_id=config['queries'][query],
             from_date=last_market_date,
             to_date=last_market_date
         )
@@ -38,15 +33,53 @@ def ibkr_daily_flow(config: dict):
             region_name=os.getenv('COGNITO_REGION'),
         )
 
-        file_name = f"{last_market_date}/{query}/{last_market_date}-{query}-{config['fund']}.csv"
+        file_name = f"daily-files/{last_market_date}/{config['fund']}/{last_market_date}-{config['fund']}-{query}.csv"
         s3.drop_file(file_name=file_name, bucket_name='ibkr-flex-query-files', file_data=df)
         
-def ibkr_backfill_flow():
+def execute_ibkr_to_s3_backfill_flow(config: dict, start_date: dt.date, end_date: dt.date) -> None:
+    for query in tqdm.tqdm(
+        iterable=['delta_nav', 'dividends', 'nav', 'positions', 'trades'],
+        desc=f"Processing {config['fund']}",
+    ):
+        # 1. Pull data from IBKR
+        df = tools.ibkr_query_batches(
+            token=config['token'],
+            query_id=config['queries'][query],
+            start_date=start_date,
+            end_date=end_date
+        )
+
+        # 2. Save to S3
+        s3 = aws.S3(
+            aws_access_key_id=os.getenv('COGNITO_ACCESS_KEY_ID'),
+            aws_secret_access_key=os.getenv('COGNITO_SECRET_ACCESS_KEY'),
+            region_name=os.getenv('COGNITO_REGION'),
+        )
+
+        file_name = f"backfill-files/{start_date}_{end_date}/{config['fund']}/{start_date}_{end_date}-{config['fund']}-{query}.csv"
+        s3.drop_file(file_name=file_name, bucket_name='ibkr-flex-query-files', file_data=df)
+
+def ibkr_to_s3_daily_flow() -> None:
+    for fund_config in config.configs:
+        execute_ibkr_to_s3_daily_flow(fund_config)
+
+def ibkr_to_s3_backfill_flow(start_date: dt.date | None = None, end_date: dt.date | None = None):
+    min_start_date = dt.date.today() - du.relativedelta(years=1)
+    min_start_date = min_start_date.replace(day=1) + du.relativedelta(months=1)
+
+    max_end_date = dt.date.today() - du.relativedelta(days=1)
+
+    start_date = start_date or min_start_date
+    end_date = end_date or max_end_date
+
+    for fund_config in config.configs:
+        execute_ibkr_to_s3_backfill_flow(fund_config, start_date, end_date)
+
+def s3_to_rds_daily_flow():
     pass
 
-def ibkr_reload_flow():
+def s3_to_rds_reload_flow():
     pass
-
 
 if __name__ == '__main__':
-    ibkr_daily_flow(config)
+    ibkr_to_s3_backfill_flow()

@@ -117,30 +117,37 @@ def ibkr_query(token: int, query_id: str, from_date: dt.date, to_date: dt.date, 
         "fd": from_date,
         "td": to_date
     }
-    receive_response = requests.get(url=request_base+receive_slug, params=receive_params, allow_redirects=True)
-
-    if receive_response.status_code != 200:
-        raise Exception("Failed to send request:", receive_response.text)
 
     # Check every 5 seconds if the report is done generating.
-    while receive_response.text.startswith("<"):
-        tree = ET.ElementTree(ET.fromstring(receive_response.text))
-        root = tree.getroot()
+    while True:
+        receive_response = requests.get(url=request_base+receive_slug, params=receive_params, allow_redirects=True)
+
+        if receive_response.status_code != 200:
+            raise Exception("Failed to send request:", receive_response.text)
         
-        error_code = root.findtext("ErrorCode")
-        error_message = root.findtext("ErrorMessage")
+        # CSV response
+        if not receive_response.text.startswith("<"):
+            break
 
-        match error_code:
+        # XML response
+        else:
+            tree = ET.ElementTree(ET.fromstring(receive_response.text))
+            root = tree.getroot()
+            
+            error_code = root.findtext("ErrorCode")
+            error_message = root.findtext("ErrorMessage")
 
-            case "1019" | "1021":
-                print(f"{error_code} status code. Waiting 5 seconds.")
-                time.sleep(5)
+            match error_code:
 
-            case _:
-                raise Exception("Failed to send request:", error_code, error_message)
+                case "1019" | "1021":
+                    print(f"{error_code} status code. Waiting 5 seconds.")
+                    time.sleep(5)
+
+                case _:
+                    raise Exception("Failed to send request:", error_code, error_message)
 
     # Parse results as polars dataframe  
-    df = pl.read_csv(io.StringIO(receive_response.text))
+    df = pl.read_csv(io.StringIO(receive_response.text), infer_schema_length=10000)
 
     return df
 
