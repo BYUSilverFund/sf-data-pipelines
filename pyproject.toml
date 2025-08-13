@@ -21,4 +21,5 @@ dependencies = [
     "s3fs>=2025.7.0",
     "tqdm>=4.67.1",
     "wrds>=3.3.0",
+    "yfinance>=0.2.65",
 ]

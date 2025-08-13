@@ -222,16 +222,3 @@ def get_last_market_date(exchange: str = 'NYSE', reference_date: dt.date = None)
     
     # Return the max date (last trading day)
     return max(valid_days)
-
-def get_market_calendar(start_date: dt.date, end_date: dt.date, exchange: str = 'NYSE') -> pl.DataFrame:
-    # Load market calendar
-    calendar = mcal.get_calendar(exchange)
-
-    # Get schedule
-    schedule = calendar.schedule(start_date=start_date.isoformat(), end_date=end_date.isoformat())
-
-    # Extract only the trading dates (from the market open times)
-    trading_days = schedule.index.date
-
-    # Convert to Polars DataFrame
-    return pl.DataFrame({"date": trading_days})

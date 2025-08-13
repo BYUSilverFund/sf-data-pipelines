@@ -1,6 +1,7 @@
 from ibkr_to_s3_flow import ibkr_to_s3_daily_flow, ibkr_to_s3_backfill_flow
 from s3_to_rds_flow import s3_to_rds_daily_flow, s3_to_rds_backfill_flow
 from calendar_flow import calendar_daily_flow, calendar_backfill_flow
+from benchmark_flow import benchmark_daily_flow, benchmark_backfill_flow
 import datetime as dt
 import dateutil.relativedelta as du
 
@@ -8,6 +9,7 @@ def dashboard_daily_flow() -> None:
     ibkr_to_s3_daily_flow()
     s3_to_rds_daily_flow()
     calendar_daily_flow()
+    benchmark_daily_flow()
 
 def dashboard_backill_flow(start_date: dt.date | None = None, end_date: dt.date | None = None) -> None:
     min_start_date = dt.date.today() - du.relativedelta(years=1)
@@ -21,7 +23,7 @@ def dashboard_backill_flow(start_date: dt.date | None = None, end_date: dt.date 
     ibkr_to_s3_backfill_flow(start_date, end_date)
     s3_to_rds_backfill_flow(start_date, end_date)
     calendar_backfill_flow(start_date, end_date)
-
+    benchmark_backfill_flow(start_date, end_date)
 
 if __name__ == '__main__':
     import os
@@ -42,6 +44,6 @@ if __name__ == '__main__':
     # dashboard_backill_flow()
 
     print(
-        db.execute_to_df("SELECT * FROM calendar_new;")
+        db.execute_to_df("SELECT * FROM benchmark_new;")
     )
 
