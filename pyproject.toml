@@ -8,6 +8,7 @@ dependencies = [
     "boto3>=1.37.1",
     "cvxpy>=1.6.4",
     "exchange-calendars>=4.9",
+    "fsspec>=2025.7.0",
     "ipykernel>=6.29.5",
     "numpy>=2.2.3",
     "pandas-market-calendars>=5.1.1",
@@ -16,6 +17,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "ray>=2.44.1",
     "rich>=14.1.0",
+    "s3fs>=2025.7.0",
     "tqdm>=4.67.1",
     "wrds>=3.3.0",
 ]

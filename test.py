@@ -102,4 +102,31 @@ df_trades = (
     )
 )
 
-print(df_trades)
+# print(df_trades)
+
+nav_path = "2024-09-01_2025-08-11-grad-nav.csv"
+
+nav_column_mapping = {
+}
+
+df_nav = (
+    pl.read_csv(nav_path)
+    .filter(pl.col('ClientAccountID').ne('ClientAccountID'))
+)
+
+# print(df_nav)
+
+delta_nav_path = "2024-09-01_2025-08-11-grad-delta_nav.csv"
+
+delta_nav_column_mapping = {
+}
+
+df_delta_nav = (
+    pl.read_csv(delta_nav_path)
+    .filter(pl.col('ClientAccountID').ne('ClientAccountID'))
+)
+
+# print(df_delta_nav)
+
+with open("pipelines/ibkr/sql/create_positions_table.sql", 'r') as file:
+    print(file.read())
