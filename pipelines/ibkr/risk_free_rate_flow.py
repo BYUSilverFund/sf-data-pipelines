@@ -37,8 +37,11 @@ def get_risk_free_rate(start_date: dt.date, end_date: dt.date) -> pl.DataFrame:
             pl.col('price').truediv('price_lag').sub(1).alias('return'),
             pl.col('yield').truediv(360).alias('daily_yield')
         )
+        .sort('date')
+        .with_columns(
+            pl.col('return', 'daily_yield').fill_null(strategy='backward')
+        )
         .filter(pl.col('date').is_between(start_date, end_date))
-        .drop_nulls('return')
         .sort('date')
         .select('date', 'return')
     )

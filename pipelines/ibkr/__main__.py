@@ -3,6 +3,7 @@ from s3_to_rds_flow import s3_to_rds_daily_flow, s3_to_rds_backfill_flow
 from calendar_flow import calendar_daily_flow, calendar_backfill_flow
 from benchmark_flow import benchmark_daily_flow, benchmark_backfill_flow
 from risk_free_rate_flow import risk_free_rate_daily_flow, risk_free_rate_backfill_flow
+from returns_flow import returns_daily_flow, returns_backfill_flow
 import datetime as dt
 import dateutil.relativedelta as du
 
@@ -12,6 +13,7 @@ def dashboard_daily_flow() -> None:
     calendar_daily_flow()
     benchmark_daily_flow()
     risk_free_rate_daily_flow()
+    returns_daily_flow()
 
 def dashboard_backill_flow(start_date: dt.date | None = None, end_date: dt.date | None = None) -> None:
     min_start_date = dt.date.today() - du.relativedelta(years=1)
@@ -27,6 +29,7 @@ def dashboard_backill_flow(start_date: dt.date | None = None, end_date: dt.date 
     calendar_backfill_flow(start_date, end_date)
     benchmark_backfill_flow(start_date, end_date)
     risk_free_rate_backfill_flow(start_date, end_date)
+    returns_backfill_flow(start_date, end_date)
 
 if __name__ == '__main__':
     import os
@@ -47,6 +50,6 @@ if __name__ == '__main__':
     # dashboard_backill_flow()
 
     print(
-        db.execute_to_df("SELECT * FROM risk_free_rate_new;")
+        db.execute_to_df("SELECT * FROM returns;")
     )
 
