@@ -63,6 +63,7 @@ def clean_dividends_data(df: pl.DataFrame) -> pl.DataFrame:
         .with_columns(
             pl.col('report_date', 'ex_date', 'pay_date').str.strptime(pl.Date, "%Y%m%d")
         )
+        .filter(pl.col('ex_date').eq(pl.col('report_date'))) # only keep dividend observations when they occur on the ex_date
         .cast(dividends_schema)
     )
 

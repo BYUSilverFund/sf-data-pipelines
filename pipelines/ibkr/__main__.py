@@ -1,13 +1,15 @@
 from ibkr_to_s3_flow import ibkr_to_s3_daily_flow, ibkr_to_s3_backfill_flow
 from s3_to_rds_flow import s3_to_rds_daily_flow, s3_to_rds_backfill_flow
+from calendar_flow import calendar_daily_flow, calendar_backfill_flow
 import datetime as dt
 import dateutil.relativedelta as du
 
-def ibkr_daily_flow() -> None:
+def dashboard_daily_flow() -> None:
     ibkr_to_s3_daily_flow()
     s3_to_rds_daily_flow()
+    calendar_daily_flow()
 
-def ibkr_backfill_flow(start_date: dt.date | None = None, end_date: dt.date | None = None) -> None:
+def dashboard_backill_flow(start_date: dt.date | None = None, end_date: dt.date | None = None) -> None:
     min_start_date = dt.date.today() - du.relativedelta(years=1)
     min_start_date = min_start_date.replace(day=1) + du.relativedelta(months=1)
 
@@ -18,6 +20,7 @@ def ibkr_backfill_flow(start_date: dt.date | None = None, end_date: dt.date | No
 
     ibkr_to_s3_backfill_flow(start_date, end_date)
     s3_to_rds_backfill_flow(start_date, end_date)
+    calendar_backfill_flow(start_date, end_date)
 
 
 if __name__ == '__main__':
@@ -27,8 +30,6 @@ if __name__ == '__main__':
 
     dotenv.load_dotenv(override=True)
 
-    ibkr_backfill_flow()
-
     db = aws.RDS(
         db_endpoint=os.getenv("DB_ENDPOINT"),
         db_name=os.getenv("DB_NAME"),
@@ -37,7 +38,10 @@ if __name__ == '__main__':
         db_port=os.getenv("DB_PORT"),
     )
 
+    # dashboard_daily_flow()
+    # dashboard_backill_flow()
+
     print(
-        db.execute_to_df("SELECT * FROM trades_new ORDER BY report_date;")
+        db.execute_to_df("SELECT * FROM calendar_new;")
     )
 
