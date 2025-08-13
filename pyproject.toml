@@ -9,6 +9,7 @@ dependencies = [
     "connectorx>=0.4.3",
     "cvxpy>=1.6.4",
     "exchange-calendars>=4.9",
+    "fredapi>=0.5.2",
     "fsspec>=2025.7.0",
     "ipykernel>=6.29.5",
     "numpy>=2.2.3",
