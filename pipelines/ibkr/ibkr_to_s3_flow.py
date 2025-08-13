@@ -62,14 +62,6 @@ def ibkr_to_s3_daily_flow() -> None:
     for fund_config in config.configs:
         execute_ibkr_to_s3_daily_flow(fund_config)
 
-def ibkr_to_s3_backfill_flow(start_date: dt.date | None = None, end_date: dt.date | None = None):
-    min_start_date = dt.date.today() - du.relativedelta(years=1)
-    min_start_date = min_start_date.replace(day=1) + du.relativedelta(months=1)
-
-    max_end_date = dt.date.today() - du.relativedelta(days=1)
-
-    start_date = start_date or min_start_date
-    end_date = end_date or max_end_date
-
+def ibkr_to_s3_backfill_flow(start_date: dt.date, end_date: dt.date):
     for fund_config in config.configs:
         execute_ibkr_to_s3_backfill_flow(fund_config, start_date, end_date)

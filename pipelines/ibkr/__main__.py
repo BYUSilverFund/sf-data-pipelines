@@ -1,12 +1,21 @@
 from ibkr_to_s3_flow import ibkr_to_s3_daily_flow, ibkr_to_s3_backfill_flow
 from s3_to_rds_flow import s3_to_rds_daily_flow, s3_to_rds_backfill_flow
 import datetime as dt
+import dateutil.relativedelta as du
 
 def ibkr_daily_flow() -> None:
     ibkr_to_s3_daily_flow()
     s3_to_rds_daily_flow()
 
-def ibkr_backfill_flow(start_date: dt.date, end_date: dt.date) -> None:
+def ibkr_backfill_flow(start_date: dt.date | None = None, end_date: dt.date | None = None) -> None:
+    min_start_date = dt.date.today() - du.relativedelta(years=1)
+    min_start_date = min_start_date.replace(day=1) + du.relativedelta(months=1)
+
+    max_end_date = dt.date.today() - du.relativedelta(days=1)
+
+    start_date = start_date or min_start_date
+    end_date = end_date or max_end_date
+
     ibkr_to_s3_backfill_flow(start_date, end_date)
     s3_to_rds_backfill_flow(start_date, end_date)
 
@@ -18,19 +27,17 @@ if __name__ == '__main__':
 
     dotenv.load_dotenv(override=True)
 
-    # ibkr_daily_flow()
+    ibkr_backfill_flow()
 
-    # db = aws.RDS(
-    #     db_endpoint=os.getenv("DB_ENDPOINT"),
-    #     db_name=os.getenv("DB_NAME"),
-    #     db_user=os.getenv("DB_USER"),
-    #     db_password=os.getenv("DB_PASSWORD"),
-    #     db_port=os.getenv("DB_PORT"),
-    # )
+    db = aws.RDS(
+        db_endpoint=os.getenv("DB_ENDPOINT"),
+        db_name=os.getenv("DB_NAME"),
+        db_user=os.getenv("DB_USER"),
+        db_password=os.getenv("DB_PASSWORD"),
+        db_port=os.getenv("DB_PORT"),
+    )
 
-    # print(
-    #     # db.execute('SELECT * FROM "2025-08-11_POSITIONS";')
-    #     db.execute_to_df("SELECT * FROM positions_new WHERE report_date = '2025-08-11';")
-    #     # db.execute("DROP TABLE positions_new;")
-    # )
+    print(
+        db.execute_to_df("SELECT * FROM trades_new ORDER BY report_date;")
+    )
 
