@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS returns (
     shares INTEGER,
     close NUMERIC,
     return NUMERIC,
-    dividends NUMERIC,
+    dividends_per_share NUMERIC,
     PRIMARY KEY (report_date, client_account_id, symbol)
 )
 ;

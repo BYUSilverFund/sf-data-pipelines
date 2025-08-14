@@ -12,10 +12,11 @@ def get_benchmark_data(start_date: dt.date, end_date: dt.date) -> pl.DataFrame:
     column_mapping = {
         'Date': 'date',
         'Ticker': 'ticker',
-        'Close': 'adjusted_close' # yfinance returns the adjusted close value as "Close"
+        'Close': 'adjusted_close', # yfinance returns the adjusted close value as "Close"
+        'Dividends': 'dividends_per_share'
     }
 
-    df = yf.download(tickers=['IWV'], start=start_date, end=end_date).stack(future_stack=True).reset_index()
+    df = yf.download(tickers=['IWV'], start=start_date, end=end_date, actions=True).stack(future_stack=True).reset_index()
 
     return (
         pl.from_pandas(df)

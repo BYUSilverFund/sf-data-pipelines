@@ -6,7 +6,7 @@ INSERT INTO returns (
     shares,
     close,
     return,
-    dividends
+    dividends_per_share
 )
 WITH positions AS (
     SELECT
@@ -17,9 +17,9 @@ WITH positions AS (
         quantity AS shares_1,
         mark_price AS price_1,
         CASE WHEN quantity > 0 THEN 1 ELSE -1 END AS side,
-        COALESCE(LAG(fx_rate_to_base) OVER (PARTITION BY symbol ORDER BY report_date), fx_rate_to_base) AS fx_rate_0,
-        COALESCE(LAG(quantity) OVER (PARTITION BY symbol ORDER BY report_date), quantity) AS shares_0,
-        COALESCE(LAG(mark_price) OVER (PARTITION BY symbol ORDER BY report_date), mark_price) AS price_0
+        COALESCE(LAG(fx_rate_to_base) OVER (PARTITION BY client_account_id, symbol ORDER BY report_date), fx_rate_to_base) AS fx_rate_0,
+        COALESCE(LAG(quantity) OVER (PARTITION BY client_account_id, symbol ORDER BY report_date), quantity) AS shares_0,
+        COALESCE(LAG(mark_price) OVER (PARTITION BY client_account_id, symbol ORDER BY report_date), mark_price) AS price_0
     FROM positions_new
     WHERE sub_category IN ('ETF', 'COMMON')
         AND report_date BETWEEN '{{start_date}}' AND '{{end_date}}'
@@ -102,7 +102,7 @@ returns AS(
         shares_1 AS shares,
         price_1 AS close,
         (shares_1_adj * price_1 - dividends) / (shares_0 * price_0) - 1 AS return,
-        dividends_per_share AS dividends
+        dividends_per_share
     FROM adjustments a
     INNER JOIN calendar_new c ON a.report_date = c.date
 )
@@ -114,7 +114,7 @@ SELECT
     shares,
     close,
     return,
-    dividends
+    dividends_per_share
 FROM returns
 ORDER BY client_account_id, report_date, symbol
 ON CONFLICT (report_date, client_account_id, symbol)
@@ -123,5 +123,5 @@ DO UPDATE SET
     shares = EXCLUDED.shares,
     close = EXCLUDED.close,
     return = EXCLUDED.return,
-    dividends = EXCLUDED.dividends
+    dividends_per_share = EXCLUDED.dividends_per_share
 ;
