@@ -16,7 +16,8 @@ def clean_delta_nav_data(df: pl.DataFrame) -> pl.DataFrame:
         'ClientAccountID': 'client_account_id',
         'StartingValue': 'starting_value',
         'EndingValue': 'ending_value',
-        'DepositsWithdrawals': 'deposits_withdrawals'
+        'DepositsWithdrawals': 'deposits_withdrawals',
+        'Dividends': 'dividends'
     }
 
     delta_nav_schema = {
@@ -25,7 +26,8 @@ def clean_delta_nav_data(df: pl.DataFrame) -> pl.DataFrame:
         'client_account_id': pl.String,
         'starting_value': pl.Float64,
         'ending_value': pl.Float64,
-        'deposits_withdrawals': pl.Float64
+        'deposits_withdrawals': pl.Float64,
+        'dividends': pl.Float64
     }
 
     return (
@@ -43,7 +45,8 @@ def clean_delta_nav_data(df: pl.DataFrame) -> pl.DataFrame:
             'client_account_id',
             'starting_value',
             'ending_value',
-            'deposits_withdrawals'
+            'deposits_withdrawals',
+            'dividends'
         )
     )
 
