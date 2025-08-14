@@ -5,6 +5,7 @@ from benchmark_flow import benchmark_daily_flow, benchmark_backfill_flow
 from risk_free_rate_flow import risk_free_rate_daily_flow, risk_free_rate_backfill_flow
 from returns_flow import returns_daily_flow, returns_backfill_flow
 from fund_returns_flow import fund_returns_daily_flow, fund_returns_backfill_flow
+from all_fund_returns import all_fund_returns_daily_flow, all_fund_returns_backfill_flow
 import datetime as dt
 import dateutil.relativedelta as du
 
@@ -16,6 +17,7 @@ def dashboard_daily_flow() -> None:
     risk_free_rate_daily_flow()
     returns_daily_flow()
     fund_returns_daily_flow()
+    all_fund_returns_daily_flow()
 
 def dashboard_backill_flow(start_date: dt.date | None = None, end_date: dt.date | None = None) -> None:
     min_start_date = dt.date.today() - du.relativedelta(years=1)
@@ -33,6 +35,7 @@ def dashboard_backill_flow(start_date: dt.date | None = None, end_date: dt.date 
     risk_free_rate_backfill_flow(start_date, end_date)
     returns_backfill_flow(start_date, end_date)
     fund_returns_backfill_flow(start_date, end_date)
+    all_fund_returns_backfill_flow(start_date, end_date)
 
 if __name__ == '__main__':
     import os
@@ -53,5 +56,5 @@ if __name__ == '__main__':
     # dashboard_backill_flow()
 
     print(
-        db.execute_to_df("SELECT * FROM fund_returns;")
+        db.execute_to_df("SELECT * FROM all_fund_returns;")
     )
