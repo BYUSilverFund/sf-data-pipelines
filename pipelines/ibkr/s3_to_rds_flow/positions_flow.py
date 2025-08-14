@@ -44,7 +44,7 @@ def clean_positions_data(df: pl.DataFrame) -> pl.DataFrame:
         .select(positions_column_mapping.keys())
         .rename(positions_column_mapping)
         .with_columns(
-            pl.col('report_date').str.strptime(pl.Date, "%Y%m%d"),
+            pl.col('report_date').cast(pl.String).str.strptime(pl.Date, "%Y%m%d"),
         )
         .cast(positions_schema)
     )

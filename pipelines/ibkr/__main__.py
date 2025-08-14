@@ -50,5 +50,5 @@ if __name__ == '__main__':
     # dashboard_backill_flow()
 
     print(
-        db.execute_to_df("SELECT * FROM returns;")
+        db.execute_to_df("SELECT * FROM delta_nav_new;")
     )
