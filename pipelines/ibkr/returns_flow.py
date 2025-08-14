@@ -6,7 +6,7 @@ import os
 def returns_daily_flow() -> None:
     yesterday = dt.date.today() - du.relativedelta(days=1)
     last_market_date = tools.get_last_market_date(reference_date=yesterday) 
-
+    
     # 1. Create core table if not exists
     db = aws.RDS(
         db_endpoint=os.getenv("DB_ENDPOINT"),

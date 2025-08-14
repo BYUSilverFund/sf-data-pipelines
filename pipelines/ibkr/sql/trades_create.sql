@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS trades_new (
     isin TEXT,
     symbol TEXT,
     trade_id TEXT,
-    quantity INTEGER,
+    quantity NUMERIC,
     trade_price NUMERIC,
     ib_commission NUMERIC,
     buy_sell TEXT,

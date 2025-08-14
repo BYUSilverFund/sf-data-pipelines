@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS dividends_new (
     action_id TEXT,
     ex_date DATE,
     pay_date DATE,
-    quantity INTEGER,
+    quantity NUMERIC,
     gross_rate NUMERIC,
     gross_amount NUMERIC,
     tax NUMERIC,

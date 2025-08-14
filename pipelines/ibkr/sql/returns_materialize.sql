@@ -22,17 +22,19 @@ WITH positions AS (
         COALESCE(LAG(mark_price) OVER (PARTITION BY symbol ORDER BY report_date), mark_price) AS price_0
     FROM positions_new
     WHERE sub_category IN ('ETF', 'COMMON')
+        AND report_date BETWEEN '{{start_date}}' AND '{{end_date}}'
 ),
 dividends AS(
     SELECT
         client_account_id,
         report_date,
         symbol,
-        action_id,
-        net_amount AS dividends,
-        gross_rate AS dividends_per_share
+        SUM(net_amount) AS dividends,
+        SUM(gross_rate) AS dividends_per_share
     FROM dividends_new
     WHERE sub_category IN ('ETF', 'COMMON')
+        AND report_date BETWEEN '{{start_date}}' AND '{{end_date}}'
+    GROUP BY client_account_id, symbol, report_date
 ),
 trades AS(
     SELECT
@@ -43,6 +45,7 @@ trades AS(
         SUM(quantity * trade_price) / SUM(quantity) AS average_trade_price
     FROM trades_new
     WHERE sub_category IN ('ETF', 'COMMON')
+        AND report_date BETWEEN '{{start_date}}' AND '{{end_date}}'
     GROUP BY client_account_id, symbol, report_date
 ),
 merge AS(
@@ -102,7 +105,6 @@ returns AS(
         dividends_per_share AS dividends
     FROM adjustments a
     INNER JOIN calendar_new c ON a.report_date = c.date
-    WHERE report_date BETWEEN '{{start_date}}' AND '{{end_date}}'
 )
 SELECT 
     report_date,

@@ -24,20 +24,29 @@ def clean_positions_data(df: pl.DataFrame) -> pl.DataFrame:
         'FXRateToBase': 'fx_rate_to_base'
     }
 
+    positions_schema = {
+        'report_date': pl.Date,
+        'client_account_id': pl.String,
+        'asset_class': pl.String,
+        'sub_category': pl.String,
+        'description': pl.String,
+        'cusip': pl.String,
+        'isin': pl.String,
+        'symbol': pl.String,
+        'mark_price': pl.Float64,
+        'quantity': pl.Float64,
+        'fx_rate_to_base': pl.Float64
+    }
+
     return (
         df
         .filter(pl.col('ClientAccountID').ne('ClientAccountID'))
         .select(positions_column_mapping.keys())
         .rename(positions_column_mapping)
         .with_columns(
-            pl.col('cusip').cast(pl.String),
             pl.col('report_date').str.strptime(pl.Date, "%Y%m%d"),
-            pl.col('mark_price', 'fx_rate_to_base').cast(pl.Float64),
-            pl.col('quantity').cast(pl.Int32)
         )
-        .with_columns(
-            pl.col('mark_price').mul('quantity').alias('value')
-        )
+        .cast(positions_schema)
     )
 
 def execute_s3_to_rds_positions_daily():
@@ -52,16 +61,12 @@ def execute_s3_to_rds_positions_daily():
         "secret": os.getenv('COGNITO_SECRET_ACCESS_KEY'),
     }
 
-    schema_overrides = {
-        'ReportDate': pl.String
-    }
-
     fs = fsspec.filesystem("s3", **storage_options)
     file_list = fs.glob(source_pattern)
 
     dfs = []
     for file in file_list:
-        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, schema_overrides=schema_overrides)
+        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, infer_schema_length=10000)
         df_clean = clean_positions_data(df)
         dfs.append(df_clean)
 
@@ -96,16 +101,12 @@ def execute_s3_to_rds_positions_backfill(start_date: dt.date, end_date: dt.date)
         "secret": os.getenv('COGNITO_SECRET_ACCESS_KEY'),
     }
 
-    schema_overrides = {
-        'ReportDate': pl.String
-    }
-
     fs = fsspec.filesystem("s3", **storage_options)
     file_list = fs.glob(source_pattern)
 
     dfs = []
     for file in file_list:
-        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, schema_overrides=schema_overrides)
+        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, infer_schema_length=10000)
         df_clean = clean_positions_data(df)
         dfs.append(df_clean)
 

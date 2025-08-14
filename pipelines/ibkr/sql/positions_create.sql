@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS positions_new (
     isin TEXT,
     symbol TEXT,
     mark_price NUMERIC,
-    quantity INTEGER,
+    quantity NUMERIC,
     fx_rate_to_base NUMERIC,
     PRIMARY KEY (report_date, client_account_id, symbol)
 )

@@ -35,7 +35,7 @@ def clean_trades_data(df: pl.DataFrame) -> pl.DataFrame:
         'isin': pl.String,
         'symbol': pl.String,
         'trade_id': pl.String,
-        'quantity': pl.Int32,
+        'quantity': pl.Float64,
         'trade_price': pl.Float64,
         'ib_commission': pl.Float64,
         'buy_sell': pl.String,
@@ -64,16 +64,12 @@ def execute_s3_to_rds_trades_daily():
         "secret": os.getenv('COGNITO_SECRET_ACCESS_KEY'),
     }
 
-    schema_overrides = {
-        'ReportDate': pl.String
-    }
-
     fs = fsspec.filesystem("s3", **storage_options)
     file_list = fs.glob(source_pattern)
 
     dfs = []
     for file in file_list:
-        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, schema_overrides=schema_overrides)
+        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, infer_schema_length=10000)
         df_clean = clean_trades_data(df)
         dfs.append(df_clean)
 
@@ -106,18 +102,14 @@ def execute_s3_to_rds_trades_backfill(start_date: dt.date, end_date: dt.date):
     storage_options = {
         "key": os.getenv('COGNITO_ACCESS_KEY_ID'),
         "secret": os.getenv('COGNITO_SECRET_ACCESS_KEY'),
-    }
-
-    schema_overrides = {
-        'ReportDate': pl.String
-    }
+    }\
 
     fs = fsspec.filesystem("s3", **storage_options)
     file_list = fs.glob(source_pattern)
 
     dfs = []
     for file in file_list:
-        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, schema_overrides=schema_overrides)
+        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, infer_schema_length=10000)
         df_clean = clean_trades_data(df)
         dfs.append(df_clean)
 

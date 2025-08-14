@@ -52,4 +52,3 @@ if __name__ == '__main__':
     print(
         db.execute_to_df("SELECT * FROM returns;")
     )
-

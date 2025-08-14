@@ -23,7 +23,7 @@ def calendar_daily_flow() -> None:
     last_market_date = tools.get_last_market_date(reference_date=yesterday)
 
     # 1. Pull calendar data
-    df = tools.get_market_calendar(last_market_date, last_market_date)
+    df = get_market_calendar(last_market_date, last_market_date)
 
     # 2. Create core table if not exists
     db = aws.RDS(
@@ -47,7 +47,7 @@ def calendar_daily_flow() -> None:
 
 def calendar_backfill_flow(start_date: dt.date, end_date: dt.date) -> None:
     # 1. Pull calendar data
-    df = tools.get_market_calendar(start_date, end_date)
+    df = get_market_calendar(start_date, end_date)
 
     # 2. Create core table if not exists
     db = aws.RDS(

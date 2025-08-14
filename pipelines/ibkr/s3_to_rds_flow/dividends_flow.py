@@ -41,7 +41,7 @@ def clean_dividends_data(df: pl.DataFrame) -> pl.DataFrame:
         'action_id': pl.String,
         'ex_date': pl.Date,
         'pay_date': pl.Date,
-        'quantity': pl.Int32,
+        'quantity': pl.Float64,
         'gross_rate': pl.Float64,
         'gross_amount': pl.Float64,
         'tax': pl.Float64,
@@ -79,16 +79,12 @@ def execute_s3_to_rds_dividends_daily():
         "secret": os.getenv('COGNITO_SECRET_ACCESS_KEY'),
     }
 
-    schema_overrides = {
-        'ReportDate': pl.String
-    }
-
     fs = fsspec.filesystem("s3", **storage_options)
     file_list = fs.glob(source_pattern)
 
     dfs = []
     for file in file_list:
-        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, schema_overrides=schema_overrides)
+        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, infer_schema_length=10000)
         df_clean = clean_dividends_data(df)
         dfs.append(df_clean)
 
@@ -123,16 +119,12 @@ def execute_s3_to_rds_dividends_backfill(start_date: dt.date, end_date: dt.date)
         "secret": os.getenv('COGNITO_SECRET_ACCESS_KEY'),
     }
 
-    schema_overrides = {
-        'ReportDate': pl.String
-    }
-
     fs = fsspec.filesystem("s3", **storage_options)
     file_list = fs.glob(source_pattern)
 
     dfs = []
     for file in file_list:
-        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, schema_overrides=schema_overrides)
+        df = pl.read_csv(f"s3://{file}", storage_options=storage_options, infer_schema_length=10000)
         df_clean = clean_dividends_data(df)
         dfs.append(df_clean)
 
