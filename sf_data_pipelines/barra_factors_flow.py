@@ -1,11 +1,11 @@
 import zipfile
 import polars as pl
 from io import BytesIO
-from pipelines.utils import barra_schema, barra_columns
+from sf_data_pipelines.utils import barra_schema, barra_columns
 import os
 from tqdm import tqdm
-from pipelines.utils import get_last_market_date
-from pipelines.utils.barra_datasets import barra_factors
+from sf_data_pipelines.utils import get_last_market_date
+from sf_data_pipelines.utils.barra_datasets import barra_factors
 from utils.tables import Database
 
 

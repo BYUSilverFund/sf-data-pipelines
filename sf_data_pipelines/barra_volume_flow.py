@@ -2,8 +2,8 @@ from datetime import date
 import zipfile
 import polars as pl
 from io import BytesIO
-from pipelines.utils import barra_schema, barra_columns, get_last_market_date
-from pipelines.utils.barra_datasets import barra_volume
+from sf_data_pipelines.utils import barra_schema, barra_columns, get_last_market_date
+from sf_data_pipelines.utils.barra_datasets import barra_volume
 from utils.tables import Database
 import os
 from tqdm import tqdm

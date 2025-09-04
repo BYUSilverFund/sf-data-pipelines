@@ -2,7 +2,7 @@ from datetime import date
 import zipfile
 import polars as pl
 from io import BytesIO
-from pipelines.utils import barra_schema, barra_columns
+from sf_data_pipelines.utils import barra_schema, barra_columns
 from utils.barra_datasets import barra_returns
 import os
 from tqdm import tqdm

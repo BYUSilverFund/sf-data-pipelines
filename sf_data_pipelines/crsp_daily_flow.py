@@ -1,5 +1,5 @@
 from datetime import date
-from pipelines.utils import crsp_schema
+from sf_data_pipelines.utils import crsp_schema
 import polars as pl
 import wrds
 from tqdm import tqdm

@@ -1,5 +1,5 @@
 from datetime import date
-from pipelines.utils import russell_schema, russell_columns
+from sf_data_pipelines.utils import russell_schema, russell_columns
 import polars as pl
 import wrds
 from tqdm import tqdm
