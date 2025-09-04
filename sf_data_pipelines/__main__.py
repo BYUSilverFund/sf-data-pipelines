@@ -1,6 +1,6 @@
 import click
 import datetime as dt
-from all_pipelines import (
+from sf_data_pipelines.all_pipelines import (
     barra_backfill_pipeline,
     ftse_backfill_pipeline,
     crsp_backfill_pipeline,
