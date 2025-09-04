@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from pipelines.utils.factors import factors
 from typing import Optional
-from pipelines.enums import DatabaseName
+from src.sf_data_pipelines.enums import DatabaseName
 
 
 class Table:

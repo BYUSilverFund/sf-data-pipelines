@@ -146,7 +146,7 @@ def crsp_daily_clean(database: Database) -> pl.LazyFrame:
     )
 
 if __name__ == '__main__':
-    from pipelines.enums import DatabaseName
+    from src.sf_data_pipelines.enums import DatabaseName
     database_name = DatabaseName.RESEARCH
     database = Database(database_name)
     print(
