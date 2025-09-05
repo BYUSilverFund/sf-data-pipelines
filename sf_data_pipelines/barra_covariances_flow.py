@@ -77,7 +77,6 @@ def barra_covariances_history_flow(start_date: date, end_date: date, database: D
     for year in tqdm(years, desc="Barra Covariances"):
         raw_df = load_barra_history_files(year)
         clean_df = clean_barra_df(raw_df)
-
         database.covariances_table.create_if_not_exists(year)
         database.covariances_table.upsert(year, clean_df)
 

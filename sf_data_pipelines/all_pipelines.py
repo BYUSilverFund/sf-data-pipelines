@@ -5,16 +5,12 @@ from barra_ids_flow import barra_ids_daily_flow
 from barra_returns_flow import barra_returns_daily_flow, barra_returns_history_flow
 from barra_risk_flow import barra_risk_daily_flow, barra_risk_history_flow
 from ftse_russell_flow import ftse_russell_backfill_flow
-from signals_flow import signals_history_flow
-from active_weights_flow import active_weights_history_flow
 from barra_specific_returns import barra_specific_returns_daily_flow, barra_specific_returns_history_flow
-from pipelines.composite_alphas import risk_parity_history_flow
 from barra_volume_flow import barra_volume_history_flow, barra_volume_daily_flow
 from crsp_daily_flow import crsp_daily_backfill_flow
 from crsp_monthly_flow import crsp_monthly_backfill_flow
 from crsp_events_flow import crsp_events_backfill_flow
 from barra_factors_flow import barra_factors_daily_flow
-from covariance_matrix_flow import covariance_daily_flow
 import datetime as dt
 from utils.tables import Database
 
@@ -57,11 +53,6 @@ def crsp_history_flow(start_date: dt.date, end_date: dt.date, database: Database
     crsp_monthly_backfill_flow(start_date, end_date, database)
     crsp_daily_backfill_flow(start_date, end_date, database)
 
-def strategy_backfill_flow(start_date: dt.date, end_date: dt.date, database: Database) -> None:
-    signals_history_flow(start_date, end_date, database)
-    active_weights_history_flow(start_date, end_date, database)
-    risk_parity_history_flow(start_date, end_date, database)
-
 def barra_daily_pipeline(database: Database) -> None:
     barra_daily_flow(database)
     id_mappings_flow(database)
@@ -75,9 +66,3 @@ def ftse_backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Dat
 
 def crsp_backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Database) -> None:
     crsp_history_flow(start_date, end_date, database)
-
-def strategy_backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Database) -> None:
-    strategy_backfill_flow(start_date, end_date, database)
-
-def covariance_matrix_pipeline(database: Database) -> None:
-    covariance_daily_flow(database)
