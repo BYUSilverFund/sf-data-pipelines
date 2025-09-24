@@ -3,7 +3,7 @@ import datetime as dt
 from rich import print
 import polars as pl
 
-grad_fund_tickers = [
+grad_fund_tickers = sorted([
     "AAPL",
     "CMG",
     "COKE",
@@ -29,7 +29,7 @@ grad_fund_tickers = [
     "ODC",
     "WFRD",
     # "IWV"
-]
+])
 
 date_ = dt.date(2025, 9, 15)
 
@@ -37,9 +37,12 @@ assets = (
     sfd.load_assets_by_date(
         date_=date_,
         in_universe=True,
-        columns=['barrid', 'ticker']
+        columns=['barrid', 'ticker', 'cusip']
     )
+    .sort('ticker')
 )
+
+print(assets)
 
 barrids = assets['barrid'].to_list()
 tickers = assets['ticker'].to_list()
@@ -50,6 +53,8 @@ cov_mat = sfd.construct_covariance_matrix(
     date_=date_,
     barrids=barrids
 )
+
+print(cov_mat)
 
 cov_mat_with_tickers = (
     cov_mat
@@ -66,4 +71,4 @@ cov_mat_with_tickers = (
 
 print(cov_mat_with_tickers)
 
-cov_mat_with_tickers.write_csv(f"grad_fund_cov_mat_{date_}.csv")
+# cov_mat_with_tickers.write_csv(f"grad_fund_cov_mat_{date_}.csv")

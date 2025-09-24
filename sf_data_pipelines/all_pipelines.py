@@ -11,6 +11,7 @@ from crsp_daily_flow import crsp_daily_backfill_flow
 from crsp_monthly_flow import crsp_monthly_backfill_flow
 from crsp_events_flow import crsp_events_backfill_flow
 from barra_factors_flow import barra_factors_daily_flow
+from covariance_matrix_flow import covariance_matrix_daily_flow
 import datetime as dt
 from utils.tables import Database
 
@@ -66,3 +67,6 @@ def ftse_backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Dat
 
 def crsp_backfill_pipeline(start_date: dt.date, end_date: dt.date, database: Database) -> None:
     crsp_history_flow(start_date, end_date, database)
+
+def covariance_matrix_pipeline() -> None:
+    covariance_matrix_daily_flow()

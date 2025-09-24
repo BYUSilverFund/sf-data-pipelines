@@ -4,7 +4,7 @@ from sf_data_pipelines.all_pipelines import (
     barra_backfill_pipeline,
     ftse_backfill_pipeline,
     crsp_backfill_pipeline,
-    # covariance_matrix_pipeline,
+    covariance_matrix_pipeline,
     barra_daily_pipeline,
     # strategy_backfill_pipeline
 )
@@ -147,6 +147,11 @@ def ftse(pipeline_type, database, start, end):
             database_instance = Database(database_name)
 
             ftse_backfill_pipeline(start, end, database_instance)
+
+@cli.command()
+def covariance_matrix():
+    click.echo(f"Running covariance matrix daily flow.")
+    covariance_matrix_pipeline()
 
 if __name__ == "__main__":
     cli()
