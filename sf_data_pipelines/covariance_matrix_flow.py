@@ -6,16 +6,19 @@ import polars as pl
 def covariance_matrix_daily_flow() -> None:
     yesterday = dt.date.today() - dt.timedelta(days=1)
 
-    barrids = (
+    assets = (
         sfd.load_assets_by_date(
             date_=yesterday,
             in_universe=True,
-            columns='barrid'
+            columns=['barrid', 'ticker']
         )
         .sort('barrid')
-        ['barrid']
-        .to_list()
     )
+
+    barrids = assets['barrid'].to_list()
+    tickers = assets['ticker'].to_list()
+
+    mapping = {barrid: ticker for barrid, ticker in zip(barrids, tickers)}
 
     covariance_matrix = (
         sfd.construct_covariance_matrix(
@@ -25,6 +28,12 @@ def covariance_matrix_daily_flow() -> None:
         .with_columns(
             pl.lit(yesterday).alias('date')
         )
+        .rename({'barrid': 'ticker', **mapping})
+        .with_columns(
+            pl.col('ticker').replace(mapping)
+        )
+        .select('date', 'ticker', *sorted(tickers))
+        .sort('ticker')
     )
 
     utils.s3.write_parquet(
