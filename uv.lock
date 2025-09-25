@@ -2271,6 +2271,11 @@ dependencies = [
     { name = "yfinance" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "rich" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "boto3", specifier = ">=1.37.1" },
@@ -2293,6 +2298,9 @@ requires-dist = [
     { name = "wrds", specifier = ">=3.3.0" },
     { name = "yfinance", specifier = ">=0.2.65" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "rich", specifier = ">=14.1.0" }]
 
 [[package]]
 name = "sf-quant"

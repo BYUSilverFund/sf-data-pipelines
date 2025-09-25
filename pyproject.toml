@@ -25,3 +25,8 @@ dependencies = [
     "wrds>=3.3.0",
     "yfinance>=0.2.65",
 ]
+
+[dependency-groups]
+dev = [
+    "rich>=14.1.0",
+]
