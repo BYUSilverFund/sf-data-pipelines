@@ -6,7 +6,7 @@ import zipfile
 import io
 from dotenv import load_dotenv
 import numpy as np
-import wrds
+from utils import get_last_market_date
 
 load_dotenv(override=True)
 
@@ -370,7 +370,7 @@ def get_barrids(date_: dt.date):
         return clean_root_ids(df, date_)
 
 def covariance_matrix_daily_flow() -> None:
-    date_ = dt.date.today() - dt.timedelta(days=1)
+    date_ = get_last_market_date()[0]
 
     # 1. Get barrids and tickers
     tickers_df = get_tickers(date_)
