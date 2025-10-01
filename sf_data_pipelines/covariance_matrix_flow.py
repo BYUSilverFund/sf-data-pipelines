@@ -7,212 +7,127 @@ import io
 from dotenv import load_dotenv
 import numpy as np
 from utils import get_last_market_date
+from utils.factors import factors
 
 load_dotenv(override=True)
 
 ROOT = os.getenv("ROOT", "/home/amh1124/groups/grp_msci_barra/nobackup/archive")
 
-factors = [
-    'USSLOWL_AERODEF',
-    'USSLOWL_AIRLINES',
-    'USSLOWL_ALUMSTEL',
-    'USSLOWL_APPAREL',
-    'USSLOWL_AUTO',
-    'USSLOWL_BANKS',
-    'USSLOWL_BETA',
-    'USSLOWL_BEVTOB',
-    'USSLOWL_BIOLIFE',
-    'USSLOWL_BLDGPROD',
-    'USSLOWL_CHEM',
-    'USSLOWL_CNSTENG',
-    'USSLOWL_CNSTMACH',
-    'USSLOWL_CNSTMATL',
-    'USSLOWL_COMMEQP',
-    'USSLOWL_COMPELEC',
-    'USSLOWL_COMSVCS',
-    'USSLOWL_CONGLOM',
-    'USSLOWL_CONTAINR',
-    'USSLOWL_COUNTRY',
-    'USSLOWL_DISTRIB',
-    'USSLOWL_DIVFIN',
-    'USSLOWL_DIVYILD',
-    'USSLOWL_EARNQLTY',
-    'USSLOWL_EARNYILD',
-    'USSLOWL_ELECEQP',
-    'USSLOWL_ELECUTIL',
-    'USSLOWL_FOODPROD',
-    'USSLOWL_FOODRET',
-    'USSLOWL_GASUTIL',
-    'USSLOWL_GROWTH',
-    'USSLOWL_HLTHEQP',
-    'USSLOWL_HLTHSVCS',
-    'USSLOWL_HOMEBLDG',
-    'USSLOWL_HOUSEDUR',
-    'USSLOWL_INDMACH',
-    'USSLOWL_INSURNCE',
-    'USSLOWL_INTERNET',
-    'USSLOWL_LEISPROD',
-    'USSLOWL_LEISSVCS',
-    'USSLOWL_LEVERAGE',
-    'USSLOWL_LIFEINS',
-    'USSLOWL_LIQUIDTY',
-    'USSLOWL_LTREVRSL',
-    'USSLOWL_MEDIA',
-    'USSLOWL_MGDHLTH',
-    'USSLOWL_MGMTQLTY',
-    'USSLOWL_MIDCAP',
-    'USSLOWL_MOMENTUM',
-    'USSLOWL_MULTUTIL',
-    'USSLOWL_OILGSCON',
-    'USSLOWL_OILGSDRL',
-    'USSLOWL_OILGSEQP',
-    'USSLOWL_OILGSEXP',
-    'USSLOWL_PAPER',
-    'USSLOWL_PHARMA',
-    'USSLOWL_PRECMTLS',
-    'USSLOWL_PROFIT',
-    'USSLOWL_PROSPECT',
-    'USSLOWL_PSNLPROD',
-    'USSLOWL_REALEST',
-    'USSLOWL_RESTAUR',
-    'USSLOWL_RESVOL',
-    'USSLOWL_ROADRAIL',
-    'USSLOWL_SEMICOND',
-    'USSLOWL_SEMIEQP',
-    'USSLOWL_SIZE',
-    'USSLOWL_SOFTWARE',
-    'USSLOWL_SPLTYRET',
-    'USSLOWL_SPTYCHEM',
-    'USSLOWL_SPTYSTOR',
-    'USSLOWL_TELECOM',
-    'USSLOWL_TRADECO',
-    'USSLOWL_TRANSPRT',
-    'USSLOWL_VALUE',
-    'USSLOWL_WIRELESS'
-]
-
 exposures_column_mapping = {
-    '!Barrid': 'barrid',
-    'Factor': 'factor',
-    'Exposure': 'exposure',
-    'DataDate': 'date'
+    "!Barrid": "barrid",
+    "Factor": "factor",
+    "Exposure": "exposure",
+    "DataDate": "date",
 }
 
 covariances_column_mapping = {
-    '!Factor1': 'factor_1',
-    'Factor2': 'factor_2',
-    'VarCovar': 'covariance',
-    'DataDate': 'date'
+    "!Factor1": "factor_1",
+    "Factor2": "factor_2",
+    "VarCovar": "covariance",
+    "DataDate": "date",
 }
 
 specific_risk_column_mapping = {
-    '!Barrid': 'barrid',
-    'Yield%': 'yield',
-    'TotalRisk%': 'total_risk',
-    'SpecRisk%': 'specific_risk',
-    'HistBeta': 'historical_beta',
-    'PredBeta': 'predicted_beta',
-    'DataDate': 'date'
+    "!Barrid": "barrid",
+    "Yield%": "yield",
+    "TotalRisk%": "total_risk",
+    "SpecRisk%": "specific_risk",
+    "HistBeta": "historical_beta",
+    "PredBeta": "predicted_beta",
+    "DataDate": "date",
 }
 
 cusips_column_mapping = {
-    '!Barrid': 'barrid',
-    'AssetIDType': 'asset_id_type',
-    'AssetID': 'asset_id',
-    'StartDate': 'start_date',
-    'EndDate': 'end_date',
+    "!Barrid": "barrid",
+    "AssetIDType": "asset_id_type",
+    "AssetID": "asset_id",
+    "StartDate": "start_date",
+    "EndDate": "end_date",
 }
 
 root_ids_column_mapping = {
-    '!Barrid': 'barrid',
-    'Name': 'name',
-    'Instrument': 'instrument',
-    'IssuerID': 'issuer_id',
-    'ISOCountryCode': 'iso_country_code',
-    'ISOCurrencyCode': 'iso_currency_code',
-    'RootID': 'root_id',
-    'StartDate': 'start_date',
-    'EndDate': 'end_date'
+    "!Barrid": "barrid",
+    "Name": "name",
+    "Instrument": "instrument",
+    "IssuerID": "issuer_id",
+    "ISOCountryCode": "iso_country_code",
+    "ISOCurrencyCode": "iso_currency_code",
+    "RootID": "root_id",
+    "StartDate": "start_date",
+    "EndDate": "end_date",
 }
+
 
 def clean_exposures(df: pl.DataFrame, barrids: list[str]) -> pl.DataFrame:
     return (
-        df
-        .rename(exposures_column_mapping)
-        .filter(
-            pl.col('barrid').ne('[End of File]'),
-            pl.col('barrid').is_in(barrids)
-        )
-        .with_columns(
-            pl.col('date').cast(pl.String).str.strptime(pl.Date, "%Y%m%d")
-        )
-        .pivot(index=['date', 'barrid'], on='factor', values='exposure')
-        .sort('barrid')
-        .select('date', 'barrid', *factors)
+        df.rename(exposures_column_mapping)
+        .filter(pl.col("barrid").ne("[End of File]"), pl.col("barrid").is_in(barrids))
+        .with_columns(pl.col("date").cast(pl.String).str.strptime(pl.Date, "%Y%m%d"))
+        .pivot(index=["date", "barrid"], on="factor", values="exposure")
+        .sort("barrid")
+        .select("date", "barrid", *factors)
     )
+
 
 def clean_covariances(df: pl.DataFrame) -> pl.DataFrame:
     return (
-        df
-        .rename(covariances_column_mapping)
-        .filter(pl.col('factor_1').ne('[End of File]'))
+        df.rename(covariances_column_mapping)
+        .filter(pl.col("factor_1").ne("[End of File]"))
         .with_columns(
-            pl.col('date').cast(pl.String).str.strptime(pl.Date, "%Y%m%d"),
-            pl.col('covariance').str.strip_chars().cast(pl.Float64)
+            pl.col("date").cast(pl.String).str.strptime(pl.Date, "%Y%m%d"),
+            pl.col("covariance").str.strip_chars().cast(pl.Float64),
         )
-        .pivot(index=['date', 'factor_1'], on='factor_2', values='covariance')
-        .sort('factor_1')
-        .select('date', 'factor_1', *factors)
+        .pivot(index=["date", "factor_1"], on="factor_2", values="covariance")
+        .sort("factor_1")
+        .select("date", "factor_1", *factors)
     )
+
 
 def clean_specific_risk(df: pl.DataFrame, barrids: list[str]) -> pl.DataFrame:
     return (
-        df
-        .rename(specific_risk_column_mapping)
-        .filter(
-            pl.col('barrid').ne('[End of File]'),
-            pl.col('barrid').is_in(barrids)
-        )
+        df.rename(specific_risk_column_mapping)
+        .filter(pl.col("barrid").ne("[End of File]"), pl.col("barrid").is_in(barrids))
         .with_columns(
-            pl.col('date').cast(pl.String).str.strptime(pl.Date, "%Y%m%d"),
+            pl.col("date").cast(pl.String).str.strptime(pl.Date, "%Y%m%d"),
         )
-        .select('barrid', 'specific_risk')
-        .sort('barrid')
+        .select("barrid", "specific_risk")
+        .sort("barrid")
     )
+
 
 def clean_tickers(df: pl.DataFrame) -> pl.DataFrame:
     return (
-        df
-        .rename(cusips_column_mapping)
-        .filter(pl.col('asset_id_type').eq('LOCALID'))
-        .rename({'asset_id': 'ticker'})
-        .with_columns(
-            pl.col('ticker').str.replace('US','')
-        )
-        .sort('barrid')
-        .select('barrid', 'ticker')
+        df.rename(cusips_column_mapping)
+        .filter(pl.col("asset_id_type").eq("LOCALID"))
+        .rename({"asset_id": "ticker"})
+        .with_columns(pl.col("ticker").str.replace("US", ""))
+        .sort("barrid")
+        .select("barrid", "ticker")
     )
+
 
 def clean_root_ids(df: pl.DataFrame, date_: dt.date) -> pl.DataFrame:
     return (
-        df
-        .rename(root_ids_column_mapping)
+        df.rename(root_ids_column_mapping)
         .with_columns(
-            pl.col('start_date', 'end_date').cast(pl.String).str.strptime(pl.Date, "%Y%m%d")
+            pl.col("start_date", "end_date")
+            .cast(pl.String)
+            .str.strptime(pl.Date, "%Y%m%d")
         )
         .filter(
-            pl.col('barrid').ne('[End of File]'),
-            pl.col('barrid').eq(pl.col('root_id')).or_(pl.col('root_id').is_null()),
-            pl.col('start_date').le(date_),
-            pl.col('end_date').ge(date_),
-            pl.col('iso_country_code').eq("USA")
+            pl.col("barrid").ne("[End of File]"),
+            pl.col("instrument").is_in(["STOCK", "ETF", "ADR"]),
+            pl.col("start_date").le(date_),
+            pl.col("end_date").ge(date_),
+            pl.col("iso_country_code").eq("USA"),
         )
-        .select('barrid', 'start_date', 'end_date')
+        .select("barrid")
     )
 
+
 def get_stock_exposures(date_: dt.date, barrids: list[str]) -> pl.DataFrame:
-    date_str_1 = date_.strftime('%y%m%d')
-    date_str_2 = date_.strftime('%Y%m%d')
+    date_str_1 = date_.strftime("%y%m%d")
+    date_str_2 = date_.strftime("%Y%m%d")
 
     zip_folder_path = f"{ROOT}/bime/SMD_USSLOWL_100_{date_str_1}.zip"
     file_name = f"USSLOWL_100_Asset_Exposure.{date_str_2}"
@@ -223,12 +138,13 @@ def get_stock_exposures(date_: dt.date, barrids: list[str]) -> pl.DataFrame:
             skip_rows=2,
             separator="|",
         )
-        
+
         return clean_exposures(df, barrids)
-    
+
+
 def get_etf_exposures(date_: dt.date, barrids: list[str]) -> pl.DataFrame:
-    date_str_1 = date_.strftime('%y%m%d')
-    date_str_2 = date_.strftime('%Y%m%d')
+    date_str_1 = date_.strftime("%y%m%d")
+    date_str_2 = date_.strftime("%Y%m%d")
 
     zip_folder_path = f"{ROOT}/bime/SMD_USSLOWL_100_ETF_{date_str_1}.zip"
     file_name = f"USSLOWL_ETF_100_Asset_Exposure.{date_str_2}"
@@ -239,12 +155,13 @@ def get_etf_exposures(date_: dt.date, barrids: list[str]) -> pl.DataFrame:
             skip_rows=2,
             separator="|",
         )
-        
+
         return clean_exposures(df, barrids)
-    
+
+
 def get_factor_covariances(date_: dt.date):
-    date_str_1 = date_.strftime('%y%m%d')
-    date_str_2 = date_.strftime('%Y%m%d')
+    date_str_1 = date_.strftime("%y%m%d")
+    date_str_2 = date_.strftime("%Y%m%d")
 
     zip_folder_path = f"{ROOT}/bime/SMD_USSLOWL_100_{date_str_1}.zip"
     file_name = f"USSLOWL_100_Covariance.{date_str_2}"
@@ -255,12 +172,13 @@ def get_factor_covariances(date_: dt.date):
             skip_rows=2,
             separator="|",
         )
-        
+
         return clean_covariances(df)
-    
+
+
 def get_stock_specific_risk(date_: dt.date, barrids: list[str]) -> pl.DataFrame:
-    date_str_1 = date_.strftime('%y%m%d')
-    date_str_2 = date_.strftime('%Y%m%d')
+    date_str_1 = date_.strftime("%y%m%d")
+    date_str_2 = date_.strftime("%Y%m%d")
 
     zip_folder_path = f"{ROOT}/bime/SMD_USSLOWL_100_{date_str_1}.zip"
     file_name = f"USSLOWL_100_Asset_Data.{date_str_2}"
@@ -271,12 +189,13 @@ def get_stock_specific_risk(date_: dt.date, barrids: list[str]) -> pl.DataFrame:
             skip_rows=2,
             separator="|",
         )
-        
+
         return clean_specific_risk(df, barrids)
-    
+
+
 def get_etf_specific_risk(date_: dt.date, barrids: list[str]) -> pl.DataFrame:
-    date_str_1 = date_.strftime('%y%m%d')
-    date_str_2 = date_.strftime('%Y%m%d')
+    date_str_1 = date_.strftime("%y%m%d")
+    date_str_2 = date_.strftime("%Y%m%d")
 
     zip_folder_path = f"{ROOT}/bime/SMD_USSLOWL_100_ETF_{date_str_1}.zip"
     file_name = f"USSLOWL_ETF_100_Asset_Data.{date_str_2}"
@@ -287,40 +206,34 @@ def get_etf_specific_risk(date_: dt.date, barrids: list[str]) -> pl.DataFrame:
             skip_rows=2,
             separator="|",
         )
-        
+
         return clean_specific_risk(df, barrids)
-    
-def construct_covariance_matrix(exposures: pl.DataFrame, covariances: pl.DataFrame, specific_risk: pl.DataFrame) -> pl.DataFrame:
-    barrids = exposures['barrid'].to_list()
+
+
+def construct_covariance_matrix(
+    exposures: pl.DataFrame, covariances: pl.DataFrame, specific_risk: pl.DataFrame
+) -> pl.DataFrame:
+    barrids = exposures["barrid"].to_list()
 
     exposures = (
-        exposures
-        .drop('date', 'barrid')
+        exposures.drop("date", "barrid")
         .with_columns(
-            pl.all().fill_null(0) # fill null factor exposures
+            pl.all().fill_null(0)  # fill null factor exposures
         )
         .to_numpy()
     )
 
     covariances = (
-        covariances
-        .drop('date', 'factor_1')
-        .with_columns(
-            pl.all().truediv(100 ** 2)
-        )
+        covariances.drop("date", "factor_1")
+        .with_columns(pl.all().truediv(100**2))
         .to_numpy()
     )
 
     mask = np.isnan(covariances)
-    covariances[mask] = covariances.T[mask] # fill symetric values
+    covariances[mask] = covariances.T[mask]  # fill symetric values
 
     specific_risk = (
-        specific_risk
-        .drop('barrid')
-        .with_columns(
-            pl.all().truediv(100)
-        )
-        .to_numpy()
+        specific_risk.drop("barrid").with_columns(pl.all().truediv(100)).to_numpy()
     )
 
     specific_risk = np.diag(specific_risk)
@@ -329,17 +242,16 @@ def construct_covariance_matrix(exposures: pl.DataFrame, covariances: pl.DataFra
 
     covariance_matrix_df = (
         pl.from_numpy(covariance_matrix, barrids)
-        .with_columns(
-            pl.Series(barrids).alias('barrid')
-        )
-        .select('barrid', *barrids)
+        .with_columns(pl.Series(barrids).alias("barrid"))
+        .select("barrid", *barrids)
     )
 
     return covariance_matrix_df
-    
+
+
 def get_tickers(date_: dt.date):
-    date_str_1 = date_.strftime('%y%m%d')
-    date_str_2 = date_.strftime('%Y%m%d')
+    date_str_1 = date_.strftime("%y%m%d")
+    date_str_2 = date_.strftime("%Y%m%d")
 
     zip_folder_path = f"{ROOT}/bime/SMD_USSLOW_XSEDOL_ID_{date_str_1}.zip"
     file_name = f"USA_XSEDOL_Asset_ID.{date_str_2}"
@@ -350,12 +262,13 @@ def get_tickers(date_: dt.date):
             skip_rows=1,
             separator="|",
         )
-        
+
         return clean_tickers(df)
-    
+
+
 def get_barrids(date_: dt.date):
-    date_str_1 = date_.strftime('%y%m%d')
-    date_str_2 = date_.strftime('%Y%m%d')
+    date_str_1 = date_.strftime("%y%m%d")
+    date_str_2 = date_.strftime("%Y%m%d")
 
     zip_folder_path = f"{ROOT}/bime/SMD_USSLOW_XSEDOL_ID_{date_str_1}.zip"
     file_name = f"USA_Asset_Identity.{date_str_2}"
@@ -366,8 +279,9 @@ def get_barrids(date_: dt.date):
             skip_rows=1,
             separator="|",
         )
-        
+
         return clean_root_ids(df, date_)
+
 
 def covariance_matrix_daily_flow() -> None:
     date_ = get_last_market_date()[0]
@@ -377,20 +291,14 @@ def covariance_matrix_daily_flow() -> None:
 
     barrids_df = (
         get_barrids(date_)
-        .join(
-            tickers_df,
-            on='barrid',
-            how='left'
-        )
-        .filter(
-            pl.col('ticker').is_not_null()
-        )
-        .select('barrid', 'ticker')
-        .sort('barrid')
+        .join(tickers_df, on="barrid", how="left")
+        .filter(pl.col("ticker").is_not_null())
+        .select("barrid", "ticker")
+        .sort("barrid")
     )
 
-    barrids = barrids_df['barrid'].to_list()
-    tickers = barrids_df['ticker'].to_list()
+    barrids = barrids_df["barrid"].to_list()
+    tickers = barrids_df["ticker"].to_list()
     ticker_mapping = {barrid: ticker for barrid, ticker in zip(barrids, tickers)}
 
     # 2. Get exposures
@@ -408,29 +316,26 @@ def covariance_matrix_daily_flow() -> None:
     specific_risk: pl.DataFrame = pl.concat([stock_specific_risk, etf_specific_risk])
 
     # 5. Construct covariance matrix
-    covariance_matrix = construct_covariance_matrix(exposures, covariances, specific_risk)
+    covariance_matrix = construct_covariance_matrix(
+        exposures, covariances, specific_risk
+    )
 
     # 6. Re-key covariance matrix
     covariance_matrix_re_keyed = (
-        covariance_matrix
-        .rename(ticker_mapping, strict=False)
-        .with_columns(
-            pl.col('barrid').replace(ticker_mapping)
-        )
-        .rename({'barrid': 'ticker'})
+        covariance_matrix.rename(ticker_mapping, strict=False)
+        .with_columns(pl.col("barrid").replace(ticker_mapping))
+        .rename({"barrid": "ticker"})
     )
 
-    tickers = covariance_matrix_re_keyed['ticker'].unique().sort().to_list()
+    tickers = covariance_matrix_re_keyed["ticker"].unique().sort().to_list()
 
-    covariance_matrix_clean = (
-        covariance_matrix_re_keyed
-        .select(pl.lit(date_).alias('date'), 'ticker', *sorted(tickers))
-        .sort('ticker')
-    )
+    covariance_matrix_clean = covariance_matrix_re_keyed.select(
+        pl.lit(date_).alias("date"), "ticker", *sorted(tickers)
+    ).sort("ticker")
 
     # 7. Upload to s3
     utils.s3.write_parquet(
-        bucket_name='barra-covariance-matrices',
-        file_name='latest.parquet',
+        bucket_name="barra-covariance-matrices",
+        file_name="latest.parquet",
         file_data=covariance_matrix_clean,
     )

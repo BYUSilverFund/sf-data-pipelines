@@ -30,13 +30,15 @@ def load_crsp_monthly_df(start_date: date, end_date: date) -> pl.DataFrame:
     return df
 
 
-def crsp_monthly_backfill_flow(start_date: date, end_date: date, database: Database) -> None:
+def crsp_monthly_backfill_flow(
+    start_date: date, end_date: date, database: Database
+) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     df = load_crsp_monthly_df(start_date, end_date)
 
     for year in tqdm(years, desc="CRSP Monthly"):
-        year_df = df.filter(pl.col('date').dt.year().eq(year))
+        year_df = df.filter(pl.col("date").dt.year().eq(year))
 
         database.crsp_monthly_table.create_if_not_exists(year)
         database.crsp_monthly_table.upsert(year, year_df)

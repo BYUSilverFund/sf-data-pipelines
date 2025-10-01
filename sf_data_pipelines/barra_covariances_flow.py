@@ -15,7 +15,9 @@ def load_barra_history_files(year: int) -> pl.DataFrame:
     dfs = []
     for zip_folder_name in sorted(os.listdir(barra_covariances.history_zip_folder())):
         if barra_covariances.history_zip_file(year) in zip_folder_name:
-            with zipfile.ZipFile(f"{barra_covariances.history_zip_folder()}/{zip_folder_name}", "r") as zip_folder:
+            with zipfile.ZipFile(
+                f"{barra_covariances.history_zip_folder()}/{zip_folder_name}", "r"
+            ) as zip_folder:
                 folder_dfs = [
                     pl.read_csv(
                         BytesIO(zip_folder.read(file)),
@@ -28,9 +30,13 @@ def load_barra_history_files(year: int) -> pl.DataFrame:
                     if file.startswith(file_name)
                 ]
 
-                folder_df = pl.concat(folder_dfs, how="vertical") if folder_dfs else pl.DataFrame()
+                folder_df = (
+                    pl.concat(folder_dfs, how="vertical")
+                    if folder_dfs
+                    else pl.DataFrame()
+                )
                 dfs.append(folder_df)
-    
+
     return pl.concat(dfs, how="vertical") if dfs else pl.DataFrame()
 
 
@@ -71,7 +77,9 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def barra_covariances_history_flow(start_date: date, end_date: date, database: Database) -> None:
+def barra_covariances_history_flow(
+    start_date: date, end_date: date, database: Database
+) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="Barra Covariances"):

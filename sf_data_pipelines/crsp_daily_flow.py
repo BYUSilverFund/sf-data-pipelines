@@ -33,7 +33,9 @@ def load_crsp_daily_df(start_date: date, end_date: date) -> pl.DataFrame:
     return df
 
 
-def crsp_daily_backfill_flow(start_date: date, end_date: date, database: Database) -> None:
+def crsp_daily_backfill_flow(
+    start_date: date, end_date: date, database: Database
+) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="CRSP Daily"):

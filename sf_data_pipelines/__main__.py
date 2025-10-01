@@ -21,6 +21,7 @@ def cli():
     """Main CLI entrypoint."""
     pass
 
+
 @cli.command()
 @click.argument(
     "pipeline_type", type=click.Choice(PIPELINE_TYPES, case_sensitive=False)
@@ -148,10 +149,12 @@ def ftse(pipeline_type, database, start, end):
 
             ftse_backfill_pipeline(start, end, database_instance)
 
+
 @cli.command()
 def covariance_matrix():
     click.echo(f"Running covariance matrix daily flow.")
     covariance_matrix_pipeline()
+
 
 if __name__ == "__main__":
     cli()

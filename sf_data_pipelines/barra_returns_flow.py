@@ -65,7 +65,9 @@ def clean_barra_returns(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def barra_returns_history_flow(start_date: date, end_date: date, database: Database) -> None:
+def barra_returns_history_flow(
+    start_date: date, end_date: date, database: Database
+) -> None:
     years = list(range(start_date.year, end_date.year + 1))
 
     for year in tqdm(years, desc="Barra Returns"):

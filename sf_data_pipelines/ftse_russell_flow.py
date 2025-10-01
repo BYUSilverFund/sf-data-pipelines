@@ -34,7 +34,9 @@ def clean(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def ftse_russell_backfill_flow(start_date: date, end_date: date, database: Database) -> None:
+def ftse_russell_backfill_flow(
+    start_date: date, end_date: date, database: Database
+) -> None:
     """Flow for orchestrating barra ids backfill."""
     years = list(range(start_date.year, end_date.year + 1))
 

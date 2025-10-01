@@ -8,7 +8,11 @@ from sf_data_pipelines.utils.enums import DatabaseName
 
 class Table:
     def __init__(
-        self, database: DatabaseName, name: str, schema: dict[str, pl.DataType], ids=list[str]
+        self,
+        database: DatabaseName,
+        name: str,
+        schema: dict[str, pl.DataType],
+        ids=list[str],
     ) -> None:
         load_dotenv(override=True)
         home, user = os.getenv("ROOT").split("/")[1:3]
@@ -58,8 +62,8 @@ class Table:
             .write_parquet(self._file_path(year))
         )
 
-class Database:
 
+class Database:
     def __init__(self, database_name: DatabaseName):
         self._database_name = database_name
 
@@ -132,7 +136,7 @@ class Database:
 
     @property
     def crsp_events_table(self) -> Table:
-        return  Table(
+        return Table(
             database=self._database_name,
             name="crsp_events",
             schema={
@@ -165,7 +169,7 @@ class Database:
 
     @property
     def crsp_daily_table(self) -> Table:
-        return  Table(
+        return Table(
             database=self._database_name,
             name="crsp_daily",
             schema={
@@ -188,14 +192,14 @@ class Database:
     def factors_table(self) -> Table:
         return Table(
             database=self._database_name,
-            name='factors',
+            name="factors",
             schema={
                 "date": pl.Date,
                 **{factor: pl.Float64 for factor in factors},
             },
-            ids=['date']
+            ids=["date"],
         )
-    
+
     @property
     def signals_table(self) -> Table:
         return Table(
@@ -211,7 +215,7 @@ class Database:
             },
             ids=["date", "barrid", "name"],
         )
-    
+
     @property
     def active_weights_table(self) -> Table:
         return Table(
@@ -225,7 +229,7 @@ class Database:
             },
             ids=["date", "barrid", "signal"],
         )
-    
+
     @property
     def composite_alphas_table(self) -> Table:
         return Table(

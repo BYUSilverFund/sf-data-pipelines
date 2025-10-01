@@ -33,10 +33,10 @@ def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
     df = (
         df.rename(barra_columns, strict=False)
         .with_columns(pl.col("date").str.strptime(pl.Date, "%Y%m%d"))
-        .with_columns(pl.col('return').mul(100))
+        .with_columns(pl.col("return").mul(100))
         .filter(pl.col("factor").ne("[End of File]"))
-        .pivot(index='date', on='factor', values='return')
-        .sort('date')
+        .pivot(index="date", on="factor", values="return")
+        .sort("date")
     )
 
     return df

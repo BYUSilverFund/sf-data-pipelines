@@ -59,7 +59,11 @@ def barra_assets_daily_flow(database: Database) -> None:
             year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
 
             dates = (
-                database.assets_table.read(year).select("date").unique().sort("date").collect()
+                database.assets_table.read(year)
+                .select("date")
+                .unique()
+                .sort("date")
+                .collect()
             )
             year_df = year_df.filter(pl.col("date").is_in(dates))
 

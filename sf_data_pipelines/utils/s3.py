@@ -11,18 +11,20 @@ aws_secret_access_key = os.getenv("COGNITO_SECRET_ACCESS_KEY")
 region_name = os.getenv("COGNITO_REGION")
 
 client = boto3.client(
-    's3',
+    "s3",
     aws_access_key_id=aws_access_key_id,
     aws_secret_access_key=aws_secret_access_key,
     region_name=region_name,
 )
 
+
 def get_file(bucket_name: str, file_key: str) -> pl.DataFrame:
     s3_object = client.get_object(Bucket=bucket_name, Key=file_key)
 
-    file_content = s3_object['Body'].read().decode('utf-8')
+    file_content = s3_object["Body"].read().decode("utf-8")
 
     return pl.read_csv(StringIO(file_content))
+
 
 def drop_file(file_name: str, bucket_name: str, file_data: pl.DataFrame) -> None:
     csv_buffer = StringIO()
@@ -33,6 +35,7 @@ def drop_file(file_name: str, bucket_name: str, file_data: pl.DataFrame) -> None
 
     client.upload_fileobj(csv_bytes, bucket_name, file_name)
 
+
 def write_parquet(file_name: str, bucket_name: str, file_data: pl.DataFrame) -> None:
     parquet_buffer = BytesIO()
 
@@ -42,13 +45,14 @@ def write_parquet(file_name: str, bucket_name: str, file_data: pl.DataFrame) -> 
 
     client.upload_fileobj(parquet_buffer, bucket_name, file_name)
 
+
 def list_files(bucket_name: str):
     file_paths = []
 
     response = client.list_objects_v2(Bucket=bucket_name)
 
-    for object in response['Contents']:
-        file_path = bucket_name + "/" + object['Key']
+    for object in response["Contents"]:
+        file_path = bucket_name + "/" + object["Key"]
         file_paths.append(file_path)
 
     return file_paths
