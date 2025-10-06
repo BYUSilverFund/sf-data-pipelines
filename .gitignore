@@ -2,7 +2,7 @@
 /.archive
 
 # Sbatch
-*.sh
+job.sh
 *.out
 
 # Data
