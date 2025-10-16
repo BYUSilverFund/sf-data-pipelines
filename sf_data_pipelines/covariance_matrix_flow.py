@@ -232,13 +232,18 @@ def construct_covariance_matrix(
     mask = np.isnan(covariances)
     covariances[mask] = covariances.T[mask]  # fill symetric values
 
+
     specific_risk = (
-        specific_risk.drop("barrid").with_columns(pl.all().truediv(100)).to_numpy()
+        specific_risk.drop("barrid")
+        .with_columns(pl.all().truediv(100))
+        .to_numpy()
+        .flatten()
     )
 
-    specific_risk = np.diag(specific_risk)
+    # Square the specific risk to get specific variance
+    specific_variance = np.diag(specific_risk ** 2)
 
-    covariance_matrix = exposures @ covariances @ exposures.T + specific_risk
+    covariance_matrix = exposures @ covariances @ exposures.T + specific_variance
 
     covariance_matrix_df = (
         pl.from_numpy(covariance_matrix, barrids)
