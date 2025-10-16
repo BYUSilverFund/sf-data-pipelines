@@ -6,7 +6,7 @@ from sf_data_pipelines.utils import barra_schema, barra_columns, get_last_market
 import os
 from tqdm import tqdm
 from sf_data_pipelines.utils.barra_datasets import barra_covariances
-from utils.tables import Database
+from sf_data_pipelines.utils.tables import Database
 
 
 def load_barra_history_files(year: int) -> pl.DataFrame:

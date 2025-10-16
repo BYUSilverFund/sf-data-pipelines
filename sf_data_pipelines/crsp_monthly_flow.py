@@ -3,7 +3,7 @@ from sf_data_pipelines.utils import crsp_schema
 import polars as pl
 import wrds
 from tqdm import tqdm
-from utils.tables import Database
+from sf_data_pipelines.utils.tables import Database
 
 
 def load_crsp_monthly_df(start_date: date, end_date: date) -> pl.DataFrame:

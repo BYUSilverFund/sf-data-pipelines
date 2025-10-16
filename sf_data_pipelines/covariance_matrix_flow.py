@@ -1,13 +1,13 @@
 import datetime as dt
-import utils.s3
+import sf_data_pipelines.utils.s3
 import polars as pl
 import os
 import zipfile
 import io
 from dotenv import load_dotenv
 import numpy as np
-from utils import get_last_market_date
-from utils.factors import factors
+from sf_data_pipelines.utils import get_last_market_date
+from sf_data_pipelines.utils.factors import factors
 
 load_dotenv(override=True)
 
@@ -339,7 +339,7 @@ def covariance_matrix_daily_flow() -> None:
     ).sort("ticker")
 
     # 7. Upload to s3
-    utils.s3.write_parquet(
+    sf_data_pipelines.utils.s3.write_parquet(
         bucket_name="barra-covariance-matrices",
         file_name="latest.parquet",
         file_data=covariance_matrix_clean,

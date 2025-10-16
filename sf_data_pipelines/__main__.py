@@ -9,7 +9,7 @@ from sf_data_pipelines.all_pipelines import (
     # strategy_backfill_pipeline
 )
 from sf_data_pipelines.utils.enums import DatabaseName
-from utils.tables import Database
+from sf_data_pipelines.utils.tables import Database
 
 # Valid options
 VALID_DATABASES = ["research", "production", "development"]
@@ -152,8 +152,9 @@ def ftse(pipeline_type, database, start, end):
 
 @cli.command()
 def covariance_matrix():
-    click.echo(f"Running covariance matrix daily flow.")
+    click.echo(f"Running covariance matrix daily flow: {dt.date.today()}.")
     covariance_matrix_pipeline()
+    click.echo("Flow completed successfully!")
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ from sf_data_pipelines.utils import barra_schema, barra_columns
 import os
 from tqdm import tqdm
 from sf_data_pipelines.utils import get_last_market_date
-from utils.tables import Database
+from sf_data_pipelines.utils.tables import Database
 from sf_data_pipelines.utils.barra_datasets import barra_assets
 
 

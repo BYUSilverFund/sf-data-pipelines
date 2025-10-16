@@ -3,7 +3,7 @@ from sf_data_pipelines.utils import russell_schema, russell_columns
 import polars as pl
 import wrds
 from tqdm import tqdm
-from utils.tables import Database
+from sf_data_pipelines.utils.tables import Database
 
 
 def load_ftse_russell_df(start_date: date, end_date: date) -> None:
