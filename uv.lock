@@ -2293,7 +2293,7 @@ requires-dist = [
     { name = "ray", specifier = ">=2.44.1" },
     { name = "rich", specifier = ">=14.1.0" },
     { name = "s3fs", specifier = ">=2025.7.0" },
-    { name = "sf-quant", specifier = ">=0.1.11" },
+    { name = "sf-quant", specifier = ">=0.1.13" },
     { name = "tqdm", specifier = ">=4.67.1" },
     { name = "wrds", specifier = ">=3.3.0" },
     { name = "yfinance", specifier = ">=0.2.65" },
@@ -2304,7 +2304,7 @@ dev = [{ name = "rich", specifier = ">=14.1.0" }]
 
 [[package]]
 name = "sf-quant"
-version = "0.1.11"
+version = "0.1.13"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cvxpy" },
@@ -2316,9 +2316,9 @@ dependencies = [
     { name = "seaborn" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c3/4c/6fe183fae802f567aa165d999fdd59cb1c2e55e1361dec6f3f78bc496892/sf_quant-0.1.11.tar.gz", hash = "sha256:ec479a3b9e1cc52afe451203eed25b972f664ad2755ad86cdf76f54868062660", size = 148671, upload-time = "2025-09-05T18:29:49.548Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fe/2b/0b12206ed760debb2f3cdd316c63bdff1af186e18fdbc1c1a416eb778c1d/sf_quant-0.1.13.tar.gz", hash = "sha256:add695cd0a5b2b2c14c194e76b9fe0ac57a04ac1c84a34015a9171202ba15242", size = 129052, upload-time = "2025-09-29T18:14:10.845Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/50/79/f02205c7f125efdcd3da1a4352e50b93a27d8a12027c67c6a95f8514b3a4/sf_quant-0.1.11-py3-none-any.whl", hash = "sha256:3074c0bc53cc5a6d5cd8677c29a0d19f0eb46bd557ff248c4e745d5e2b405d0d", size = 23101, upload-time = "2025-09-05T18:29:48.562Z" },
+    { url = "https://files.pythonhosted.org/packages/94/38/858c358f2b598bc2669b1f59a77645b78fa7c8a416b95a474d4f7184ebf8/sf_quant-0.1.13-py3-none-any.whl", hash = "sha256:1908c4608729c7bf08659a186c71320cdc0991895207202e8dc3f4d3b48c8b16", size = 26414, upload-time = "2025-09-29T18:14:10.005Z" },
 ]
 
 [[package]]

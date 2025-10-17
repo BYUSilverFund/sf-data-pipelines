@@ -1,4 +1,3 @@
-from datetime import date
 import zipfile
 import polars as pl
 from io import BytesIO
@@ -8,7 +7,7 @@ from tqdm import tqdm
 from sf_data_pipelines.utils import get_last_market_date
 from sf_data_pipelines.utils.barra_datasets import barra_ids
 from sf_data_pipelines.utils.tables import Database
-
+import datetime as dt
 
 def load_current_barra_files() -> pl.DataFrame:
     dates = get_last_market_date(n_days=60)
@@ -31,42 +30,38 @@ def load_current_barra_files() -> pl.DataFrame:
 
 
 def clean_barra_df(df: pl.DataFrame) -> pl.DataFrame:
-    df = (
+    return (
         df.rename(barra_columns, strict=False)
         .with_columns(pl.col("start_date", "end_date").str.strptime(pl.Date, "%Y%m%d"))
-        .filter(pl.col("barrid").ne("[End of File]"))
-        .filter(pl.col("asset_id_type").eq("CUSIP"))
+        .filter(
+            pl.col("barrid").ne("[End of File]"),
+            pl.col("asset_id_type").eq("LOCALID"),
+            pl.col("barrid").str.contains('US')
+        )
+        .drop('asset_id_type')
+        .rename({"assetid": "ticker"})
+        .with_columns(pl.col("ticker").str.replace("US", "")) # Only works for US securities
+        .sort('barrid', 'start_date', 'end_date')
     )
 
-    return (
-        df.with_columns(pl.col("end_date").clip(upper_bound=date.today()))
-        .with_columns(pl.date_ranges("start_date", "end_date").alias("date"))
-        .explode("date")
-        .drop("start_date", "end_date", "asset_id_type")
-        .rename({"assetid": "cusip"})
-        .sort(["barrid", "date"])
-    )
 
-
-def barra_ids_daily_flow(database: Database) -> None:
+def barra_tickers_daily_flow(database: Database) -> None:
     raw_df = load_current_barra_files()
     clean_df = clean_barra_df(raw_df)
 
-    years = clean_df.select(pl.col("date").dt.year().unique().sort().alias("year"))[
-        "year"
-    ]
+    min_date = clean_df['start_date'].min()
+    max_date = min(clean_df['end_date'].max(), dt.date.today())
 
-    for year in tqdm(years, desc="Barra IDs"):
+    years = list(range(min_date.year, max_date.year + 1))
+
+    for year in tqdm(years, desc="Barra Tickers"):
         if database.assets_table.exists(year):
-            year_df = clean_df.filter(pl.col("date").dt.year().eq(year))
-
-            dates = (
-                database.assets_table.read(year)
-                .select("date")
-                .unique()
-                .sort("date")
-                .collect()
+            database.assets_table.update_asof(
+                year=year,
+                right_df=clean_df,
+                left_on='date',
+                right_on='start_date',
+                by='barrid',
+                strategy='backward',
+                drop_right_cols=['start_date', 'end_date']
             )
-            year_df = year_df.filter(pl.col("date").is_in(dates))
-
-            database.assets_table.update(year, year_df)

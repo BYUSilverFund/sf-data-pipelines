@@ -62,6 +62,84 @@ class Table:
             .write_parquet(self._file_path(year))
         )
 
+    def update_asof(
+        self,
+        year: int,
+        right_df: pl.DataFrame,
+        left_on: str,
+        right_on: str,
+        by: str | list[str],
+        strategy: str = 'backward',
+        drop_right_cols: list[str] | None = None
+    ) -> pl.DataFrame:
+        """
+        Perform join_asof with intelligent column conflict handling.
+        
+        Overlapping columns are coalesced (preferring right_df values).
+        Columns unique to either DataFrame are preserved.
+        
+        Args:
+            left_df: Left DataFrame
+            right_df: Right DataFrame to join
+            left_on: Temporal column in left_df
+            right_on: Temporal column in right_df
+            by: Column(s) to join on
+            strategy: Join strategy ('backward', 'forward', 'nearest')
+            drop_right_cols: Columns from right_df to exclude from result
+        
+        Returns:
+            Joined DataFrame with resolved column conflicts
+        """
+        left_df = pl.scan_parquet(self._file_path(year))
+
+        if drop_right_cols is None:
+            drop_right_cols = []
+        
+        on = by if isinstance(by, list) else [by]
+        on_with_left = on + [left_on]
+        
+        left_cols = set(left_df.collect_schema().names())
+        right_cols = set(right_df.collect_schema().names())
+        
+        right_cols_to_keep = right_cols - set(drop_right_cols) - {right_on}
+        
+        # Columns in both DataFrames get suffix '_updated' during join
+        overlap_cols = (left_cols & right_cols_to_keep) - set(on_with_left)
+        
+        # Columns unique to each DataFrame
+        left_only_cols = left_cols - right_cols_to_keep - set(on_with_left)
+        right_only_cols = right_cols_to_keep - left_cols - set(on)
+
+        joined = (
+            left_df
+            .sort(*on, left_on)
+            .join_asof(
+                other=right_df.lazy().sort(*on, right_on),
+                left_on=left_on,
+                right_on=right_on,
+                by=by,
+                strategy=strategy,
+                suffix='_updated',
+                check_sortedness=False
+            )
+        )
+        
+        select_exprs = on_with_left.copy()
+        
+        # Coalesce overlapping columns (prefer right_df)
+        for col in sorted(overlap_cols):
+            select_exprs.append(pl.coalesce(f"{col}_updated", col).alias(col))
+        
+        # Keep left-only columns
+        for col in sorted(left_only_cols):
+            select_exprs.append(pl.col(col))
+        
+        # Keep right-only columns (no suffix added by join)
+        for col in sorted(right_only_cols):
+            select_exprs.append(pl.col(col))
+
+        joined.select(select_exprs).collect().write_parquet(self._file_path(year))
+        
 
 class Database:
     def __init__(self, database_name: DatabaseName):
