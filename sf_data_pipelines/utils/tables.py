@@ -174,6 +174,7 @@ class Database:
                 "predicted_beta": pl.Float64,
                 "russell_1000": pl.Boolean,
                 "russell_2000": pl.Boolean,
+                "in_universe": pl.Boolean,
                 "daily_volume": pl.Float64,
                 "average_daily_volume_30": pl.Float64,
                 "average_daily_volume_60": pl.Float64,
