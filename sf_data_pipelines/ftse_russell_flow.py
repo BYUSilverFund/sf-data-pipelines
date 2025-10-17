@@ -14,7 +14,6 @@ def load_ftse_russell_df(start_date: date, end_date: date) -> None:
             SELECT 
                 date, 
                 cusip, 
-                ticker, 
                 russell2000,
                 russell1000
             FROM ftse_russell_us.idx_holdings_us
